@@ -17,6 +17,8 @@ import json
 import streamlit as st
 import streamlit.components.v1 as components
 
+from utils.search_nav import render_search_box
+
 _NAVY = "#4A5568"
 
 _STAGES = [
@@ -215,6 +217,7 @@ def _build_js(current_stage: str) -> str:
 
 def render_nav_strip(current_stage: str = "") -> None:
     """Render the IS Cycle horizontal strip. Call after set_page_config / init_db."""
+    render_search_box()
     st.markdown(_CSS, unsafe_allow_html=True)
 
     # Marker — lets JS confirm the page has rendered before injecting the bar.

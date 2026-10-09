@@ -21,9 +21,11 @@ import streamlit as st
 from database.db import init_db, run_query, run_write, insert_returning_id
 from utils.auth import can, can_view_module
 from utils.strategic_outcomes import STRATEGIC_OUTCOMES, get_outcome_progress
+from utils.search_nav import render_search_box
 
 st.set_page_config(page_title="Strategic Plan — CEL MEL", page_icon="🎯", layout="wide")
 init_db()
+render_search_box()
 
 if not st.session_state.get("authentication_status"):
     st.error("Please log in from the main page.")
