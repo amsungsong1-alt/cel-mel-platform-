@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS partners (
     project_id INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
     name       TEXT    NOT NULL,
     role       TEXT,
-    tier       TEXT    CHECK(tier IN ('Anchor','Technical','Implementing'))
+    tier       TEXT    CHECK(tier IN ('Anchor','Technical','Implementing','Institutional Strengthening'))
 );
 
 CREATE TABLE IF NOT EXISTS indicators (

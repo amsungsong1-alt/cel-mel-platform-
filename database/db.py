@@ -260,6 +260,25 @@ def _run_migrations() -> bool:
                 "ALTER TABLE kobo_form_mapping ADD CONSTRAINT kobo_form_mapping_transform_check "
                 "CHECK (transform IN ('count','count_unique','count_yes','count_no','sum','mean','latest'))"
             ))
+            # Add 'Institutional Strengthening' to partners.tier (PwC) — same
+            # attribute-based catalog lookup as the partner_visits.status fix
+            # above (avoids both the name-guessing trap and literal '%'
+            # wildcards in SQL text passed through SQLAlchemy/psycopg).
+            _partner_tier_constraints = conn.execute(text("""
+                SELECT c.conname
+                FROM   pg_constraint c
+                JOIN   pg_attribute a
+                       ON a.attrelid = c.conrelid AND a.attnum = ANY(c.conkey)
+                WHERE  c.conrelid = 'partners'::regclass
+                  AND  c.contype  = 'c'
+                  AND  a.attname  = 'tier'
+            """)).fetchall()
+            for (_con_name,) in _partner_tier_constraints:
+                conn.execute(text(f'ALTER TABLE partners DROP CONSTRAINT "{_con_name}"'))
+            conn.execute(text(
+                "ALTER TABLE partners ADD CONSTRAINT partners_tier_check "
+                "CHECK (tier IN ('Anchor','Technical','Implementing','Institutional Strengthening'))"
+            ))
             # Index must come after ADD COLUMN (schema.sql can't do it safely on existing DBs).
             conn.execute(text(
                 "CREATE INDEX IF NOT EXISTS idx_rda_partner ON raw_data_analysis(partner_id)"
@@ -1234,6 +1253,32 @@ def _run_migrations() -> bool:
                 "       status, general_notes, created_at FROM partner_visits_old"
             )
             conn.execute("DROP TABLE partner_visits_old")
+    except Exception:
+        pass
+    # Add 'Institutional Strengthening' to partners.tier. SQLite has no ALTER
+    # TABLE ... DROP/ADD CONSTRAINT, so rebuild the table when the old CHECK
+    # (without 'Institutional Strengthening') is still in place — only runs
+    # once, since the rebuilt table's own CREATE statement already includes it.
+    try:
+        _p_row = conn.execute(
+            "SELECT sql FROM sqlite_master WHERE type='table' AND name='partners'"
+        ).fetchone()
+        if _p_row and _p_row[0] and "'Institutional Strengthening'" not in _p_row[0]:
+            conn.execute("ALTER TABLE partners RENAME TO partners_old")
+            conn.execute("""
+                CREATE TABLE partners (
+                    partner_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    project_id INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+                    name       TEXT    NOT NULL,
+                    role       TEXT,
+                    tier       TEXT    CHECK(tier IN ('Anchor','Technical','Implementing','Institutional Strengthening'))
+                )
+            """)
+            conn.execute(
+                "INSERT INTO partners (partner_id, project_id, name, role, tier) "
+                "SELECT partner_id, project_id, name, role, tier FROM partners_old"
+            )
+            conn.execute("DROP TABLE partners_old")
     except Exception:
         pass
     # Ensure workplan_activities table exists (added after initial schema deploy).

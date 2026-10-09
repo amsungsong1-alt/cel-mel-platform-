@@ -56,6 +56,12 @@ _needs_seed = (
         "SELECT 1 FROM partners WHERE name = 'AFRIGEM' LIMIT 1",
         {},
     )
+    or not run_query(
+        # stale: PwC (Institutional Strengthening Partner) not yet seeded —
+        # added from the SAWA Program Overview 2026-2030 brochure.
+        "SELECT 1 FROM partners WHERE name = 'PwC' LIMIT 1",
+        {},
+    )
 )
 if _needs_seed:
     try:

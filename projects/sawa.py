@@ -44,6 +44,12 @@ PARTNERS = [
     {"name": "e-SAWA/KNUST",
      "role": "Technical Partner — SAWAtech digital tools, SAWA Voices and e-SAWA platform",
      "tier": "Technical"},
+    # ── Institutional Strengthening Partner ────────────────────────────────────
+    # Source: SAWA Program Overview 2026-2030 (Agri-Impact Ltd / Mastercard
+    # Foundation partner brochure), Partners page.
+    {"name": "PwC",
+     "role": "Institutional Strengthening Partner",
+     "tier": "Institutional Strengthening"},
 ]
 
 # ── Module A — Partner Target Funnel ──────────────────────────────────────────
@@ -137,6 +143,12 @@ PARTNER_TARGETS = [
     {"partner_name": None, "level": 4, "metric_label": "Additional annual revenue",         "target_value": "90M",     "unit": "USD",           "time_basis": "Annual",            "source_doc": "SAWA Proposal, 28 Nov 2025", "source_page": ""},
     {"partner_name": None, "level": 4, "metric_label": "Women-led microenterprises funded", "target_value": "2,500",   "unit": "enterprises",   "time_basis": "Life of programme", "source_doc": "SAWA Proposal, 28 Nov 2025", "source_page": ""},
     {"partner_name": None, "level": 4, "metric_label": "Productivity improvement",          "target_value": "≥30",     "unit": "%",             "time_basis": "Life of programme", "source_doc": "SAWA Proposal, 28 Nov 2025", "source_page": ""},
+    # Source: SAWA Program Overview 2026-2030 (Agri-Impact Ltd / Mastercard
+    # Foundation partner brochure) — two figures not previously in the app.
+    # Both are consistent with existing LoP figures above (60,000 jobs incl.
+    # 3,000 PWDs; $90M/yr x 4 years = $360M), not new/conflicting claims.
+    {"partner_name": None, "level": 4, "metric_label": "Young women with disabilities (within the 60,000)", "target_value": "3,000", "unit": "beneficiaries", "time_basis": "Life of programme", "source_doc": "SAWA Program Overview 2026-2030", "source_page": "5"},
+    {"partner_name": None, "level": 4, "metric_label": "Total revenue over programme lifecycle",            "target_value": "360M",  "unit": "USD",           "time_basis": "Life of programme", "source_doc": "SAWA Program Overview 2026-2030", "source_page": "5"},
 ]
 
 # ── Budget by pillar (source: SAWA Proposal s8.1) ─────────────────────────────
