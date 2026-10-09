@@ -1,13 +1,14 @@
 """KoboToolbox API client for Module D — Kobo Data Sync.
 
-Token storage: the API token is base64-obfuscated in database/.kobo_token.
-This deters casual reading but is NOT true encryption. For production
-deployments, store the token in an environment variable or a proper secrets
-manager and never commit .kobo_token to version control.
+Token resolution order: st.secrets["KOBO_API_TOKEN"] (Streamlit Cloud →
+App Settings → Secrets), then the KOBO_API_TOKEN environment variable, then
+the base64-obfuscated local file database/.kobo_token (dev only — NOT true
+encryption, and gitignored).
 """
 from __future__ import annotations
 
 import base64
+import os
 from pathlib import Path
 
 import requests
@@ -40,7 +41,15 @@ def save_api_token(token: str) -> None:
 
 
 def load_api_token() -> str | None:
-    """Return previously saved token, or None if not stored."""
+    """Return the token from Streamlit secrets, env, or local file; else None."""
+    try:
+        import streamlit as st
+        if st.secrets.get("KOBO_API_TOKEN"):
+            return str(st.secrets["KOBO_API_TOKEN"]).strip()
+    except Exception:
+        pass  # no secrets.toml configured
+    if os.environ.get("KOBO_API_TOKEN"):
+        return os.environ["KOBO_API_TOKEN"].strip()
     if not _TOKEN_FILE.exists():
         return None
     try:
