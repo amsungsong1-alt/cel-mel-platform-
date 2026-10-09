@@ -56,12 +56,6 @@ _needs_seed = (
         "SELECT 1 FROM partners WHERE name = 'AFRIGEM' LIMIT 1",
         {},
     )
-    or not run_query(
-        # stale: PwC (Institutional Strengthening Partner) not yet seeded —
-        # added from the SAWA Program Overview 2026-2030 brochure.
-        "SELECT 1 FROM partners WHERE name = 'PwC' LIMIT 1",
-        {},
-    )
 )
 if _needs_seed:
     try:
@@ -262,7 +256,7 @@ _CEL_PORTFOLIO = [
      "name": "SAWA", "period": "2026–2030", "status": "Active",
      "donor": "Mastercard Foundation",
      "cel_role": "Implementing Partner — BDS, safeguarding focal point, WAN establishment",
-     "description": "National aquaculture initiative for 80,000 young women, PWDs & displaced youth across Ghana (Catfish + Tilapia value chain)"},
+     "description": "National aquaculture initiative for 60,000 young women, PWDs & displaced youth across Ghana (Catfish + Tilapia value chain)"},
     # ── Blue Economy ──────────────────────────────────────────────────────────
     {"sector": "🌊 Blue Economy & Marine Innovation",
      "name": "A3MAtlantic", "period": "Ongoing", "status": "Active",

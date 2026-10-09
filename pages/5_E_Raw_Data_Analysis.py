@@ -817,6 +817,18 @@ with st.expander(
         },
     )
 
+    st.caption(
+        "MEL design note: the SAWA Program Overview 2026-2030 brochure (pp.7, 12) "
+        "describes delivery as persona-driven (5 personas: Aspiring Young "
+        "Entrepreneur, Resilient Single Mother, Married Woman with Care Burdens, "
+        "Rural Independent Woman, Person with Disability) and explicitly targets "
+        "displaced youth and rural/peri-urban/urban participants. None of these "
+        "are current enrolment disaggregation fields on PI.1 — the same gaps the "
+        "'Total Rural / Urban / Peri-Urban' and 'Refugee and/or Displaced Persons' "
+        "rows above already flag. Adding a persona field would be a logframe/Kobo "
+        "form change, not something this page can infer from existing data."
+    )
+
 
 # =============================================================================
 # Evidence & Means of Verification
@@ -931,7 +943,7 @@ else:
             with up_c1:
                 up_label = st.text_input(
                     "Description *",
-                    placeholder="e.g. Training attendance sheet — R&B Farms Q2",
+                    placeholder="e.g. Training attendance sheet — AFRIGEM Q2",
                     key="ev_up_label",
                     help="What this evidence is — shown in the evidence list above. Be specific enough to identify it without opening the file.",
                 )

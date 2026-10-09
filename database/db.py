@@ -497,6 +497,48 @@ def _run_migrations() -> bool:
                         AND p2.name = 'TechnoServe'
                   )
             """))
+            # Ensure PwC (Institutional Strengthening Partner) is present on
+            # older live DBs — added from the SAWA Program Overview
+            # 2026-2030 partner brochure.
+            conn.execute(text("""
+                INSERT INTO partners (project_id, name, role, tier)
+                SELECT pr.project_id,
+                       'PwC',
+                       'Institutional Strengthening Partner',
+                       'Institutional Strengthening'
+                FROM projects pr
+                WHERE pr.name = 'SAWA'
+                  AND NOT EXISTS (
+                      SELECT 1 FROM partners p2
+                      WHERE p2.project_id = pr.project_id
+                        AND p2.name = 'PwC'
+                  )
+            """))
+            # Ensure new Level 4 (project-level, no partner) targets from the
+            # SAWA Program Overview 2026-2030 brochure are present on older
+            # live DBs, without requiring a full seed() rebuild of
+            # partner_targets (which would discard manual Target Value edits).
+            for _l4_label, _l4_val, _l4_unit, _l4_doc, _l4_page in [
+                ("Young women with disabilities (within the 60,000)", "3,000", "beneficiaries", "SAWA Program Overview 2026-2030", "5"),
+                ("Total revenue over programme lifecycle",            "360M",  "USD",           "SAWA Program Overview 2026-2030", "5"),
+                ("Starter kits distributed",                          "30,000","participants",  "SAWA Program Overview 2026-2030", "8"),
+            ]:
+                conn.execute(text("""
+                    INSERT INTO partner_targets
+                           (partner_id, project_id, level, metric_label,
+                            target_value, unit, time_basis, source_doc, source_page)
+                    SELECT NULL, pr.project_id, 4, :label,
+                           :val, :unit, 'Life of programme', :doc, :page
+                    FROM projects pr
+                    WHERE pr.name = 'SAWA'
+                      AND NOT EXISTS (
+                          SELECT 1 FROM partner_targets pt2
+                          WHERE pt2.project_id = pr.project_id
+                            AND pt2.level = 4
+                            AND pt2.metric_label = :label
+                      )
+                """), {"label": _l4_label, "val": _l4_val, "unit": _l4_unit,
+                       "doc": _l4_doc, "page": _l4_page})
             # Remove decision_reports/actions whose logframe_row_id no longer
             # exists (left by a concurrent reseed where one process deleted
             # logframe_rows that another process had used for its FK inserts).
@@ -1230,9 +1272,28 @@ def _run_migrations() -> bool:
             "SELECT sql FROM sqlite_master WHERE type='table' AND name='partner_visits'"
         ).fetchone()
         if _pv_row and _pv_row[0] and "'Pending'" not in _pv_row[0]:
-            conn.execute("ALTER TABLE partner_visits RENAME TO partner_visits_old")
+            # Build the replacement under a NEW name, copy into it, drop the
+            # old table, then rename the new one onto the original name —
+            # rather than renaming the old table out of the way first. SQLite
+            # auto-rewrites the FK clause of every OTHER table that
+            # references a table being RENAMED (here: visit_findings,
+            # visit_evidence referencing partner_visits) to point at its new
+            # name; renaming "partner_visits" to "partner_visits_old" would
+            # leave them pointing at "partner_visits_old", which dangles once
+            # that table is dropped. Nothing references "partner_visits_new"
+            # before it exists, so renaming IT onto "partner_visits" at the
+            # end triggers no such rewrite.
+            #
+            # schema.sql turns on PRAGMA foreign_keys, under which DROP TABLE
+            # performs every ON DELETE CASCADE as if each row had been
+            # deleted first — wiping visit_findings/visit_evidence when the
+            # old partner_visits table below is dropped. Toggling it off (and
+            # committing first — SQLite ignores this pragma mid-transaction)
+            # makes the DROP a pure schema change again.
+            conn.commit()
+            conn.execute("PRAGMA foreign_keys=OFF")
             conn.execute("""
-                CREATE TABLE partner_visits (
+                CREATE TABLE partner_visits_new (
                     id            INTEGER PRIMARY KEY AUTOINCREMENT,
                     project_id    INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
                     partner_id    INTEGER REFERENCES partners(partner_id) ON DELETE SET NULL,
@@ -1246,13 +1307,16 @@ def _run_migrations() -> bool:
                 )
             """)
             conn.execute(
-                "INSERT INTO partner_visits "
+                "INSERT INTO partner_visits_new "
                 "(id, project_id, partner_id, visit_date, visit_type, conducted_by, "
                 " status, general_notes, created_at) "
                 "SELECT id, project_id, partner_id, visit_date, visit_type, conducted_by, "
-                "       status, general_notes, created_at FROM partner_visits_old"
+                "       status, general_notes, created_at FROM partner_visits"
             )
-            conn.execute("DROP TABLE partner_visits_old")
+            conn.execute("DROP TABLE partner_visits")
+            conn.execute("ALTER TABLE partner_visits_new RENAME TO partner_visits")
+            conn.commit()
+            conn.execute("PRAGMA foreign_keys=ON")
     except Exception:
         pass
     # Add 'Institutional Strengthening' to partners.tier. SQLite has no ALTER
@@ -1264,9 +1328,32 @@ def _run_migrations() -> bool:
             "SELECT sql FROM sqlite_master WHERE type='table' AND name='partners'"
         ).fetchone()
         if _p_row and _p_row[0] and "'Institutional Strengthening'" not in _p_row[0]:
-            conn.execute("ALTER TABLE partners RENAME TO partners_old")
+            # Build the replacement under a NEW name, copy into it, drop the
+            # old table, then rename the new one onto "partners" — rather
+            # than renaming "partners" out of the way first. SQLite
+            # auto-rewrites the FK clause of every OTHER table that
+            # references a table being RENAMED (here: partner_targets,
+            # raw_data_analysis, workplan_activities, partner_visits,
+            # participant_register, mel_activities all reference
+            # partners(partner_id)) to point at its new name; renaming
+            # "partners" to "partners_old" would leave all of them pointing
+            # at "partners_old", which dangles once that table is dropped,
+            # breaking every future INSERT into any of them. Nothing
+            # references "partners_new" before it exists, so renaming IT
+            # onto "partners" at the end triggers no such rewrite.
+            #
+            # schema.sql turns on PRAGMA foreign_keys, under which DROP TABLE
+            # performs every ON DELETE CASCADE as if each row had been
+            # deleted first — wiping partner_targets, raw_data_analysis,
+            # workplan_activities, participant_register, mel_activities and
+            # setting partner_visits.partner_id to NULL when the old
+            # partners table below is dropped. Toggling it off (and
+            # committing first — SQLite ignores this pragma mid-transaction)
+            # makes the DROP a pure schema change again.
+            conn.commit()
+            conn.execute("PRAGMA foreign_keys=OFF")
             conn.execute("""
-                CREATE TABLE partners (
+                CREATE TABLE partners_new (
                     partner_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     project_id INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
                     name       TEXT    NOT NULL,
@@ -1275,10 +1362,13 @@ def _run_migrations() -> bool:
                 )
             """)
             conn.execute(
-                "INSERT INTO partners (partner_id, project_id, name, role, tier) "
-                "SELECT partner_id, project_id, name, role, tier FROM partners_old"
+                "INSERT INTO partners_new (partner_id, project_id, name, role, tier) "
+                "SELECT partner_id, project_id, name, role, tier FROM partners"
             )
-            conn.execute("DROP TABLE partners_old")
+            conn.execute("DROP TABLE partners")
+            conn.execute("ALTER TABLE partners_new RENAME TO partners")
+            conn.commit()
+            conn.execute("PRAGMA foreign_keys=ON")
     except Exception:
         pass
     # Ensure workplan_activities table exists (added after initial schema deploy).
@@ -1579,6 +1669,45 @@ def _run_migrations() -> bool:
                   WHERE p2.project_id = pr.project_id AND p2.name = 'TechnoServe'
               )
         """)
+    except Exception:
+        pass
+    # Ensure PwC (Institutional Strengthening Partner) is present on older
+    # live DBs — added from the SAWA Program Overview 2026-2030 brochure.
+    try:
+        conn.execute("""
+            INSERT INTO partners (project_id, name, role, tier)
+            SELECT pr.project_id,
+                   'PwC',
+                   'Institutional Strengthening Partner',
+                   'Institutional Strengthening'
+            FROM projects pr
+            WHERE pr.name = 'SAWA'
+              AND NOT EXISTS (
+                  SELECT 1 FROM partners p2
+                  WHERE p2.project_id = pr.project_id AND p2.name = 'PwC'
+              )
+        """)
+    except Exception:
+        pass
+    # Ensure new Level 4 (project-level, no partner) targets from the SAWA
+    # Program Overview 2026-2030 brochure are present on older live DBs,
+    # without requiring a full seed() rebuild of partner_targets (which
+    # would discard manual Target Value edits).
+    try:
+        for _l4_label, _l4_val, _l4_unit, _l4_doc, _l4_page in [
+            ("Young women with disabilities (within the 60,000)", "3,000", "beneficiaries", "SAWA Program Overview 2026-2030", "5"),
+            ("Total revenue over programme lifecycle",            "360M",  "USD",           "SAWA Program Overview 2026-2030", "5"),
+            ("Starter kits distributed",                          "30,000","participants",  "SAWA Program Overview 2026-2030", "8"),
+        ]:
+            conn.execute(
+                "INSERT INTO partner_targets "
+                "(partner_id, project_id, level, metric_label, target_value, unit, time_basis, source_doc, source_page) "
+                "SELECT NULL, pr.project_id, 4, ?, ?, ?, 'Life of programme', ?, ? "
+                "FROM projects pr WHERE pr.name = 'SAWA' "
+                "AND NOT EXISTS (SELECT 1 FROM partner_targets pt2 "
+                "WHERE pt2.project_id = pr.project_id AND pt2.level = 4 AND pt2.metric_label = ?)",
+                (_l4_label, _l4_val, _l4_unit, _l4_doc, _l4_page, _l4_label)
+            )
     except Exception:
         pass
     # Module K: Team Workspace tables (added Sep 2026).

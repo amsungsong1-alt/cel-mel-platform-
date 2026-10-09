@@ -579,9 +579,9 @@ with tab_map:
     with ip3:
         st.markdown(_card(
             _LC["input"], "Input — Partners",
-            "Agri-Impact (lead), Fisheries Commission, CEL, TechnoServe, R&B, NewAge, Agro Kings",
-            "Consortium: Agri-Impact (lead), Fisheries Commission, CEL, TechnoServe, R&B, NewAge, Agro Kings. "
-            "Anchors: R&B, AgroKings, Yedent, NewAge, Aglow. Specialists: KNUST, CSIR-FRI, ISP.",
+            "Agri-Impact (lead), Fisheries Commission, CEL, TechnoServe, AFRIGEM, NewAge, Agro Kings",
+            "Consortium: Agri-Impact (lead), Fisheries Commission, CEL, TechnoServe, AFRIGEM, NewAge, Agro Kings. "
+            "Anchors: AFRIGEM, AgroKings, Naple Betta, NewAge, Aglow. Specialists: KNUST, CSIR-FRI, PwC (ISP).",
         ), unsafe_allow_html=True)
     with ip4:
         st.markdown(_card(

@@ -379,6 +379,75 @@ with st.expander("CEL's Delivery Role in SAWA", expanded=False):
             unsafe_allow_html=True,
         )
 
+# ── SAWA Programme Overview (2026-2030 brochure) ─────────────────────────────
+with st.expander("SAWA Programme Overview — Strategic Context & Delivery Model", expanded=False):
+    st.caption(
+        "Source: SAWA Program Overview 2026-2030 (Agri-Impact Ltd / Mastercard "
+        "Foundation partner brochure), pp.4, 7-8, 11-12."
+    )
+
+    st.markdown("**Sector baseline (p.4)**")
+    bl1, bl2, bl3, bl4 = st.columns(4)
+    bl1.metric("Women in aquaculture jobs", "5%")
+    bl2.metric("PWDs in aquaculture jobs", "1.1%")
+    bl3.metric("Aquaculture share of GDP", "~4.5%")
+    bl4.metric("Catfish segment growth", "~14%/yr")
+    bl5, bl6, bl7, bl8 = st.columns(4)
+    bl5.metric("Youth labour-force participation", "62%→41%")
+    bl6.metric("Net jobs vs. working-age growth (2012-23)", "+250k vs +2.7M")
+    bl7.metric("GDP value of closing the gap by 2030", "USD 4B")
+    bl8.metric("Ghana NADP projection", "3M jobs · $1B/yr")
+
+    st.markdown("---")
+    st.markdown("**5 participant personas (pp.7, 12)** — delivery is persona-driven; "
+                "none of these are currently tracked as an enrolment disaggregation in Module E.")
+    st.markdown(
+        "- Aspiring Young Entrepreneur\n"
+        "- Resilient Single Mother\n"
+        "- Married Woman with Care Burdens\n"
+        "- Rural Independent Woman\n"
+        "- Person with Disability"
+    )
+
+    pc1, pc2 = st.columns(2)
+    with pc1:
+        st.markdown("**4 ecosystem assets (p.9)**")
+        st.markdown(
+            "- Training hubs\n"
+            "- Satellite fish markets\n"
+            "- Digital coordination platforms\n"
+            "- Women-led networks (Aquaculture Women Network)"
+        )
+        st.markdown("**5 participant journey stages (p.10)**")
+        st.markdown(
+            "1. Awareness & mobilisation\n"
+            "2. Onboarding & needs assessment\n"
+            "3. Modular skills training\n"
+            "4. Employment/entrepreneurship transition\n"
+            "5. Enterprise scaling & formalisation"
+        )
+    with pc2:
+        st.markdown("**5 implementation models (p.8)**")
+        st.markdown(
+            "- Enclave/production hub\n"
+            "- Community aggregator\n"
+            "- Private-sector investment\n"
+            "- Public-sector leveraging\n"
+            "- Ecosystem enablers\n\n"
+            "Plus HAPPY synergy — feed from soy/maize/rice by-products."
+        )
+        st.markdown("**3 safeguarding mechanisms (p.11)**")
+        st.markdown(
+            "- Grievance channel\n"
+            "- Safe spaces in hubs, with female facilitators\n"
+            "- Inclusive infrastructure for 3,000 PWDs"
+        )
+
+    st.caption(
+        "GTAs = Gender Action Learning System (GALS) + Economic & Mothers' "
+        "Empowerment in Agriculture Programme (EMAP)."
+    )
+
 # ── How CEL Structures BDS & WAN Delivery ────────────────────────────────────
 with st.expander("How CEL Structures BDS & WAN Delivery", expanded=False):
     st.caption(

@@ -232,7 +232,7 @@ def build_report(project_id: int, fiscal_year: int, quarter: int) -> bytes:
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p.add_run(
         "Centre for Enterprise Learning (CEL)\n"
-        "Sustainable Aquaculture for Wealth and Achievement (SAWA) Programme\n"
+        "Sustainable Aquaculture for Women Advancement (SAWA) Programme\n"
         f"Reporting Period: {period}  ·  {fy_str}\n"
         f"Generated: {datetime.utcnow().strftime('%d %B %Y')}"
     )

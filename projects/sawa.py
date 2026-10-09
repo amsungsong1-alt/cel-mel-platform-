@@ -149,6 +149,7 @@ PARTNER_TARGETS = [
     # 3,000 PWDs; $90M/yr x 4 years = $360M), not new/conflicting claims.
     {"partner_name": None, "level": 4, "metric_label": "Young women with disabilities (within the 60,000)", "target_value": "3,000", "unit": "beneficiaries", "time_basis": "Life of programme", "source_doc": "SAWA Program Overview 2026-2030", "source_page": "5"},
     {"partner_name": None, "level": 4, "metric_label": "Total revenue over programme lifecycle",            "target_value": "360M",  "unit": "USD",           "time_basis": "Life of programme", "source_doc": "SAWA Program Overview 2026-2030", "source_page": "5"},
+    {"partner_name": None, "level": 4, "metric_label": "Starter kits distributed",                          "target_value": "30,000","unit": "participants",  "time_basis": "Life of programme", "source_doc": "SAWA Program Overview 2026-2030", "source_page": "8"},
 ]
 
 # ── Budget by pillar (source: SAWA Proposal s8.1) ─────────────────────────────
@@ -381,12 +382,21 @@ TOC_NODES = [
     },
     {
         "key": "input_partners", "parent_key": "act3", "level": "Input",
-        "source_verified": True, "source_note": None,
+        "source_verified": True,
+        "source_note": (
+            "Open question: tiers below follow CEL's contribution to SAWA "
+            "(Sep 2026) slides. The SAWA Program Overview 2026-2030 partner "
+            "brochure's Partners page groups these differently — CSIR as "
+            "Anchor, and NewAge Agric/AgroKings/TechnoServe/Fisheries "
+            "Commission as Implementing — which would also change module A's "
+            "tier field. Not reconciled; flagging for AIL/CEL to confirm "
+            "which is current before the tier field is changed."
+        ),
         "statement": (
             "Partners: Consortium — Agri-Impact (lead), Fisheries Commission, "
-            "CEL, TechnoServe, R&B Farms, NewAge Agric, Agro Kings. Anchors — "
-            "R&B, AgroKings, Yedent, NewAge, Aglow. Specialists — KNUST, "
-            "CSIR/CSIR-FRI, Institutional Strengthening Partner."
+            "CEL, TechnoServe, AFRIGEM, NewAge Agric, Agro Kings. Anchors — "
+            "AFRIGEM, AgroKings, Naple Betta, NewAge, Aglow. Specialists — KNUST, "
+            "CSIR/CSIR-FRI, PwC (Institutional Strengthening Partner)."
         ),
     },
     {
@@ -1412,7 +1422,7 @@ REVIEW_PROTOCOLS: list[dict] = [
         "review_scope":          (
             "Partner delivery against Module A Level 1 (anchor partner commitments) "
             "and Level 2 (CEL Y1 delivery targets) — all 5 anchor partners: "
-            "R&B Farms, AgroKings, Yedent/Naple Betta, Aglow Farms, NewAge Agric"
+            "AFRIGEM, AgroKings, Naple Betta, Aglow Farms, NewAge Agric"
         ),
         "existing_info_source":  (
             "partner_targets table, Module A; signed MoUs and workplans; "
