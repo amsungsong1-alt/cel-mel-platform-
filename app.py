@@ -256,7 +256,7 @@ _CEL_PORTFOLIO = [
      "name": "SAWA", "period": "2026–2030", "status": "Active",
      "donor": "Mastercard Foundation",
      "cel_role": "Implementing Partner — BDS, safeguarding focal point, WAN establishment",
-     "description": "National aquaculture initiative for 60,000 young women, PWDs & displaced youth across Ghana (Catfish + Tilapia value chain)"},
+     "description": "National aquaculture initiative for 60,000 dignified jobs for young women (18–35), PWDs (3,000) & displaced youth across Ghana's tilapia & catfish value chains. Tagline: Empowering women, Transforming aquaculture."},
     # ── Blue Economy ──────────────────────────────────────────────────────────
     {"sector": "🌊 Blue Economy & Marine Innovation",
      "name": "A3MAtlantic", "period": "Ongoing", "status": "Active",

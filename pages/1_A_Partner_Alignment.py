@@ -21,7 +21,7 @@ import plotly.graph_objects as go
 from database.db import init_db, run_query, run_write
 from utils.shared_widgets import project_selector
 from utils.auth import can, can_write_module
-from projects.sawa import PILLAR_BUDGETS, PROJECT
+from projects.sawa import PILLAR_BUDGETS, PROJECT, PERSONAS, JOURNEY_STAGES, IMPLEMENTATION_MODELS, INTERVENTION_PILLARS, SAFEGUARDING_MECHANISMS
 from utils.nav_strip import render_nav_strip
 
 st.set_page_config(page_title="Partner Alignment — CEL MEL", layout="wide")
@@ -333,6 +333,50 @@ with st.expander("SAWA Partners on the Map", expanded=False):
     if _map_path.exists():
         st.image(str(_map_path), use_container_width=True)
 
+# ── Programme Overview: Personas, Pillars, Journey Stages ────────────────────
+with st.expander("SAWA Programme Design — Personas, Pillars & Journey Stages", expanded=False):
+    st.caption("Source: SAWA Programme Overview, Oct 2026 (Mastercard Foundation / Agri-Impact Ltd)")
+
+    st.markdown(f"**Programme tagline:** *{PROJECT['tagline']}*")
+    st.markdown(
+        f"**Headline targets** — "
+        f"{PROJECT['target_jobs']:,} dignified jobs · "
+        f"{PROJECT['target_pwd']:,} PWDs included · "
+        f"{PROJECT['target_fish_mt']:,} MT annual fish production increase · "
+        f"USD {PROJECT['target_revenue_pa_usd']//1_000_000}M revenue/year · "
+        f"USD {PROJECT['target_revenue_lop_usd']//1_000_000}M total over programme life"
+    )
+
+    st.divider()
+    st.markdown("**The 5 Participant Personas**")
+    _pcols = st.columns(5)
+    _persona_colors = ["#1565C0", "#6A1B9A", "#2E7D32", "#E65100", "#B71C1C"]
+    for _col, _p, _color in zip(_pcols, PERSONAS, _persona_colors):
+        _col.markdown(
+            f'<div style="background:{_color}15;border-left:3px solid {_color};'
+            f'border-radius:4px;padding:8px 10px;height:100%;">'
+            f'<div style="font-weight:bold;font-size:0.82em;color:{_color};">#{_p["id"]} {_p["name"]}</div>'
+            f'<div style="font-size:0.76em;color:#555;margin-top:4px;">{_p["description"]}</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+
+    st.divider()
+    _c1, _c2 = st.columns(2)
+    with _c1:
+        st.markdown("**4 Strategic Intervention Pillars**")
+        for _i, _pillar in enumerate(INTERVENTION_PILLARS, 1):
+            st.markdown(f"**{_i}.** {_pillar}")
+    with _c2:
+        st.markdown("**5 Participant Journey Stages**")
+        for _i, _stage in enumerate(JOURNEY_STAGES, 1):
+            st.markdown(f"**{_i}.** {_stage}")
+
+    st.divider()
+    st.markdown("**6 Implementation Models**")
+    for _model_name, _model_desc in IMPLEMENTATION_MODELS:
+        st.markdown(f"**{_model_name}** — {_model_desc}")
+
 # ── CEL's Role in SAWA ────────────────────────────────────────────────────────
 with st.expander("CEL's Delivery Role in SAWA", expanded=False):
     st.caption("Source: CEL SAWA proposal (Value Chain Pathway & Job Roles slide, July 2026)")
@@ -398,17 +442,14 @@ with st.expander("SAWA Programme Overview — Strategic Context & Delivery Model
     bl7.metric("GDP value of closing the gap by 2030", "USD 4B")
     bl8.metric("Ghana NADP projection", "3M jobs · $1B/yr")
 
-    st.markdown("---")
-    st.markdown("**5 participant personas (pp.7, 12)** — delivery is persona-driven; "
-                "none of these are currently tracked as an enrolment disaggregation in Module E.")
-    st.markdown(
-        "- Aspiring Young Entrepreneur\n"
-        "- Resilient Single Mother\n"
-        "- Married Woman with Care Burdens\n"
-        "- Rural Independent Woman\n"
-        "- Person with Disability"
+    st.caption(
+        "The 5 participant personas, 4 strategic pillars and 6 implementation "
+        "models (incl. the HAPPY-programme synergy) are in the 'SAWA Programme "
+        "Design' expander above. None of the 5 personas are currently tracked "
+        "as an enrolment disaggregation in Module E."
     )
 
+    st.markdown("---")
     pc1, pc2 = st.columns(2)
     with pc1:
         st.markdown("**4 ecosystem assets (p.9)**")
@@ -418,30 +459,10 @@ with st.expander("SAWA Programme Overview — Strategic Context & Delivery Model
             "- Digital coordination platforms\n"
             "- Women-led networks (Aquaculture Women Network)"
         )
-        st.markdown("**5 participant journey stages (p.10)**")
-        st.markdown(
-            "1. Awareness & mobilisation\n"
-            "2. Onboarding & needs assessment\n"
-            "3. Modular skills training\n"
-            "4. Employment/entrepreneurship transition\n"
-            "5. Enterprise scaling & formalisation"
-        )
     with pc2:
-        st.markdown("**5 implementation models (p.8)**")
-        st.markdown(
-            "- Enclave/production hub\n"
-            "- Community aggregator\n"
-            "- Private-sector investment\n"
-            "- Public-sector leveraging\n"
-            "- Ecosystem enablers\n\n"
-            "Plus HAPPY synergy — feed from soy/maize/rice by-products."
-        )
         st.markdown("**3 safeguarding mechanisms (p.11)**")
-        st.markdown(
-            "- Grievance channel\n"
-            "- Safe spaces in hubs, with female facilitators\n"
-            "- Inclusive infrastructure for 3,000 PWDs"
-        )
+        for _mech_name, _mech_desc in SAFEGUARDING_MECHANISMS:
+            st.markdown(f"**{_mech_name}** — {_mech_desc}")
 
     st.caption(
         "GTAs = Gender Action Learning System (GALS) + Economic & Mothers' "
