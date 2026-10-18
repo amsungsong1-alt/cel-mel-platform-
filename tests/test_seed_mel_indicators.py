@@ -136,3 +136,50 @@ def test_every_indicator_id_matches_the_workbook_scheme(seeded_db):
     pattern = re.compile(r"^(IM[1-4]|OC(1[0-3]|[1-9])|OP(3[0-9]|[1-2][0-9]|[1-9]))$")
     bad = [r["indicator_id"] for r in rows if not pattern.match(r["indicator_id"])]
     assert bad == []
+
+
+def test_extract_sm_code_pulls_the_leading_shared_measures_prefix():
+    from database.seed_mel_indicators import _extract_sm_code
+    assert _extract_sm_code("SM 5.1 Number of young women...") == "SM 5.1"
+    assert _extract_sm_code("SM 8.2 Percentage of WAN members...") == "SM 8.2"
+    assert _extract_sm_code("Quantity (MT) of fish produced annually") is None
+    assert _extract_sm_code("") is None
+
+
+def test_sm_code_populated_on_indicators_whose_statement_starts_with_one(seeded_db):
+    db_, _ = seeded_db
+    rows = db_.run_query(
+        "SELECT indicator_id, sm_code FROM mel_indicators "
+        "WHERE indicator_id IN ('IM1','IM2','IM3','OC1','OC10')", {},
+    )
+    assert {r["indicator_id"]: r["sm_code"] for r in rows} == {
+        "IM1": "SM 5.1", "IM2": "SM 6.1", "IM3": "SM 6.1",
+        "OC1": "SM 5.1", "OC10": "SM 8.2",
+    }
+
+
+def test_sm_code_is_null_for_statements_with_no_shared_measure_prefix(seeded_db):
+    db_, _ = seeded_db
+    rows = db_.run_query(
+        "SELECT sm_code FROM mel_indicators WHERE indicator_id = 'OC12'", {},
+    )
+    assert rows[0]["sm_code"] is None
+
+
+def test_sm_code_backfilled_on_rows_seeded_before_the_column_existed(seeded_db):
+    # Simulates a deployed DB whose mel_indicators rows predate sm_code:
+    # insert a bare row the old way (no sm_code param), then re-run seed()
+    # and confirm the backfill pass (not the idempotency skip) fills it in.
+    db_, seed_mod = seeded_db
+    db_.run_write(
+        "UPDATE mel_indicators SET sm_code = NULL WHERE indicator_id = 'IM1'", {},
+    )
+    assert db_.run_query(
+        "SELECT sm_code FROM mel_indicators WHERE indicator_id='IM1'", {}
+    )[0]["sm_code"] is None
+
+    seed_mod.seed()
+
+    assert db_.run_query(
+        "SELECT sm_code FROM mel_indicators WHERE indicator_id='IM1'", {}
+    )[0]["sm_code"] == "SM 5.1"

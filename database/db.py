@@ -219,8 +219,12 @@ def _run_migrations() -> bool:
                 "ALTER TABLE raw_data_analysis ADD COLUMN IF NOT EXISTS dqa_stage TEXT",
                 "ALTER TABLE raw_data_analysis ADD COLUMN IF NOT EXISTS disaggregation TEXT",
                 "ALTER TABLE raw_data_analysis ADD COLUMN IF NOT EXISTS partner_id INTEGER",
+                "ALTER TABLE mel_indicators ADD COLUMN IF NOT EXISTS sm_code TEXT",
             ):
                 conn.execute(text(stmt))
+            conn.execute(text(
+                "CREATE INDEX IF NOT EXISTS idx_mind_sm_code ON mel_indicators(sm_code)"
+            ))
             # Add 'Pending' to partner_visits.status. Don't assume the CHECK
             # constraint's name (guessing 'partner_visits_status_check' left
             # a differently-named old constraint in place in production,
@@ -1192,6 +1196,7 @@ def _run_migrations() -> bool:
         "ALTER TABLE raw_data_analysis ADD COLUMN dqa_stage TEXT",
         "ALTER TABLE raw_data_analysis ADD COLUMN disaggregation TEXT",
         "ALTER TABLE raw_data_analysis ADD COLUMN partner_id INTEGER",
+        "ALTER TABLE mel_indicators ADD COLUMN sm_code TEXT",
     ):
         try:
             conn.execute(stmt)
@@ -1201,6 +1206,12 @@ def _run_migrations() -> bool:
     try:
         conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_rda_partner ON raw_data_analysis(partner_id)"
+        )
+    except Exception:
+        pass
+    try:
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_mind_sm_code ON mel_indicators(sm_code)"
         )
     except Exception:
         pass

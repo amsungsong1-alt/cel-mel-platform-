@@ -28,7 +28,18 @@ the workbook has them.
 """
 from __future__ import annotations
 
+import re
+
 from database.db import run_query, run_write
+
+_SM_CODE_RE = re.compile(r"^(SM \d+(?:\.\d+)?)\b")
+
+
+def _extract_sm_code(statement: str) -> str | None:
+    """Pull the leading AIL Shared Measures 2.0 code (e.g. 'SM 5.1') off a
+    workbook indicator statement, or None if it doesn't start with one."""
+    m = _SM_CODE_RE.match(statement.strip())
+    return m.group(1) if m else None
 
 
 MEL_INDICATORS: list[dict] = [
@@ -1088,14 +1099,33 @@ def seed(project_id: int = 1) -> None:
                (project_id, indicator_id, level, statement, unit_of_measure,
                 fish_type, aggregation_type, model_sheet, cel_scope,
                 means_of_verification, responsible_collect, responsible_verify,
-                responsible_review, planner_reference, source_doc, source_page)
+                responsible_review, planner_reference, source_doc, source_page,
+                sm_code)
                VALUES (:project_id, :indicator_id, :level, :statement, :unit_of_measure,
                        :fish_type, :aggregation_type, :model_sheet, :cel_scope,
                        :means_of_verification, :responsible_collect, :responsible_verify,
-                       :responsible_review, :planner_reference, :source_doc, :source_page)""",
-            {"project_id": project_id, **ind},
+                       :responsible_review, :planner_reference, :source_doc, :source_page,
+                       :sm_code)""",
+            {"project_id": project_id, "sm_code": _extract_sm_code(ind["statement"]), **ind},
         )
         n_ind += 1
+
+    # Backfill sm_code for rows inserted by an earlier version of this seed
+    # (before the sm_code column existed) — the idempotency check above
+    # only skips rows that already exist, it doesn't update them.
+    n_backfilled = 0
+    for row in run_query(
+        "SELECT id, statement FROM mel_indicators WHERE project_id=:pid AND sm_code IS NULL",
+        {"pid": project_id},
+    ):
+        sm_code = _extract_sm_code(row["statement"])
+        if sm_code is None:
+            continue
+        run_write(
+            "UPDATE mel_indicators SET sm_code=:sm_code WHERE id=:id",
+            {"sm_code": sm_code, "id": row["id"]},
+        )
+        n_backfilled += 1
 
     id_map = {
         r["indicator_id"]: r["id"]
@@ -1132,4 +1162,6 @@ def seed(project_id: int = 1) -> None:
         n_tgt += 1
 
     print(f"mel_indicators: {n_ind} inserted ({len(MEL_INDICATORS) - n_ind} already present).")
+    if n_backfilled:
+        print(f"mel_indicators: sm_code backfilled on {n_backfilled} pre-existing row(s).")
     print(f"mel_indicator_targets: {n_tgt} inserted ({len(MEL_INDICATOR_TARGETS) - n_tgt} already present).")

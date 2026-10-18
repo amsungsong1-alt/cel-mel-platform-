@@ -15,6 +15,22 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 - A Step 1 gap audit of all 11 workbook-area-to-app mappings was done against
   this v3 export (reported in-conversation, not as a repo file) and approved
   as a 6-phase plan. This commit is Phase 1, part 1 of 6.
+- `mel_indicators.sm_code` — Phase 1 part 2 of 6: the first piece of the
+  Shared Measures 2.0 crosswalk. Nullable TEXT column holding the AIL SM
+  code (e.g. `'SM 5.1'`) an indicator rolls up to, extracted by
+  `seed_mel_indicators._extract_sm_code()` from the leading `SM x.x` prefix
+  already present in 26 of the 56 indicator statements (the other 30 have
+  none — not every CEL indicator maps to one). Migrated onto the existing
+  table via `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` (Postgres) /
+  try-ALTER (SQLite) in `db.py`, same pattern as the earlier
+  `raw_data_analysis.partner_id` addition; `seed()` also backfills `sm_code`
+  on rows inserted by the pre-this-change seed, since its idempotency check
+  only skips existing rows, it doesn't update them. The index on it is
+  created after the ALTER, not inline in schema.sql/schema_postgres.sql, to
+  avoid referencing the column before it exists on already-deployed DBs.
+  Verified against both a fresh SQLite DB and a simulated pre-existing one,
+  and against real Postgres 15 (fresh + pre-existing + backfill paths).
+  5 new tests in `tests/test_seed_mel_indicators.py`.
 - `app.py` — "SAWA MEL Workbook Map (v3)" expander on the home page: the
   Cover sheet's 14-sheet ownership/frequency/AIL-sharing table and the A1–A5
   assignments tracker, sourced from new `WORKBOOK_MAP`/`ASSIGNMENTS_TRACKER`

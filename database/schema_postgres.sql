@@ -503,11 +503,14 @@ CREATE TABLE IF NOT EXISTS mel_indicators (
     responsible_review   TEXT,
     planner_reference    TEXT,
     source_doc           TEXT,
-    source_page          TEXT
+    source_page          TEXT,
+    sm_code              TEXT    -- AIL Shared Measures 2.0 code (e.g. 'SM 5.1')
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_mind_key   ON mel_indicators(project_id, indicator_id);
 CREATE INDEX IF NOT EXISTS idx_mind_model_sheet  ON mel_indicators(model_sheet);
 CREATE INDEX IF NOT EXISTS idx_mind_cel_scope    ON mel_indicators(cel_scope);
+-- idx_mind_sm_code is NOT created here — see schema.sql's comment; added
+-- in db.py after the ALTER TABLE ... ADD COLUMN IF NOT EXISTS below.
 
 CREATE TABLE IF NOT EXISTS mel_indicator_targets (
     id                INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

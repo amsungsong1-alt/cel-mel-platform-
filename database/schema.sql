@@ -670,11 +670,19 @@ CREATE TABLE IF NOT EXISTS mel_indicators (
     planner_reference    TEXT,   -- free-text notes; also preserves the old
                                   -- CEL planner code (PI.1 etc.) as history
     source_doc           TEXT,
-    source_page          TEXT
+    source_page          TEXT,
+    sm_code              TEXT    -- AIL Shared Measures 2.0 code this indicator
+                                  -- rolls up to (e.g. 'SM 5.1'), extracted from
+                                  -- the workbook statement text at seed time.
+                                  -- Nullable: not every CEL indicator has one.
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_mind_key   ON mel_indicators(project_id, indicator_id);
 CREATE INDEX IF NOT EXISTS idx_mind_model_sheet  ON mel_indicators(model_sheet);
 CREATE INDEX IF NOT EXISTS idx_mind_cel_scope    ON mel_indicators(cel_scope);
+-- idx_mind_sm_code is NOT created here: sm_code is added to pre-existing
+-- deployed tables via an ALTER in db.py, which runs after this script; an
+-- index on it here would fail on those tables before the ALTER catches up
+-- (same reason idx_rda_partner is created after its ALTER, not in-line).
 
 -- One row per indicator per quarter. target_value is REAL and nullable so
 -- SQL NULL maps directly onto the workbook's blank-vs-zero rule (NULL =
