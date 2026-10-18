@@ -40,6 +40,23 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 - A Step 1 gap audit of all 11 workbook-area-to-app mappings was done against
   this v3 export (reported in-conversation, not as a repo file) and approved
   as a 6-phase plan. This commit is Phase 1, part 1 of 6.
+- `mel_indicator_pirs` — Phase 1 part 3 of 6: a new table + `database/seed_pirs.py`
+  seeding the 58 Performance Indicator Reference Sheet entries from
+  `docs/mel_tool/12_PIRS.md` (definition, disaggregation, unit, data type,
+  collection method, source, frequency per entry), plus a read-only "PIRS —
+  Indicator Reference" expander on the home page with a keyword filter.
+  `indicator_id` links each entry to a `mel_indicators` row only where the
+  PIRS statement text exactly matches after normalising — 28 of 58. The
+  other 30 are intentionally left unmatched (shown as "not yet linked" in
+  the UI, not guessed): PIRS wording genuinely diverges from the IPTT
+  sheets' wording for the same concept in the source workbook itself (e.g.
+  PIRS #1 omits "and PWDs" that IM1's statement has) — this is the same gap
+  `00_README.md` already flags under "Items to settle before building."
+  Not a DB-level FK, since forcing one would mean guessing the other 30.
+  Parsed programmatically from the Markdown (not hand-typed), same
+  precedent as the original 56-indicator seed. Verified against SQLite and
+  real Postgres 15, including idempotency and the project_id-by-name
+  lookup. 7 new tests in `tests/test_seed_pirs.py`.
 - `mel_indicators.sm_code` — Phase 1 part 2 of 6: the first piece of the
   Shared Measures 2.0 crosswalk. Nullable TEXT column holding the AIL SM
   code (e.g. `'SM 5.1'`) an indicator rolls up to, extracted by

@@ -560,3 +560,22 @@ CREATE TABLE IF NOT EXISTS mel_indicator_actuals_changelog (
     changed_at    TEXT    NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_iacl_actual ON mel_indicator_actuals_changelog(actual_id);
+
+-- Performance Indicator Reference Sheets (PIRS) — see schema.sql's comment
+-- for the indicator_id matching rationale (28/58 matched, not a hard FK).
+CREATE TABLE IF NOT EXISTS mel_indicator_pirs (
+    id                      INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    project_id              INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    pirs_number             INTEGER NOT NULL,
+    statement               TEXT    NOT NULL,
+    indicator_id            TEXT,
+    definition              TEXT,
+    disaggregation          TEXT,
+    unit_of_measure         TEXT,
+    data_type               TEXT,
+    data_collection_method  TEXT,
+    data_source             TEXT,
+    frequency               TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_pirs_key        ON mel_indicator_pirs(project_id, pirs_number);
+CREATE INDEX IF NOT EXISTS idx_pirs_indicator_id      ON mel_indicator_pirs(indicator_id);

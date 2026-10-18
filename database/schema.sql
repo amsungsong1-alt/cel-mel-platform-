@@ -744,3 +744,31 @@ CREATE TABLE IF NOT EXISTS mel_indicator_actuals_changelog (
     changed_at    TEXT    NOT NULL   -- ISO-8601 datetime
 );
 CREATE INDEX IF NOT EXISTS idx_iacl_actual ON mel_indicator_actuals_changelog(actual_id);
+
+-- Performance Indicator Reference Sheets (PIRS) — docs/mel_tool/12_PIRS.md.
+-- pirs_number is the PIRS sheet's own 1-58 sequential numbering, NOT an
+-- IM/OC/OP ID — the workbook itself has no stable cross-sheet key (see
+-- 00_README.md's "Items to settle"). indicator_id is populated only where
+-- the PIRS statement text exactly matches a mel_indicators.statement after
+-- normalising (stripping a leading SM-code, case/whitespace) — left NULL
+-- otherwise, since PIRS wording often genuinely differs from the IPTT
+-- sheets' wording for the same concept (confirmed by inspection, not a
+-- parsing gap): 28 of 58 matched this way, 30 need a human to confirm.
+-- Not a DB-level FK to mel_indicators, precisely because that mapping is
+-- uncertain for the other 30 — a hard FK would force a guess.
+CREATE TABLE IF NOT EXISTS mel_indicator_pirs (
+    id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id              INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    pirs_number             INTEGER NOT NULL,
+    statement               TEXT    NOT NULL,
+    indicator_id            TEXT,   -- 'IM1' | 'OC7' | 'OP29' ... ; NULL if unmatched (see above)
+    definition              TEXT,
+    disaggregation          TEXT,
+    unit_of_measure         TEXT,
+    data_type               TEXT,
+    data_collection_method  TEXT,
+    data_source             TEXT,
+    frequency               TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_pirs_key        ON mel_indicator_pirs(project_id, pirs_number);
+CREATE INDEX IF NOT EXISTS idx_pirs_indicator_id      ON mel_indicator_pirs(indicator_id);

@@ -83,6 +83,15 @@ except Exception as _e:
     print(f"MEL indicator seed skipped: {_e}\n{_traceback.format_exc()}")
     st.warning(f"MEL indicator seed skipped: {_e}")
 
+# mel_indicator_pirs (PIRS reference, Phase 1 part 3): same idempotent,
+# unconditional-seed pattern as mel_indicators above.
+try:
+    from database.seed_pirs import seed as _seed_pirs
+    _seed_pirs()
+except Exception as _e:
+    print(f"PIRS seed skipped: {_e}\n{_traceback.format_exc()}")
+    st.warning(f"PIRS seed skipped: {_e}")
+
 # ── Brand ─────────────────────────────────────────────────────────────────────
 NAVY = "#4A5568"
 GOLD = "#F5A820"
@@ -300,6 +309,50 @@ with st.expander("📋 SAWA MEL Workbook Map (v3, 18 Oct 2026)", expanded=False)
         "Dates and owners marked 'To be confirmed' are workbook proposals, "
         "not confirmed commitments — shown as-is, not defaulted."
     )
+
+# ── PIRS — Performance Indicator Reference Sheets (v3) ────────────────────────
+# Phase 1 part 3. Read-only: definitions, disaggregation, unit, data type,
+# collection method, source and frequency per indicator, from
+# docs/mel_tool/12_PIRS.md. indicator_id links to mel_indicators only where
+# the wording matched exactly at seed time (28/58) — the rest show
+# "not yet linked" rather than a guessed ID.
+with st.expander("📖 PIRS — Indicator Reference (v3, 58 entries)", expanded=False):
+    _pirs_rows = run_query(
+        """SELECT pirs_number, statement, indicator_id, definition, disaggregation,
+                  unit_of_measure, data_type, data_collection_method, data_source, frequency
+           FROM mel_indicator_pirs p
+           JOIN projects pr ON pr.project_id = p.project_id
+           WHERE pr.name = 'SAWA'
+           ORDER BY pirs_number""",
+        {},
+    )
+    if not _pirs_rows:
+        st.caption("PIRS reference not seeded yet — reload once the SAWA project exists.")
+    else:
+        _n_linked = sum(1 for r in _pirs_rows if r["indicator_id"])
+        st.caption(
+            f"{len(_pirs_rows)} indicator reference sheets. {_n_linked} are linked to an "
+            f"IM/OC/OP indicator by exact wording match; the other {len(_pirs_rows) - _n_linked} "
+            "use PIRS-only wording that doesn't exactly match any IPTT sheet statement — "
+            "shown as 'not yet linked', not guessed."
+        )
+        _pirs_query = st.text_input(
+            "Filter by keyword", key="pirs_filter",
+            help="Matches against the indicator statement only.",
+        )
+        for _r in _pirs_rows:
+            if _pirs_query and _pirs_query.lower() not in _r["statement"].lower():
+                continue
+            _badge = _r["indicator_id"] or "not yet linked"
+            with st.expander(f"{_r['pirs_number']}. [{_badge}] {_r['statement']}"):
+                st.markdown(f"**Definition:** {_r['definition']}")
+                st.markdown(f"**Disaggregation:** {_r['disaggregation']}")
+                c1, c2, c3 = st.columns(3)
+                c1.markdown(f"**Unit:** {_r['unit_of_measure']}")
+                c2.markdown(f"**Data type:** {_r['data_type']}")
+                c3.markdown(f"**Frequency:** {_r['frequency']}")
+                st.markdown(f"**Collection method:** {_r['data_collection_method']}")
+                st.markdown(f"**Data source:** {_r['data_source']}")
 
 # ── CEL Project Portfolio by Sector ──────────────────────────────────────────
 st.markdown("#### CEL Project Portfolio")
