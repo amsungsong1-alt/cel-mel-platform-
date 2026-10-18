@@ -638,3 +638,101 @@ CREATE TABLE IF NOT EXISTS qr_actuals (
 CREATE UNIQUE INDEX IF NOT EXISTS idx_qra_key ON qr_actuals(project_id, fiscal_year, indicator_code, submitting_org);
 CREATE INDEX IF NOT EXISTS idx_qra_project  ON qr_actuals(project_id);
 CREATE INDEX IF NOT EXISTS idx_qra_year     ON qr_actuals(fiscal_year);
+
+-- ── CEL SAWA MEL workbook indicator model (Phase 2) ───────────────────────────
+-- Source: docs/mel_tool/. Replaces logframe_rows as the indicator definition
+-- table; indicator_id is the workbook's IM/OC/OP code (e.g. 'IM1', 'OC7',
+-- 'OP29') and is the only indicator ID used anywhere once the cutover from
+-- CEL planner codes (PI.1, PIII.R1, ...) is complete. Old codes are kept only
+-- as free-text history in planner_reference, never as a lookup key.
+CREATE TABLE IF NOT EXISTS mel_indicators (
+    id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id           INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    indicator_id         TEXT    NOT NULL,   -- 'IM1' | 'OC7' | 'OP29' ...
+    level                TEXT    NOT NULL CHECK(level IN ('Impact','Outcomes','Outputs')),
+    statement            TEXT    NOT NULL,
+    unit_of_measure      TEXT,
+    fish_type            TEXT    CHECK(fish_type IN ('Catfish','Tilapia','Catfish and Tilapia','Not applicable')),
+    aggregation_type     TEXT    NOT NULL DEFAULT 'Incremental'
+                         CHECK(aggregation_type IN ('Incremental','Cumulative','Annual survey (not summed)')),
+    -- NULL only for indicators with cel_scope = 'Not in CEL scope' (not
+    -- reported in any model sheet).
+    model_sheet          TEXT    CHECK(model_sheet IN ('BDS IPTT','WAN IPTT','Cross-cutting IPTT')),
+    cel_scope            TEXT    NOT NULL CHECK(cel_scope IN (
+                              'Applicable to CEL','To be confirmed',
+                              'New output indicator','Not treated as WEO',
+                              'Not in CEL scope'
+                          )),
+    means_of_verification TEXT,
+    responsible_collect  TEXT,
+    responsible_verify   TEXT,
+    responsible_review   TEXT,
+    planner_reference    TEXT,   -- free-text notes; also preserves the old
+                                  -- CEL planner code (PI.1 etc.) as history
+    source_doc           TEXT,
+    source_page          TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_mind_key   ON mel_indicators(project_id, indicator_id);
+CREATE INDEX IF NOT EXISTS idx_mind_model_sheet  ON mel_indicators(model_sheet);
+CREATE INDEX IF NOT EXISTS idx_mind_cel_scope    ON mel_indicators(cel_scope);
+
+-- One row per indicator per quarter. target_value is REAL and nullable so
+-- SQL NULL maps directly onto the workbook's blank-vs-zero rule (NULL =
+-- not due/not reported, 0.0 = measured and none achieved) — see
+-- utils/iptt_rules.py, which this table is designed to feed directly.
+CREATE TABLE IF NOT EXISTS mel_indicator_targets (
+    id                INTEGER PRIMARY KEY AUTOINCREMENT,
+    indicator_id      INTEGER NOT NULL REFERENCES mel_indicators(id) ON DELETE CASCADE,
+    project_id        INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    fiscal_year       INTEGER NOT NULL,
+    quarter           INTEGER NOT NULL CHECK(quarter IN (1,2,3,4)),
+    target_value      REAL,
+    phasing_confirmed INTEGER NOT NULL DEFAULT 0 CHECK(phasing_confirmed IN (0,1))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_itg_key ON mel_indicator_targets(indicator_id, fiscal_year, quarter);
+CREATE INDEX IF NOT EXISTS idx_itg_project    ON mel_indicator_targets(project_id);
+
+-- One row per indicator per quarter, carrying the CEL IPTT Guide's
+-- Draft -> Submitted -> Verified -> Approved workflow (§5) and the
+-- completeness-check + 80%-threshold phone-verification QA step (§5 step 4).
+-- tilapia_value/catfish_value are the species breakdown for indicators whose
+-- fish_type is 'Catfish and Tilapia' (mirrors qr_actuals' existing pattern,
+-- which this table supersedes); achieved_value stays the combined total.
+CREATE TABLE IF NOT EXISTS mel_indicator_actuals (
+    id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+    indicator_id            INTEGER NOT NULL REFERENCES mel_indicators(id) ON DELETE CASCADE,
+    project_id              INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    fiscal_year             INTEGER NOT NULL,
+    quarter                 INTEGER NOT NULL CHECK(quarter IN (1,2,3,4)),
+    achieved_value          REAL,
+    tilapia_value           REAL,
+    catfish_value           REAL,
+    status                  TEXT    NOT NULL DEFAULT 'Draft'
+                            CHECK(status IN ('Draft','Submitted','Verified','Approved')),
+    evidence_note           TEXT,
+    completeness_checked    INTEGER NOT NULL DEFAULT 0 CHECK(completeness_checked IN (0,1)),
+    phone_verification_pct  REAL,
+    variance_explanation    TEXT,
+    submitted_by            TEXT,
+    submitted_at            TEXT,
+    verified_by             TEXT,
+    verified_at             TEXT,
+    approved_by             TEXT,
+    approved_at             TEXT    -- ISO-8601 timestamps above; NULL until that stage is reached
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_iac_key ON mel_indicator_actuals(indicator_id, fiscal_year, quarter);
+CREATE INDEX IF NOT EXISTS idx_iac_project    ON mel_indicator_actuals(project_id);
+CREATE INDEX IF NOT EXISTS idx_iac_status     ON mel_indicator_actuals(status);
+
+-- Append-only audit trail for mel_indicator_actuals edits — same shape as the
+-- existing logframe_changelog, targeting actuals instead.
+CREATE TABLE IF NOT EXISTS mel_indicator_actuals_changelog (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    actual_id     INTEGER NOT NULL REFERENCES mel_indicator_actuals(id) ON DELETE CASCADE,
+    field_changed TEXT    NOT NULL,
+    old_value     TEXT,
+    new_value     TEXT,
+    changed_by    TEXT    NOT NULL,
+    changed_at    TEXT    NOT NULL   -- ISO-8601 datetime
+);
+CREATE INDEX IF NOT EXISTS idx_iacl_actual ON mel_indicator_actuals_changelog(actual_id);

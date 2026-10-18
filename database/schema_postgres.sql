@@ -474,3 +474,86 @@ CREATE INDEX IF NOT EXISTS idx_tt_project ON team_tasks(project_id);
 CREATE INDEX IF NOT EXISTS idx_tt_role    ON team_tasks(team_role);
 CREATE INDEX IF NOT EXISTS idx_tf_project ON team_files(project_id);
 CREATE INDEX IF NOT EXISTS idx_tf_role    ON team_files(team_role);
+
+-- ── CEL SAWA MEL workbook indicator model (Phase 2) ───────────────────────────
+-- Source: docs/mel_tool/. Mirrors schema.sql's mel_indicators et al. — see
+-- that file's comments for the design rationale. Named with an "mel_" prefix
+-- because a differently-shaped "indicators" table already exists and is
+-- actively used (seed_sawa.py, Module I Strategic Plan wiring); retiring it
+-- in favour of this one is a later, separate migration, not this one.
+CREATE TABLE IF NOT EXISTS mel_indicators (
+    id                   INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    project_id           INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    indicator_id         TEXT    NOT NULL,
+    level                TEXT    NOT NULL CHECK(level IN ('Impact','Outcomes','Outputs')),
+    statement            TEXT    NOT NULL,
+    unit_of_measure      TEXT,
+    fish_type            TEXT    CHECK(fish_type IN ('Catfish','Tilapia','Catfish and Tilapia','Not applicable')),
+    aggregation_type     TEXT    NOT NULL DEFAULT 'Incremental'
+                         CHECK(aggregation_type IN ('Incremental','Cumulative','Annual survey (not summed)')),
+    model_sheet          TEXT    CHECK(model_sheet IN ('BDS IPTT','WAN IPTT','Cross-cutting IPTT')),
+    cel_scope            TEXT    NOT NULL CHECK(cel_scope IN (
+                              'Applicable to CEL','To be confirmed',
+                              'New output indicator','Not treated as WEO',
+                              'Not in CEL scope'
+                          )),
+    means_of_verification TEXT,
+    responsible_collect  TEXT,
+    responsible_verify   TEXT,
+    responsible_review   TEXT,
+    planner_reference    TEXT,
+    source_doc           TEXT,
+    source_page          TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_mind_key   ON mel_indicators(project_id, indicator_id);
+CREATE INDEX IF NOT EXISTS idx_mind_model_sheet  ON mel_indicators(model_sheet);
+CREATE INDEX IF NOT EXISTS idx_mind_cel_scope    ON mel_indicators(cel_scope);
+
+CREATE TABLE IF NOT EXISTS mel_indicator_targets (
+    id                INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    indicator_id      INTEGER NOT NULL REFERENCES mel_indicators(id) ON DELETE CASCADE,
+    project_id        INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    fiscal_year       INTEGER NOT NULL,
+    quarter           INTEGER NOT NULL CHECK(quarter IN (1,2,3,4)),
+    target_value      DOUBLE PRECISION,
+    phasing_confirmed BOOLEAN NOT NULL DEFAULT FALSE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_itg_key ON mel_indicator_targets(indicator_id, fiscal_year, quarter);
+CREATE INDEX IF NOT EXISTS idx_itg_project    ON mel_indicator_targets(project_id);
+
+CREATE TABLE IF NOT EXISTS mel_indicator_actuals (
+    id                      INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    indicator_id            INTEGER NOT NULL REFERENCES mel_indicators(id) ON DELETE CASCADE,
+    project_id              INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    fiscal_year             INTEGER NOT NULL,
+    quarter                 INTEGER NOT NULL CHECK(quarter IN (1,2,3,4)),
+    achieved_value          DOUBLE PRECISION,
+    tilapia_value           DOUBLE PRECISION,
+    catfish_value           DOUBLE PRECISION,
+    status                  TEXT    NOT NULL DEFAULT 'Draft'
+                            CHECK(status IN ('Draft','Submitted','Verified','Approved')),
+    evidence_note           TEXT,
+    completeness_checked    BOOLEAN NOT NULL DEFAULT FALSE,
+    phone_verification_pct  DOUBLE PRECISION,
+    variance_explanation    TEXT,
+    submitted_by            TEXT,
+    submitted_at            TEXT,
+    verified_by             TEXT,
+    verified_at             TEXT,
+    approved_by             TEXT,
+    approved_at             TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_iac_key ON mel_indicator_actuals(indicator_id, fiscal_year, quarter);
+CREATE INDEX IF NOT EXISTS idx_iac_project    ON mel_indicator_actuals(project_id);
+CREATE INDEX IF NOT EXISTS idx_iac_status     ON mel_indicator_actuals(status);
+
+CREATE TABLE IF NOT EXISTS mel_indicator_actuals_changelog (
+    id            INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    actual_id     INTEGER NOT NULL REFERENCES mel_indicator_actuals(id) ON DELETE CASCADE,
+    field_changed TEXT    NOT NULL,
+    old_value     TEXT,
+    new_value     TEXT,
+    changed_by    TEXT    NOT NULL,
+    changed_at    TEXT    NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_iacl_actual ON mel_indicator_actuals_changelog(actual_id);
