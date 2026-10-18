@@ -5,6 +5,16 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 
 ## Unreleased
 
+### Fixed
+- `app.py` — the auto-seed and MEL-indicator-seed exception handlers now
+  also `print()` the full traceback before showing `st.warning()`.
+  `st.warning()` only renders in the browser; it was never reaching
+  Streamlit Cloud's server-side log panel, so a production failure in
+  either seed step (e.g. the `mel_indicators` "relation does not exist"
+  report) was previously undiagnosable from logs — the log panel would
+  show nothing at all for it, which is what happened when first
+  investigated.
+
 ### Added
 - `docs/mel_tool/` replaced with the **v3** workbook export
   (`SAWA_IP_MEL_System_Tool_CEL_v3_10_18_2026.xlsx`, 18 Oct 2026): 15 files

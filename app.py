@@ -57,6 +57,8 @@ _needs_seed = (
         {},
     )
 )
+import traceback as _traceback
+
 if _needs_seed:
     try:
         from database.seed_sawa import seed as _seed
@@ -64,6 +66,10 @@ if _needs_seed:
         from database.seed_sample_data import seed as _seed_sample
         _seed_sample()
     except Exception as _e:
+        # st.warning() only renders in the browser — it never reaches
+        # Streamlit Cloud's server-side log panel (stdout/stderr), so a
+        # failure here was previously undiagnosable from logs alone.
+        print(f"Auto-seed skipped: {_e}\n{_traceback.format_exc()}")
         st.warning(f"Auto-seed skipped: {_e}")
 
 # mel_indicators/mel_indicator_targets (Phase 2 workbook indicator model):
@@ -74,6 +80,7 @@ try:
     from database.seed_mel_indicators import seed as _seed_mel
     _seed_mel()
 except Exception as _e:
+    print(f"MEL indicator seed skipped: {_e}\n{_traceback.format_exc()}")
     st.warning(f"MEL indicator seed skipped: {_e}")
 
 # ── Brand ─────────────────────────────────────────────────────────────────────
