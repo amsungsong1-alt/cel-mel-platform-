@@ -6,6 +6,21 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 ## Unreleased
 
 ### Fixed
+- `database/seed_mel_indicators.py` — `seed()` no longer hardcodes
+  `project_id=1`. The production deploy's `projects` table has its SAWA row
+  at a different id (the auto-increment sequence had advanced past 1 for
+  unrelated reasons), so every boot's unconditional `seed()` call was
+  raising `ForeignKeyViolation: insert ... violates foreign key constraint
+  "mel_indicators_project_id_fkey" ... project_id=1 is not present in table
+  "projects"` — caught by `app.py`'s try/except and only ever shown as the
+  quiet "MEL indicator seed skipped" warning (see the logging fix below for
+  why this took two rounds of log-reading to actually see). `seed()` now
+  looks up the SAWA project by name when no `project_id` is passed, the
+  same way `seed_sawa.py` already does, and no-ops cleanly (prints, doesn't
+  raise) if no such project exists yet. Confirmed on real Postgres earlier
+  that `mel_indicators` itself migrates fine — this FK violation was the
+  actual production failure the "relation does not exist" report evolved
+  into once the table was reached. 2 new regression tests.
 - `app.py` — the auto-seed and MEL-indicator-seed exception handlers now
   also `print()` the full traceback before showing `st.warning()`.
   `st.warning()` only renders in the browser; it was never reaching

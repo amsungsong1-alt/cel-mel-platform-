@@ -1081,11 +1081,26 @@ MEL_INDICATOR_TARGETS: list[tuple] = [
 ]
 
 
-def seed(project_id: int = 1) -> None:
+def seed(project_id: int | None = None) -> None:
     """Idempotently insert MEL_INDICATORS and MEL_INDICATOR_TARGETS for
     *project_id*. Safe to call on every app boot: existing rows are left
     untouched (matched on indicator_id for indicators, on
-    (indicator_id, fiscal_year, quarter) for targets)."""
+    (indicator_id, fiscal_year, quarter) for targets).
+
+    project_id=None (the default) looks up the SAWA project by name, the
+    same way seed_sawa.py does, rather than assuming project_id=1 — on a
+    database where rows were created/deleted before this ran, SAWA's actual
+    id can be anything, and inserting against a hardcoded 1 would violate
+    mel_indicators' FK to projects(project_id) if no such row exists."""
+    if project_id is None:
+        existing_project = run_query(
+            "SELECT project_id FROM projects WHERE name = 'SAWA'", {}
+        )
+        if not existing_project:
+            print("mel_indicators: skipped (no 'SAWA' row in projects yet).")
+            return
+        project_id = existing_project[0]["project_id"]
+
     n_ind = 0
     for ind in MEL_INDICATORS:
         existing = run_query(

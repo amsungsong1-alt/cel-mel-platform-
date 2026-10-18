@@ -166,6 +166,50 @@ def test_sm_code_is_null_for_statements_with_no_shared_measure_prefix(seeded_db)
     assert rows[0]["sm_code"] is None
 
 
+def test_seed_looks_up_sawa_project_id_by_name_not_hardcoded_1(monkeypatch):
+    # Regression test: a production deploy had a 'SAWA' row at project_id=7
+    # (not 1 — the auto-increment sequence had advanced past 1 for reasons
+    # unrelated to this seed script), and seed()'s old hardcoded default of
+    # project_id=1 raised a FK violation inserting against a project_id that
+    # didn't exist. seed() must resolve the real id by name instead.
+    fd, path = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
+    os.remove(path)
+    monkeypatch.setattr(db, "DB_PATH", path)
+    monkeypatch.setattr(db, "DATABASE_URL", f"sqlite:///{path}")
+    st.cache_resource.clear()
+    db.init_db()
+    db.run_write("INSERT INTO projects (project_id, name) VALUES (7, 'SAWA')", {})
+
+    from database import seed_mel_indicators
+    seed_mel_indicators.seed()  # no project_id passed
+
+    rows = db.run_query("SELECT DISTINCT project_id FROM mel_indicators", {})
+    assert rows == [{"project_id": 7}]
+    assert db.run_query("SELECT COUNT(*) AS c FROM mel_indicators", {})[0]["c"] == 56
+
+    st.cache_resource.clear()
+    os.remove(path)
+
+
+def test_seed_skips_gracefully_when_no_sawa_project_exists_yet(monkeypatch):
+    fd, path = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
+    os.remove(path)
+    monkeypatch.setattr(db, "DB_PATH", path)
+    monkeypatch.setattr(db, "DATABASE_URL", f"sqlite:///{path}")
+    st.cache_resource.clear()
+    db.init_db()  # no projects row inserted at all
+
+    from database import seed_mel_indicators
+    seed_mel_indicators.seed()  # must not raise
+
+    assert db.run_query("SELECT COUNT(*) AS c FROM mel_indicators", {})[0]["c"] == 0
+
+    st.cache_resource.clear()
+    os.remove(path)
+
+
 def test_sm_code_backfilled_on_rows_seeded_before_the_column_existed(seeded_db):
     # Simulates a deployed DB whose mel_indicators rows predate sm_code:
     # insert a bare row the old way (no sm_code param), then re-run seed()
