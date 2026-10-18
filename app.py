@@ -66,6 +66,16 @@ if _needs_seed:
     except Exception as _e:
         st.warning(f"Auto-seed skipped: {_e}")
 
+# mel_indicators/mel_indicator_targets (Phase 2 workbook indicator model):
+# seed() checks each row individually before inserting (no delete+rebuild
+# like seed_sawa's partner_targets), so it's safe to call unconditionally
+# on every boot rather than gating it behind _needs_seed.
+try:
+    from database.seed_mel_indicators import seed as _seed_mel
+    _seed_mel()
+except Exception as _e:
+    st.warning(f"MEL indicator seed skipped: {_e}")
+
 # ── Brand ─────────────────────────────────────────────────────────────────────
 NAVY = "#4A5568"
 GOLD = "#F5A820"
