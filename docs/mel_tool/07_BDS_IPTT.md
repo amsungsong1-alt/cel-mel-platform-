@@ -1,16 +1,16 @@
 # BDS IPTT
 
-Model sheet: Business Development Services (BDS). Input sheet for BDS indicators (targets and verified achievements per quarter).
+Model sheet: Business Development Services (BDS). Input sheet for BDS indicators (typed targets and verified achievements per quarter). Y1 and % columns are formulas.
 
 ## Header lines
 
-- B1: Created on: 15th October 2026 | Last revised on: 18th October 2026
-- B2: Last revised by: Muhammadu Sungsong Aboubakr
-- B3: Indicators: 22  |  With Y1 target: 10  |  With Y1 achievement reported: 0  |  At or above 100% of Y1 target: 0
-- B4: Input cells: Target and Achieved for Q1-Q4. Yellow = quarterly phasing to be confirmed. Formula cells (Y1 and % columns) must not be overwritten. Enter achievements only after verification (see CEL IPTT Guide).
-- B5: BDS Indicator Performance Tracking Table (IPTT) - Business Development Services
+- B2: Created on: 15th October 2026 | Last revised on: 18th October 2026
+- B3: Last revised by: Muhammadu Sungsong Aboubakr
+- B4: Indicators: 21  |  With Y1 target: 10  |  With Y1 achievement reported: 0  |  At or above 100% of Y1 target: 0
+- B5: Input cells: Target and Achieved for Q1-Q4. Yellow = quarterly phasing to be confirmed. Formula cells (Y1 and % columns) must not be overwritten. Enter achievements only after verification (see CEL IPTT Guide).
+- B6: BDS Indicator Performance Tracking Table (IPTT) - Business Development Services
 
-## Indicator definitions (22)
+## Indicator definitions (21)
 
 | ID | Level | Indicator | Unit of Measure | Fish Type | Aggregation type | Means of verification | Responsible (Collect / Verify / Review) | Planner reference / phasing status |
 |---|---|---|---|---|---|---|---|---|
@@ -22,8 +22,10 @@ Model sheet: Business Development Services (BDS). Input sheet for BDS indicators
 | OC4 | Outcomes | SM 5.1 <br>Number of young women in new, improved and additional employments in the aquaculture value chain | Young Women & PWDs | Catfish and Tilapia | Incremental | Production records, YiW records, Programs survey | Collect: BDS Coach<br>Verify: MEAL Officer<br>Review: MEAL Lead | No Y1 target set yet. |
 | OC5 | Outcomes | SM 4.2 <br>Number of supported young-women-owned enterprises showing growth through market expansion / diversification | Enterprises | Catfish and Tilapia | Incremental | Production records, YiW records, Programs survey | Collect: BDS Coach<br>Verify: MEAL Officer<br>Review: MEAL Lead | No Y1 target set yet. |
 | OC6 | Outcomes | SM 4.1<br>Number of supported young-women-owned enterprisesshowing growth through increased in revenue | Enterprises | Catfish and Tilapia | Incremental | Production records, YiW records, Programs survey | Collect: BDS Coach<br>Verify: MEAL Officer<br>Review: MEAL Lead | No Y1 target set yet. |
-| OC7 | Outcomes | Quantity (MT) of fish produced annually | Fish (MT) | Catfish and Tilapia | Incremental | YiW records, Partner reports, Program and Participant surveys | Collect: BDS Coach<br>Verify: MEAL Officer<br>Review: MEAL Lead | Planner ref: Pll.R6 & Plll.R2. Quarterly phasing not stated in the concept notes: confirm with AIL. |
-| OC8 | Outcomes | Amount of revenue (USD) from fish produced annually | US Dollars | Catfish and Tilapia | Incremental | YiW records, Partner reports, Program and Participant surveys | Collect: Finance Lead; BDS Coach<br>Verify: MEAL Officer<br>Review: MEAL Lead | Planner ref: Pll.R7 & Plll.R3. Quarterly phasing not stated in the concept notes: confirm with AIL. |
+| OC7 | Outcomes | Number of CEL-referred enterprises supported with Catalytic Fund support | Enterprises supported | Catfish and Tilapia | Incremental | TechnoServe award/disbursement records, Partner reports, Enterprise verification | Collect: BDS Coach (TechnoServe feedback via Partner's)<br>Verify: MEAL Officer<br>Review: Program Lead | TechnoServe planner III.3: 10 enterprises (Q3 3, Q4 7). Programme-wide figure: agree the CEL-referred share. |
+| OC8 | Outcomes | Number of CEL-referred enterprises supported with Micro Investment Fund support | Enterprises supported | Catfish and Tilapia | Incremental | TechnoServe award/disbursement records, Partner reports, Enterprise verification | Collect: BDS Coach (TechnoServe feedback via Partner's)<br>Verify: MEAL Officer<br>Review: Program Lead | TechnoServe planner III.4: 150 enterprises (Q3 52, Q4 98). Programme-wide figure: agree the CEL-referred share. |
+| OC9 | Outcomes | Quantity (MT) of fish produced annually | Fish (MT) | Catfish and Tilapia | Incremental | YiW records, Partner reports, Program and Participant surveys | Collect: BDS Coach<br>Verify: MEAL Officer<br>Review: MEAL Lead | Planner ref: Pll.R6 & Plll.R2. Quarterly phasing not stated in the concept notes: confirm with AIL. |
+| OC10 | Outcomes | Amount of revenue (USD) from fish produced annually | US Dollars | Catfish and Tilapia | Incremental | YiW records, Partner reports, Program and Participant surveys | Collect: Finance Lead; BDS Coach<br>Verify: MEAL Officer<br>Review: MEAL Lead | Planner ref: Pll.R7 & Plll.R3. Quarterly phasing not stated in the concept notes: confirm with AIL. |
 | OP4 | Outputs | SM 4<br>Number of young women supported to start/operate their own aquaculture enterprises | Young Women & PWDs | Catfish and Tilapia | Incremental | Program, participant and business surveys | Collect: BDS Coach<br>Verify: MEAL Officer<br>Review: Program Lead | No Y1 target set yet. |
 | OP5 | Outputs | SM 4.3 Number of young women and PWDs employed by supported aquaculture enterprises | Young Women & PWDs | Catfish and Tilapia | Incremental | YiW records, Partner reports, Program and Participant surveys | Collect: BDS Coach<br>Verify: MEAL Officer<br>Review: Program Lead | No Y1 target set yet. |
 | OP9 | Outputs | SM 1.1 <br>Number of young women who completed training in aquaculture business development and entrepreneurship skills | Young Women & PWDs | Catfish and Tilapia | Incremental | WEO records, Partner reports, Program and Participant surveys | Collect: BDS Officer<br>Verify: MEAL Officer<br>Review: Program Lead | Planner ref: Pl.3. Phasing confirmed in BDS/WAN concept note (28 Sep 2026). |
@@ -32,10 +34,7 @@ Model sheet: Business Development Services (BDS). Input sheet for BDS indicators
 | OP27 | Outputs | Number of youth mobilised into the programme (community entry, sensitization, selection) | Youth Mobilised | Catfish and Tilapia | Incremental | Participant onboarding records, Mobilisation and sensitisation reports, Attendance records | Collect: BDS Officer (mobilisation with Partner's)<br>Verify: MEAL Officer<br>Review: Program Lead | Planner ref: Pl.1. Phasing confirmed in BDS/WAN concept note (28 Sep 2026). |
 | OP29 | Outputs | Number of young women in women-led cooperatives/clusters trained in gender, financial literacy and business mentoring | Young women (count of individuals) | Catfish and Tilapia | Incremental | Training reports, Participant lists, WEO records | Collect: BDS Officer<br>Verify: MEAL Officer<br>Review: Program Lead | Planner ref: Pl.17. Phasing confirmed in BDS/WAN concept note (28 Sep 2026). |
 | OP32 | Outputs | Number of persons trained in mentorship and digital literacy | Persons (count of individuals) | Catfish and Tilapia | Incremental | WEO records, Training reports, Participant lists | Collect: BDS Officer<br>Verify: MEAL Officer<br>Review: Program Lead | Planner ref: PlV.5. Quarterly phasing not stated in the concept notes: confirm with AIL. |
-| OP36 | Outputs | Number of enterprises prepared and referred to TechnoServe for Catalytic Fund | Enterprises referred | Catfish and Tilapia | Incremental | Referral checklist, Referral register, Enterprise growth plans, TechnoServe feedback | Collect: BDS Coach; Finance Lead<br>Verify: MEAL Officer<br>Review: Program Lead | TechnoServe planner III.3 (referral step). No Y1 target yet: agree with TechnoServe and AIL. Must be at least the funded numbers below. Referral is not a funding or job outcome. |
-| OP37 | Outputs | Number of enterprises prepared and referred to TechnoServe for Micro Investment Fund support | Enterprises referred | Catfish and Tilapia | Incremental | Referral checklist, Referral register, Enterprise growth plans, TechnoServe feedback | Collect: BDS Coach; Finance Lead<br>Verify: MEAL Officer<br>Review: Program Lead | TechnoServe planner III.4 (referral step). No Y1 target yet: agree with TechnoServe and AIL. Must be at least the funded numbers below. Referral is not a funding or job outcome. |
-| OP38 | Outputs | Number of CEL-referred enterprises supported with Catalytic Fund support | Enterprises supported | Catfish and Tilapia | Incremental | TechnoServe award/disbursement records, Partner reports, Enterprise verification | Collect: BDS Coach (TechnoServe feedback via Partner's)<br>Verify: MEAL Officer<br>Review: Program Lead | TechnoServe planner III.3: 10 enterprises (Q3 3, Q4 7). Programme-wide figure: agree the CEL-referred share. |
-| OP39 | Outputs | Number of CEL-referred enterprises supported with Micro Investment Fund support | Enterprises supported | Catfish and Tilapia | Incremental | TechnoServe award/disbursement records, Partner reports, Enterprise verification | Collect: BDS Coach (TechnoServe feedback via Partner's)<br>Verify: MEAL Officer<br>Review: Program Lead | TechnoServe planner III.4: 150 enterprises (Q3 52, Q4 98). Programme-wide figure: agree the CEL-referred share. |
+| OP36 | Outputs | Number of enterprises prepared and referred to TechnoServe for Catalytic Fund or  Micro Investment Fund support | Enterprises referred | Catfish and Tilapia | Incremental | Referral checklist, Referral register, Enterprise growth plans, TechnoServe feedback | Collect: BDS Coach; Finance Lead<br>Verify: MEAL Officer<br>Review: Program Lead | TechnoServe planner III.3 / lll.4 (referral step). No Y1 target yet: agree with TechnoServe and AIL. Must be at least the funded numbers below. Referral is not a funding or job outcome. |
 
 ## Targets and achievements (cached values)
 
@@ -51,8 +50,10 @@ Blank = not due / not reported (not zero). `-` = percentage not computable. Y1 =
 | OC4 |  |  | - |  |  | - |  |  | - |  |  | - |  |  | - |
 | OC5 |  |  | - |  |  | - |  |  | - |  |  | - |  |  | - |
 | OC6 |  |  | - |  |  | - |  |  | - |  |  | - |  |  | - |
-| OC7 | 123.7 |  | - | 1 |  | - | 48.3 |  | - | 36.7 |  | - | 37.7 |  | - |
-| OC8 | 225000 |  | - | 2083 |  | - | 87500 |  | - | 66667 |  | - | 68750 |  | - |
+| OC7 | 10 |  | - |  |  | - |  |  | - | 3 |  | - | 7 |  | - |
+| OC8 | 150 |  | - |  |  | - |  |  | - | 52 |  | - | 98 |  | - |
+| OC9 | 123.7 |  | - | 1 |  | - | 48.3 |  | - | 36.7 |  | - | 37.7 |  | - |
+| OC10 | 225000 |  | - | 2083 |  | - | 87500 |  | - | 66667 |  | - | 68750 |  | - |
 | OP4 |  |  | - |  |  | - |  |  | - |  |  | - |  |  | - |
 | OP5 |  |  | - |  |  | - |  |  | - |  |  | - |  |  | - |
 | OP9 | 500 |  | - | 95 |  | - | 135 |  | - | 135 |  | - | 135 |  | - |
@@ -62,61 +63,114 @@ Blank = not due / not reported (not zero). `-` = percentage not computable. Y1 =
 | OP29 | 500 |  | - | 0 |  | - | 150 |  | - | 150 |  | - | 200 |  | - |
 | OP32 | 500 |  | - | 0 |  | - | 150 |  | - | 150 |  | - | 200 |  | - |
 | OP36 |  |  | - |  |  | - |  |  | - |  |  | - |  |  | - |
-| OP37 |  |  | - |  |  | - |  |  | - |  |  | - |  |  | - |
-| OP38 | 10 |  | - |  |  | - |  |  | - | 3 |  | - | 7 |  | - |
-| OP39 | 150 |  | - |  |  | - |  |  | - | 52 |  | - | 98 |  | - |
 
-## Formulas (example row, pattern repeats per row)
+## Formulas (active; complete inventory)
 
-Example row 9 (ID IM1):
+148 formulas. Formulas are shown exactly as stored in the workbook. `{r}` stands for the formula's own row number. Cached values appear in the content tables above.
 
-```
-E9: =IF(COUNT(H9,K9,N9,Q9)=0,"",SUM(H9,K9,N9,Q9))
-F9: =IF(COUNT(I9,L9,O9,R9)=0,"",SUM(I9,L9,O9,R9))
-G9: =IF(F9="","-",IFERROR(F9/E9,"-"))
-J9: =IF(I9="","-",IFERROR(I9/H9,"-"))
-```
-
-Summary line (B3) formula:
+**Column B**, rows 4 (1 cell):
 
 ```
-="Indicators: "&COUNTA(A8:A80)&"  |  With Y1 target: "&COUNT(E8:E80)&"  |  With Y1 achievement reported: "&COUNT(F8:F80)&"  |  At or above 100% of Y1 target: "&COUNTIF(G8:G80,">=1")
+="Indicators: "&COUNTA(A9:A80)&"  |  With Y1 target: "&COUNT(E9:E80)&"  |  With Y1 achievement reported: "&COUNT(F9:F80)&"  |  At or above 100% of Y1 target: "&COUNTIF(G9:G80,">=1")
 ```
 
-**Data validation**
+**Column E**, rows 10-11, 13-22, 24-32 (21 cells):
 
-- type `decimal`, rule `0` (greaterThanOrEqual), applies to `H9:I11 H13:I20 H22:I32 K9:L11 K13:L20 K22:L32 N9:O11 N13:O20 N22:O32 Q9:R11 Q...`; error: Enter a number of 0 or more. Leave blank if not due or not reported.
-- type `list`, rule `"Incremental,Cumulative,Annual survey (not summed)"`, applies to `T9:T11 T13:T20 T22:T32`
-- type `list`, rule `"Catfish,Tilapia,Catfish and Tilapia,Not applicable"`, applies to `D9:D11 D13:D20 D22:D32`
+```
+=IF(COUNT(H{r},K{r},N{r},Q{r})=0,"",SUM(H{r},K{r},N{r},Q{r}))
+```
 
-**Conditional formatting**
+**Column F**, rows 10-11, 13-22, 24-32 (21 cells):
 
-- `G8:G32`: `AND(ISNUMBER(G8),G8<0.7)`
-- `G8:G32`: `AND(ISNUMBER(G8),G8>=0.7,G8<1)`
-- `G8:G32`: `AND(ISNUMBER(G8),G8>=1)`
-- `J8:J32`: `AND(ISNUMBER(J8),J8<0.7)`
-- `J8:J32`: `AND(ISNUMBER(J8),J8>=0.7,J8<1)`
-- `J8:J32`: `AND(ISNUMBER(J8),J8>=1)`
-- `M8:M32`: `AND(ISNUMBER(M8),M8<0.7)`
-- `M8:M32`: `AND(ISNUMBER(M8),M8>=0.7,M8<1)`
-- `M8:M32`: `AND(ISNUMBER(M8),M8>=1)`
-- `P8:P32`: `AND(ISNUMBER(P8),P8<0.7)`
-- `P8:P32`: `AND(ISNUMBER(P8),P8>=0.7,P8<1)`
-- `P8:P32`: `AND(ISNUMBER(P8),P8>=1)`
-- ... 3 more similar rules
+```
+=IF(COUNT(I{r},L{r},O{r},R{r})=0,"",SUM(I{r},L{r},O{r},R{r}))
+```
+
+**Column G**, rows 10-11, 13-22, 24-32 (21 cells):
+
+```
+=IF(F{r}="","-",IFERROR(F{r}/E{r},"-"))
+```
+
+**Column J**, rows 10-11, 13-22, 24-32 (21 cells):
+
+```
+=IF(I{r}="","-",IFERROR(I{r}/H{r},"-"))
+```
+
+**Column M**, rows 10-11, 13-22, 24-32 (21 cells):
+
+```
+=IF(L{r}="","-",IFERROR(L{r}/K{r},"-"))
+```
+
+**Column P**, rows 10-11, 13-22, 24-32 (21 cells):
+
+```
+=IF(O{r}="","-",IFERROR(O{r}/N{r},"-"))
+```
+
+**Column S**, rows 10-11, 13-22, 24-32 (21 cells):
+
+```
+=IF(R{r}="","-",IFERROR(R{r}/Q{r},"-"))
+```
+
+Total: 148 formulas in 8 distinct patterns.
+
+## Data validation
+
+- type `decimal`, rule `0` (greaterThanOrEqual), applies to `H10:I12 H14:I23 H25:I32 K10:L12 K14:L23 K25:L32 N10:O12 N14:O23 N25:O32 Q10:R12 Q14:R23...`; error message: Enter a number of 0 or more. Leave blank if not due or not reported.
+- type `list`, rule `"Incremental,Cumulative,Annual survey (not summed)"` (between), applies to `T10:T12 T14:T23 T25:T32`
+- type `list`, rule `"Catfish,Tilapia,Catfish and Tilapia,Not applicable"` (between), applies to `D10:D12 D14:D23 D25:D32`
+
+## Conditional formatting rules
+
+- `G20`: `AND(ISNUMBER(G20),G20<0.7)` (fill FFF8CBAD)
+- `G20`: `AND(ISNUMBER(G20),G20>=0.7,G20<1)` (fill FFFFE699)
+- `G20`: `AND(ISNUMBER(G20),G20>=1)` (fill FFC6E0B4)
+- `J20`: `AND(ISNUMBER(J20),J20<0.7)` (fill FFF8CBAD)
+- `J20`: `AND(ISNUMBER(J20),J20>=0.7,J20<1)` (fill FFFFE699)
+- `J20`: `AND(ISNUMBER(J20),J20>=1)` (fill FFC6E0B4)
+- `M20`: `AND(ISNUMBER(M20),M20<0.7)` (fill FFF8CBAD)
+- `M20`: `AND(ISNUMBER(M20),M20>=0.7,M20<1)` (fill FFFFE699)
+- `M20`: `AND(ISNUMBER(M20),M20>=1)` (fill FFC6E0B4)
+- `P20`: `AND(ISNUMBER(P20),P20<0.7)` (fill FFF8CBAD)
+- `P20`: `AND(ISNUMBER(P20),P20>=0.7,P20<1)` (fill FFFFE699)
+- `P20`: `AND(ISNUMBER(P20),P20>=1)` (fill FFC6E0B4)
+- `S20`: `AND(ISNUMBER(S20),S20<0.7)` (fill FFF8CBAD)
+- `S20`: `AND(ISNUMBER(S20),S20>=0.7,S20<1)` (fill FFFFE699)
+- `S20`: `AND(ISNUMBER(S20),S20>=1)` (fill FFC6E0B4)
+- `G19`: `AND(ISNUMBER(G19),G19<0.7)` (fill FFF8CBAD)
+- `G19`: `AND(ISNUMBER(G19),G19>=0.7,G19<1)` (fill FFFFE699)
+- `G19`: `AND(ISNUMBER(G19),G19>=1)` (fill FFC6E0B4)
+- `J19`: `AND(ISNUMBER(J19),J19<0.7)` (fill FFF8CBAD)
+- `J19`: `AND(ISNUMBER(J19),J19>=0.7,J19<1)` (fill FFFFE699)
+- `J19`: `AND(ISNUMBER(J19),J19>=1)` (fill FFC6E0B4)
+- `M19`: `AND(ISNUMBER(M19),M19<0.7)` (fill FFF8CBAD)
+- `M19`: `AND(ISNUMBER(M19),M19>=0.7,M19<1)` (fill FFFFE699)
+- `M19`: `AND(ISNUMBER(M19),M19>=1)` (fill FFC6E0B4)
+- `P19`: `AND(ISNUMBER(P19),P19<0.7)` (fill FFF8CBAD)
+- `P19`: `AND(ISNUMBER(P19),P19>=0.7,P19<1)` (fill FFFFE699)
+- `P19`: `AND(ISNUMBER(P19),P19>=1)` (fill FFC6E0B4)
+- `S19`: `AND(ISNUMBER(S19),S19<0.7)` (fill FFF8CBAD)
+- `S19`: `AND(ISNUMBER(S19),S19>=0.7,S19<1)` (fill FFFFE699)
+- `S19`: `AND(ISNUMBER(S19),S19>=1)` (fill FFC6E0B4)
+- `G9:G18 G21:G32 J9:J18 J21:J32 M9:M18 M21:M32 P9:P18 P21:P32 S9:S18 S21:S32`: `AND(ISNUMBER(G9),G9<0.7)` (fill FFF8CBAD)
+- `G9:G18 G21:G32 J9:J18 J21:J32 M9:M18 M21:M32 P9:P18 P21:P32 S9:S18 S21:S32`: `AND(ISNUMBER(G9),G9>=0.7,G9<1)` (fill FFFFE699)
+- `G9:G18 G21:G32 J9:J18 J21:J32 M9:M18 M21:M32 P9:P18 P21:P32 S9:S18 S21:S32`: `AND(ISNUMBER(G9),G9>=1)` (fill FFC6E0B4)
 
 ## Cell comments
 
 | Cell | Comment |
 |---|---|
-| B9 | ams: Plll.R1 |
-| B18 | ams: Pll.R6 & Plll.R2 |
-| B19 | ams: Pll.R7 & Plll.R3 |
-| B23 | ams: Pl.3 |
-| B26 | ams: Pl.1 |
-| B27 | ams: Pl.17 |
-| B28 | ams: PlV.5 |
-| B29 | TechnoServe referral step (planner III.3) |
-| B30 | TechnoServe referral step (planner III.4) |
-| B31 | TechnoServe planner III.3 |
-| B32 | TechnoServe planner III.4 |
+| B10 | ams: Plll.R1 |
+| B19 | TechnoServe planner III.3 |
+| B20 | TechnoServe planner III.4 |
+| B21 | ams: Pll.R6 & Plll.R2 |
+| B22 | ams: Pll.R7 & Plll.R3 |
+| B26 | ams: Pl.3 |
+| B29 | ams: Pl.1 |
+| B30 | ams: Pl.17 |
+| B31 | ams: PlV.5 |
+| B32 | TechnoServe referral step (planner III.3 / III.4) |

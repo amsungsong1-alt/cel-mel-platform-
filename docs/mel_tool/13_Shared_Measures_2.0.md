@@ -1,6 +1,6 @@
 # Shared Measures 2.0
 
-Shared Measures 2.0 reference (programme-wide shared measures, metrics and indicator definitions).
+Shared Measures 2.0 reference (programme-wide shared measures, metrics and indicator definitions) issued by Agri-Impact.
 
 - Created on:
 - Last revised on:
@@ -1934,3 +1934,9 @@ Programme reports
 **Frequency:**
 
 According to schedule
+
+
+## Formulas
+
+No formulas in this sheet (all cells are typed values).
+

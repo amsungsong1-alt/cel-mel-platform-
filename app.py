@@ -255,6 +255,45 @@ for level, colour, mod, page, objective, users, description in MODULES:
 
 st.markdown("---")
 
+# ── SAWA MEL Workbook Map (v3) ────────────────────────────────────────────────
+# Mirrors the Cover sheet of SAWA_IP_MEL_System_Tool_CEL_v3_10_18_2026.xlsx
+# (docs/mel_tool/01_Cover.md) — Phase 1 of the v3 adoption plan. Static
+# reference content; nothing here is edited from the app yet.
+from projects.sawa import WORKBOOK_MAP, ASSIGNMENTS_TRACKER
+
+with st.expander("📋 SAWA MEL Workbook Map (v3, 18 Oct 2026)", expanded=False):
+    st.caption(
+        "The CEL MEL workbook behind this platform has 14 sheets grouped by "
+        "purpose. This table shows who owns each sheet, how often it updates, "
+        "and whether it goes to Agri-Impact (AIL)."
+    )
+    _wm_group = None
+    for _group, _sheet, _desc, _aud, _owner, _freq, _share in WORKBOOK_MAP:
+        if _group != _wm_group:
+            _wm_group = _group
+            st.markdown(f"**{_group}**")
+        st.markdown(
+            f"- **{_sheet}** — {_desc}  \n"
+            f"  <span style='font-size:0.78em;color:#666;'>"
+            f"👤 {_aud} · owner: {_owner} · updates {_freq} · share with AIL: {_share}"
+            f"</span>",
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("**Assignments tracker**")
+    st.markdown(
+        "| Assignment | Deliverable | Sheet | Status | Due | Owner |\n"
+        "|---|---|---|---|---|---|\n"
+        + "\n".join(
+            f"| {a} | {d} | {s} | {status} | {due} | {owner} |"
+            for a, d, s, status, due, owner in ASSIGNMENTS_TRACKER
+        )
+    )
+    st.caption(
+        "Dates and owners marked 'To be confirmed' are workbook proposals, "
+        "not confirmed commitments — shown as-is, not defaulted."
+    )
+
 # ── CEL Project Portfolio by Sector ──────────────────────────────────────────
 st.markdown("#### CEL Project Portfolio")
 st.caption("All programmes and projects grouped by CEL service sector. Admins can register upcoming projects.")

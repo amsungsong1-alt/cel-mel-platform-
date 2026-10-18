@@ -67,11 +67,14 @@ Credentials come from `st.secrets` (Streamlit Cloud) or
 ## MEL source of truth
 
 `docs/mel_tool/` is a Markdown export of CEL's Excel MEL tool
-(`SAWA_IP_MEL_System_Tool_CEL_v1.xlsx`) — ProFrame, MEL Plan, Project IPTT,
-BDS/WAN/Cross-cutting IPTT, the CEL IPTT user guide, PIRS, and Shared
-Measures 2.0. Start with `docs/mel_tool/00_README.md`. The platform is being
-brought in line with this workbook's indicator model, formulas and workflow;
-see that folder for the authoritative business rules.
+(`SAWA_IP_MEL_System_Tool_CEL_v3_10_18_2026.xlsx`) — Cover, ProFrame, A3
+Results Framework (ToC), MEL Plan, A2 Data Flow & Roles, Project IPTT,
+BDS/WAN/Cross-cutting IPTT, A4 Onboarding Q2, A5 Training Q2, PIRS, Shared
+Measures 2.0, and the CEL IPTT user guide — 15 files for 14 sheets. Start
+with `docs/mel_tool/00_README.md`. The platform is being brought in line
+with this workbook's indicator model, formulas and workflow across a
+6-phase plan (Phase 1 in progress); see that folder for the authoritative
+business rules.
 
 ## Tests
 

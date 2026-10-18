@@ -1,6 +1,6 @@
 # ProFrame (Program Framework)
 
-Programme framework for SAWA (Sustainable Aquaculture for Women Advancement): partners, delivery models, key impact measures, goal/objectives/assumptions and the results framework with indicators.
+Programme framework for SAWA: partners, delivery models, key impact measures, goal/objectives/assumptions and the results framework with indicators. The only formulas in this workbook that read it are the links in A3 Results Framework (ToC).
 
 ## Program details
 
@@ -56,7 +56,7 @@ Over 60,000 financially disadvantage young women and persons with disabilities (
 
 ## Results framework
 
-Each block is a results framework area. "CEL scope" is derived from the font colour of the indicator text (see Legend).
+Each block is a results framework area. "CEL scope" is derived from the font colour of the indicator text (see Legend). The # column is the ProFrame number; it is not the IPTT ID (IM/OC/OP) and some numbers repeat across areas.
 
 ### 1. Impact level
 
@@ -91,7 +91,7 @@ Each block is a results framework area. "CEL scope" is derived from the font col
 
 • 	Young women and PWDs are able and willing to take on enterprise leadership roles given their constraints (care burdens, resources, norms).
 
-•	 Business development services, incubation, access to finance and market linkages are sufficient to support enterprise survival and growth.
+•	 Business development services, incubation, access to finance and market linkages are sufficient to support enterprise survival and growth.                                                                                         • 	Referred enterprises meet TechnoServe's criteria and funds are disbursed on schedule.
 
 **Risks:**
 
@@ -105,7 +105,7 @@ Each block is a results framework area. "CEL scope" is derived from the font col
 
 • 	Market shocks or input cost increases that reduce profitability and discourage continued operation.
 
-• 	Barriers to finance or formalization that limit enterprise growth beyond micro scale.
+• 	Barriers to finance or formalization that limit enterprise growth beyond micro scale.                                                                                       • 	Programme-wide TechnoServe targets are not matched by CEL-referred enterprises (attribution to be agreed).
 
 | # | Indicator | Key Measure | Disaggregation | Markers | Means of verification | CEL scope | Note (CEL consolidated plan) |
 |---|---|---|---|---|---|---|---|
@@ -113,6 +113,8 @@ Each block is a results framework area. "CEL scope" is derived from the font col
 | 6 | SM 5.1 <br>Number of young women in new, improved and additional employments in the aquaculture value chain | YiW | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: Wage and Self<br>Pathways: Input supply, production, processing, marketing, logistics, digital services, etc<br>Location: Region, district, community | Income earned | Program & Participant surveys, YiW records and Technical reports | To be confirmed (not directly in CEL's consolidated plan) |  |
 | 7 | SM 4.2 <br>Number of supported young-women-owned enterprises showing growth through market expansion / diversification | Enterprise | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: Wage and Self<br>Pathways: Input supply, production, processing, marketing, logistics, digital services, etc<br>Location: Region, district, community | Market expansion | WEO records, Training reports, Program & Participants surveys | To be confirmed (not directly in CEL's consolidated plan) |  |
 | 8 | SM 4.1<br>Number of supported young-women-owned enterprisesshowing growth through increased in revenue | Enterprise | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: Wage and Self<br>Pathways: Input supply, production, processing, marketing, logistics, digital services, etc<br>Location: Region, district, community | Income earned | WEO records, Training reports, Program & Participants surveys | To be confirmed (not directly in CEL's consolidated plan) |  |
+| 9 | Number of CEL-referred enterprises supported with Catalytic Fund support | Enterprise | Sex of owner: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Fund type: Catalytic Fund, Micro Investment Fund<br>Location: Region, district, community | Market expansion | TechnoServe award/disbursement records, Partner reports, Enterprise verification | New output indicator (in CEL's consolidated plan) | TechnoServe planner III.3: 10 enterprises in Y1 (Q3 3, Q4 7). Programme-wide figure: agree the CEL-referred share. |
+| 10 | Number of CEL-referred enterprises supported with Micro Investment Fund support | Enterprise | Sex of owner: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Fund type: Catalytic Fund, Micro Investment Fund<br>Location: Region, district, community | Market expansion | TechnoServe award/disbursement records, Partner reports, Enterprise verification | New output indicator (in CEL's consolidated plan) | TechnoServe planner III.4: 150 enterprises in Y1 (Q3 52, Q4 98). Programme-wide figure: agree the CEL-referred share. |
 
 ### 2. Outcome / 2.2 Aquaculture Production and Revenue
 
@@ -244,7 +246,9 @@ Each block is a results framework area. "CEL scope" is derived from the font col
 
 •  Employers and markets provide viable opportunities for trained participants.
 
-•  Participants receive adequate post-training mentorship, placement, market linkage, and enterprise support.
+•  Participants receive adequate post-training mentorship, placement, market linkage, and enterprise support.                                           • 	TechnoServe funds remain open and eligibility criteria are clear to CEL and enterprises.
+
+• 	Enterprises complete finance-readiness support and meet the referral criteria.
 
 **Risks:**
 
@@ -256,7 +260,9 @@ Each block is a results framework area. "CEL scope" is derived from the font col
 
 •  Participants drop out because of financial, household, mobility, accessibility, or caregiving constraints.
 
-•  Training does not meet employer, market, or enterprise requirements.
+•  Training does not meet employer, market, or enterprise requirements.                                                                                            • 	Referral does not guarantee funding; TechnoServe decisions may be delayed or declined.
+
+• 	Enterprises are referred before they are ready, or dropped from the pipeline.
 
 | # | Indicator | Key Measure | Disaggregation | Markers | Means of verification | CEL scope | Note (CEL consolidated plan) |
 |---|---|---|---|---|---|---|---|
@@ -266,8 +272,9 @@ Each block is a results framework area. "CEL scope" is derived from the font col
 | 27 | SM 1.1 <br>Number of young women who completed training in aquaculture business development and entrepreneurship skills | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: <br>Pathways: Inperson, Online <br>Location: Region, district, community | Readiness for work | WEO records, Training reports, Program & Participants surveys | Applicable to CEL |  |
 | 28 | Number of existing aquaculture enterprises trained in BDS, production, and value addition | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: <br>Pathways: Inperson, Online <br>Location: Region, district, community | Readiness for work | WEO records, Training reports, Program & Participants surveys | To be confirmed (not directly in CEL's consolidated plan) |  |
 | 29 | Number of new aquaculture enterprises trained in BDS, production, and value addition | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: <br>Pathways: Inperson, Online <br>Location: Region, district, community | Readiness for work | WEO records, Training reports, Program & Participants surveys | To be confirmed (not directly in CEL's consolidated plan) |  |
-| 30 | Number of young women in women-led cooperatives/clusters trained in gender, financial literacy and business mentoring | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type:Pathways: Inperson, Online  Cooperative/cluster (name or ID):<br>Location: Region, district, community | Readiness for work | WEO records, Training reports, Program & Participants surveys | New output indicator (in CEL's consolidated plan) | Counts women trained (planner PI.17), not cooperatives; cooperatives reached derived from the cooperative/cluster disaggregation. Planner Pl.17 |
-| 31 | Number of young women trained in mentorship and digital literacy | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type:Pathways: Inperson, Online <br>Location: Region, district, community | Readiness for work | WEO records, Training reports, Program & Participants surveys | New output indicator (in CEL's consolidated plan) | Planner PIV.5. |
+| 30 | Number of enterprises prepared and referred to TechnoServe for Catalytic Fund or Micro Investment Fund support | Enterprise | Fund type: Catalytic Fund, Micro Investment Fund<br>Referral status: Referred, Pending<br>Sex of owner: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Location: Region, district, community | BDS | Referral checklist, Referral register, Enterprise growth plans, TechnoServe feedback | To be confirmed (not directly in CEL's consolidated plan) | TechnoServe planner III.3 / III.4 (referral step). Not a funding or job outcome. No Y1 target yet: agree with TechnoServe and AIL. |
+| 31 | Number of young women in women-led cooperatives/clusters trained in gender, financial literacy and business mentoring | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type:Pathways: Inperson, Online  Cooperative/cluster (name or ID):<br>Location: Region, district, community | Readiness for work | WEO records, Training reports, Program & Participants surveys | New output indicator (in CEL's consolidated plan) | Counts women trained (planner PI.17), not cooperatives; cooperatives reached derived from the cooperative/cluster disaggregation. Planner Pl.17 |
+| 32 | Number of young women trained in mentorship and digital literacy | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type:Pathways: Inperson, Online <br>Location: Region, district, community | Readiness for work | WEO records, Training reports, Program & Participants surveys | New output indicator (in CEL's consolidated plan) | Planner PIV.5. |
 | 30 | SM 1.1<br>Number of young women who access training starter pack for aquaculture production | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: <br>Pathways: In person, Online<br>Location: Region, district, community | Readiness for work | Participant Onboarding records, WEO and YiW records, Program reports, Field and participant surveys | Not in CEL scope / unclassified (plain font) |  |
 | 31 | SM 1.1<br>Number of young women who access training starter pack for aquaculture processing and value addition | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: <br>Pathways: In Person, online<br>Location: Region, district, community | Readiness for work | Participant Onboarding records, WEO and YiW records, Program reports, Field and participant surveys | Not in CEL scope / unclassified (plain font) |  |
 | 32 | SM 1.1<br>Number of young women who access training starter pack for marketing of aquaculture products | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: <br>Pathways: In Person, Online<br>Location: Region, district, community | Readiness for work | Participant Onboarding records, WEO and YiW records, Program reports, Field and participant surveys | Not in CEL scope / unclassified (plain font) |  |
@@ -383,3 +390,9 @@ Each block is a results framework area. "CEL scope" is derived from the font col
 - To Be Confirmed (Not directly in CEL's Consolidated Plan)
 - New output indicators (in CEL's Consolidated Plan)
 - Not treated as WEO indicators (CEL's Consolidated Plan)
+
+## Formulas
+
+No formulas in this sheet (all cells are typed values).
+
+

@@ -2733,3 +2733,79 @@ WORKPLAN_ACTIVITIES: list[dict] = [
      "deliverable": "Full Year 1 research report published",
      "due_date": "2027-06-30"},
 ]
+
+# ── MEL Workbook Map & Assignments Tracker ────────────────────────────────────
+# Source: SAWA_IP_MEL_System_Tool_CEL_v3_10_18_2026.xlsx, Cover sheet
+# (docs/mel_tool/01_Cover.md). Static reference content — mirrors the
+# workbook's own navigation sheet for AIL and the CEL team; not yet backed
+# by a DB table since nothing here is edited from the app (Phase 1 of the
+# v3 adoption plan — audit discussed before this commit).
+WORKBOOK_MAP = [
+    # (group, sheet, description, audience, owner, update_frequency, share_with_ail)
+    ("1. Strategy and framework", "ProFrame",
+     "Programme framework: partners, 10 delivery models, key impact measures, "
+     "results framework and indicators.",
+     "CEL team and AIL", "MEAL Lead", "When the framework changes", "Yes"),
+    ("1. Strategy and framework", "A3 Results Framework (ToC)",
+     "Assignment 3. Theory of change and results chain from CEL delivery models "
+     "to impact, with assumptions and risks.",
+     "CEL team and AIL", "MEAL Lead; Program Lead", "Review when framework changes", "Yes"),
+    ("1. Strategy and framework", "MEL Plan",
+     "Indicators with life-of-project targets, data collection methods, "
+     "frequency, sources and responsible roles.",
+     "CEL team and AIL", "MEAL Lead", "When targets or methods change", "Yes"),
+    ("2. Data system and reporting", "A2 Data Flow & Roles",
+     "Assignment 2. Who collects, verifies, reviews and submits data, key "
+     "persons and what CEL does with the data.",
+     "CEL team and AIL", "MEAL Lead", "Review each quarter", "Yes"),
+    ("2. Data system and reporting", "Project IPTT",
+     "Assignment 1. Consolidated quarterly progress table (formula-driven). "
+     "The main reporting table for AIL.",
+     "AIL and CEL management", "MEAL Officer prepares; Program Lead approves", "Quarterly", "Yes"),
+    ("2. Data system and reporting", "BDS IPTT",
+     "Input sheet for BDS indicators (targets and verified achievements).",
+     "CEL team", "BDS Coach / BDS Officer; MEAL Officer enters", "Quarterly", "On request"),
+    ("2. Data system and reporting", "WAN IPTT",
+     "Input sheet for WAN indicators.",
+     "CEL team", "GYSI Lead (WAN); MEAL Officer enters", "Quarterly", "On request"),
+    ("2. Data system and reporting", "Cross-cutting IPTT",
+     "Input sheet for inclusion, safeguarding and coverage indicators.",
+     "CEL team", "GYSI Lead; MEAL Officer enters", "Quarterly", "On request"),
+    ("3. Quarter 2 operations", "A4 Onboarding Q2",
+     "Assignment 4. Onboarding schedule for Q2 (Oct to Dec 2026) with owners, "
+     "dates and status.",
+     "CEL team and AIL", "BDS Officer; GYSI Lead; MEAL Officer", "Weekly during Q2", "Yes"),
+    ("3. Quarter 2 operations", "A5 Training Q2",
+     "Assignment 5. Training schedule for Q2 linked to the Q2 training targets.",
+     "CEL team and AIL", "BDS Officer; GYSI Lead", "Weekly during Q2", "Yes"),
+    ("4. Reference", "PIRS",
+     "Performance indicator reference sheets: definitions, disaggregation, "
+     "unit, method and source.",
+     "CEL team and AIL", "MEAL Lead", "When indicators change", "Yes"),
+    ("4. Reference", "Shared Measures 2.0",
+     "AIL's shared measures reference.",
+     "AIL template", "AIL", "As issued by AIL", "Reference"),
+    ("4. Reference", "CEL IPTT Guide",
+     "How to fill the IPTT sheets: workflow, roles, counting rules, worked example.",
+     "CEL team", "MEAL Lead", "When rules change", "Internal"),
+]
+
+ASSIGNMENTS_TRACKER = [
+    # (assignment, deliverable, sheet, status, due, owner)
+    ("A1", "IPTT: break down model delivery to set targets and monitor",
+     "Project IPTT; BDS, WAN, Cross-cutting IPTT",
+     "In progress", "23 Oct 2026", "MEAL Officer"),
+    ("A2", "Data map / flow: who is responsible for data, who they report to, "
+     "what we do with the data",
+     "A2 Data Flow & Roles",
+     "Draft for review", "To be confirmed", "MEAL Lead"),
+    ("A3", "Results framework (theory of change)",
+     "A3 Results Framework (ToC)",
+     "Draft for review", "To be confirmed", "MEAL Lead; Program Lead"),
+    ("A4", "Onboarding schedule, Quarter 2",
+     "A4 Onboarding Q2",
+     "Draft: dates to confirm", "23 Oct 2026 (confirm)", "BDS Officer; MEAL Officer"),
+    ("A5", "Training schedule, Quarter 2",
+     "A5 Training Q2",
+     "Draft: dates to confirm", "23 Oct 2026 (confirm)", "BDS Officer; GYSI Lead"),
+]

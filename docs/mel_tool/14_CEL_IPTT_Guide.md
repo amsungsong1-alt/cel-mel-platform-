@@ -23,7 +23,7 @@ _Adapted from the SAWA IPTT user guide for CEL's BDS, WAN and Cross-cutting mode
 | BDS IPTT | 1 to 4: Ideation & early business development; Accelerator & enterprise transition; Partner half-day workshops; Finance readiness & referral | WEO, YiW, Enterprises | 21 | BDS Officer / BDS Coach collect; MEAL Officer verifies; Program Lead reviews |
 | WAN IPTT | 5 to 8: Membership, charter & affiliation; Market access & opportunities; Advocacy & policy influence; Mentoring, leadership & exchange | WEO (WAN participation), Enterprises | 9 | GYSI Lead (leads WAN) collects; MEAL Officer verifies; Program Lead reviews |
 | Cross-cutting IPTT | 9 to 10: Inclusion & safeguarding; Needs assessment, coordination & MEAL | PWDs; inclusion and safeguarding trainings; coverage (not WEO) | 12 | GYSI Lead collects (MEAL Officer for coverage); MEAL Officer verifies; Program Lead reviews |
-| Project IPTT | All models (consolidated, formulas only) | WEO, YiW, Enterprises, PWDs | 42 | MEAL Lead / MEAL Officer prepare and check; Program Lead approves; CEL Admin files |
+| Project IPTT | All models (consolidated, formulas only) | WEO, YiW, Enterprises, PWDs | 55 | MEAL Lead / MEAL Officer prepare and check; Program Lead approves; CEL Admin files |
 
 
 ## 3. Delivery model map
@@ -31,14 +31,14 @@ _Adapted from the SAWA IPTT user guide for CEL's BDS, WAN and Cross-cutting mode
 | Delivery model (ProFrame) | Reports in sheet | Main indicators (IDs) | Key Impact Measure | Pathway (YAW ToC) |
 |---|---|---|---|---|
 | 1. BDS: Ideation & Early Business Dev. | BDS IPTT | OP27, OP9, OP29, OP32, OP11 | WEO (mobilisation is onboarding, not WEO) | Capacity building: gain confidence and skills |
-| 2. BDS: Accelerator & Enterprise Transition | BDS IPTT | OP4, OP10, OP5, IM1, IM2, OC5, OC6 | WEO, YiW, Enterprises | Capacity building and market linkage: enterprise growth, dignified work |
+| 2. BDS: Accelerator & Enterprise Transition | BDS IPTT | OP4, OP10, OP5, IM1, IM2, OC1, OC2, OC3, OC4, OC5, OC6, OC9, OC10 | WEO, YiW, Enterprises | Capacity building and market linkage: enterprise growth, dignified work |
 | 3. BDS: Partner Half-day Workshops | BDS IPTT | OP32 | WEO | Capacity building (regulatory, financial literacy, digital, market access) |
-| 4. BDS: Finance Readiness & Referral | BDS IPTT | OC5, OC6, OP36, OP37, OP38 | Enterprises | Market linkage: access to suitable finance |
+| 4. BDS: Finance Readiness & Referral | BDS IPTT | OC5, OC6, OP36, OC7, OC8 | Enterprises | Market linkage: access to suitable finance |
 | 5. WAN: Membership, Charter & Affiliation | WAN IPTT | OP15, OP16, OP34 | WEO (WAN participation) | Capacity building: voice and agency |
-| 6. WAN: Market Access & Opportunities | WAN IPTT | OP17, OC9 | Enterprises, WEO | Market linkage: increased access to markets |
+| 6. WAN: Market Access & Opportunities | WAN IPTT | OP17, OC11 | Enterprises, WEO | Market linkage: increased access to markets |
 | 7. WAN: Advocacy & Policy Influence | WAN IPTT | OP18 | Enabling environment (supports YiW, Enterprises) | Market linkage and enabling environment |
-| 8. WAN: Mentoring, Leadership & Exchange | WAN IPTT | OP33, OC10, OC11 | WEO | Capacity building: confidence, leadership |
-| 9. Cross-cutting: Inclusion & Safeguarding | Cross-cutting IPTT | IM3, OP22, OC12, OC13, OP23, OP24, OP28, OP30, OP31, OP35 | PWDs; trainings tagged WEO; focal persons not WEO | Cross-cutting: inclusive, safe participation |
+| 8. WAN: Mentoring, Leadership & Exchange | WAN IPTT | OP33, OC12, OC13 | WEO | Capacity building: confidence, leadership |
+| 9. Cross-cutting: Inclusion & Safeguarding | Cross-cutting IPTT | IM3, OP22, OC14, OC15, OP23, OP24, OP28, OP30, OP31, OP35 | PWDs; trainings tagged WEO; focal persons tagged WEO | Cross-cutting: inclusive, safe participation |
 | 10. Cross-cutting: Needs Assessment, Coordination & MEAL | Cross-cutting IPTT | OP25, OP26 | Coverage (not WEO) | Cross-cutting: coverage and traceability |
 
 
@@ -176,4 +176,32 @@ Interpretation: Y1 achieved so far is 90 + 150 = 240 of 500 (48.0%). Q2 is above
 | Support and escalation | Contact the programme MEL team (AIL) when definitions, aggregation, targets, formulas, duplicate attribution or evidence are unclear. |
 
 
-_Formula cells in the sheet (counts, worked-example percentages) are shown here with their cached values._
+## Formulas (active; complete inventory)
+
+11 formulas. Formulas are shown exactly as stored in the workbook. `{r}` stands for the formula's own row number. Cached values appear in the content tables above.
+
+```
+D13: =COUNTA('BDS IPTT'!A9:A80)
+    => 21
+D14: =COUNTA('WAN IPTT'!A9:A80)
+    => 9
+D15: =COUNTA('Cross-cutting IPTT'!A9:A80)
+    => 12
+D16: =COUNTA('Project IPTT'!A10:A66)-COUNTIF('Project IPTT'!V10:V66,"Not in CEL scope")
+    => 55
+D113: =IFERROR(C113/B113,"-")
+    => 0.9473684211
+D114: =IFERROR(C114/B114,"-")
+    => 1.111111111
+D115: =IFERROR(C115/B115,"-")
+    => 0
+D116: =IFERROR(C116/B116,"-")
+    => 0
+B117: =SUM(B113:B116)
+    => 500
+C117: =SUM(C113:C116)
+    => 240
+D117: =IFERROR(C117/B117,"-")
+    => 0.48
+```
+

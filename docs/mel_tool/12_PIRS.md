@@ -840,7 +840,95 @@ YiW records
 According to schedule
 
 
-## 21. Number of young women who completed training in aquaculture production
+## 21. Number of CEL-referred enterprises supported with Catalytic Fund support
+
+**Definition & Description:**
+
+Definition: Number of enterprises referred by CEL that receive Catalytic Fund support from TechnoServe during the reporting period.
+
+CEL-referred enterprise: an enterprise whose referral was submitted by CEL (counted in the referral indicator).
+
+Supported: TechnoServe has approved and awarded or disbursed Catalytic Fund support, confirmed by TechnoServe records. Each enterprise is counted once. Only CEL-referred enterprises count; TechnoServe's programme-wide figure is not CEL's result.
+
+**Disaggregation:**
+
+Sex of owner
+Disability status of owner
+Youth category
+Aquaculture pathway
+Location
+
+**Unit of Measurement:**
+
+Number (enterprises)
+
+**Data Type:**
+
+Integer
+
+**Data Collection method:**
+
+TechnoServe award/disbursement record review
+enterprise verification
+
+**Data Source:**
+
+TechnoServe award/disbursement records
+
+Enterprise records
+
+Programme reports
+
+**Frequency:**
+
+According to schedule
+
+
+## 22. Number of CEL-referred enterprises supported with Micro Investment Fund support
+
+**Definition & Description:**
+
+Definition: Number of enterprises referred by CEL that receive Micro Investment Fund support from TechnoServe during the reporting period.
+
+CEL-referred enterprise: an enterprise whose referral was submitted by CEL (counted in the referral indicator).
+
+Supported: TechnoServe has approved and awarded or disbursed Micro Investment Fund support, confirmed by TechnoServe records. Each enterprise is counted once. Only CEL-referred enterprises count; TechnoServe's programme-wide figure is not CEL's result.
+
+**Disaggregation:**
+
+Sex of owner
+Disability status of owner
+Youth category
+Aquaculture pathway
+Location
+
+**Unit of Measurement:**
+
+Number (enterprises)
+
+**Data Type:**
+
+Integer
+
+**Data Collection method:**
+
+TechnoServe award/disbursement record review
+enterprise verification
+
+**Data Source:**
+
+TechnoServe award/disbursement records
+
+Enterprise records
+
+Programme reports
+
+**Frequency:**
+
+According to schedule
+
+
+## 23. Number of young women who completed training in aquaculture production
 
 **Definition & Description:**
 
@@ -883,7 +971,7 @@ Programme reports
 According to schedule
 
 
-## 22. Number of young women who completed training in aquaculture processing and product development
+## 24. Number of young women who completed training in aquaculture processing and product development
 
 **Definition & Description:**
 
@@ -924,7 +1012,7 @@ WEO records
 According to schedule
 
 
-## 23. Number of young women who completed training in marketing of aquaculture products (fresh and processed)
+## 25. Number of young women who completed training in marketing of aquaculture products (fresh and processed)
 
 **Definition & Description:**
 
@@ -966,7 +1054,7 @@ WEO records
 According to schedule
 
 
-## 24. Number of young women who completed training in aquaculture business development and entrepreneurship skills
+## 26. Number of young women who completed training in aquaculture business development and entrepreneurship skills
 
 **Definition & Description:**
 
@@ -1009,7 +1097,7 @@ Programme reports
 According to schedule
 
 
-## 25. Number of young women who access training starter pack for aquaculture production
+## 27. Number of young women who access training starter pack for aquaculture production
 
 **Definition & Description:**
 
@@ -1052,7 +1140,7 @@ Programme reports
 According to schedule
 
 
-## 26. Number of young women who access training starter pack for aquaculture processing and value addition
+## 28. Number of young women who access training starter pack for aquaculture processing and value addition
 
 **Definition & Description:**
 
@@ -1093,7 +1181,7 @@ Distribution records
 According to schedule
 
 
-## 27. Number of young women who access training starter pack for marketing of aquaculture products
+## 29. Number of young women who access training starter pack for marketing of aquaculture products
 
 **Definition & Description:**
 
@@ -1134,7 +1222,7 @@ Programme reports
 According to schedule
 
 
-## 28. Number of Women in Aquaculture Network (WAN) groups established and active.
+## 30. Number of Women in Aquaculture Network (WAN) groups established and active.
 
 **Definition & Description:**
 
@@ -1177,7 +1265,7 @@ Field surveys
 According to schedule
 
 
-## 29. Number of young women actively participating in WAN.
+## 31. Number of young women actively participating in WAN.
 
 **Definition & Description:**
 
@@ -1219,7 +1307,7 @@ Programme reports
 According to schedule
 
 
-## 30. Number of young women-owned enterprises mentored and coached by WAN
+## 32. Number of young women-owned enterprises mentored and coached by WAN
 
 **Definition & Description:**
 
@@ -1260,7 +1348,7 @@ Programme reports
 According to schedule
 
 
-## 31. Number of advocacy campaigns undertaken by WAN
+## 33. Number of advocacy campaigns undertaken by WAN
 
 **Definition & Description:**
 
@@ -1299,7 +1387,7 @@ Programme reports
 According to schedule
 
 
-## 32. Percentage of WAN members who report increased confidence ans voice in aquaculture-related decision-making
+## 34. Percentage of WAN members who report increased confidence ans voice in aquaculture-related decision-making
 
 **Definition & Description:**
 
@@ -1340,7 +1428,7 @@ Programme reports
 According to schedule
 
 
-## 33. Number of regions covered by program intervention
+## 35. Number of regions covered by program intervention
 
 **Definition & Description:**
 
@@ -1378,7 +1466,7 @@ Programme records
 According to schedule
 
 
-## 34. Number of districts covered by program intervention
+## 36. Number of districts covered by program intervention
 
 **Definition & Description:**
 
@@ -1417,7 +1505,7 @@ Programme records
 According to schedule
 
 
-## 35. Number of communities covered by program intervention
+## 37. Number of communities covered by program intervention
 
 **Definition & Description:**
 
@@ -1458,7 +1546,7 @@ Field records
 According to schedule
 
 
-## 36. Number of regions participants hail from
+## 38. Number of regions participants hail from
 
 **Definition & Description:**
 
@@ -1496,7 +1584,7 @@ WEO/YiW records
 According to schedule
 
 
-## 37. Number of districts participants hail from
+## 39. Number of districts participants hail from
 
 **Definition & Description:**
 
@@ -1534,7 +1622,7 @@ WEO/YiW records
 According to schedule
 
 
-## 38. Number of communities participants hail from
+## 40. Number of communities participants hail from
 
 **Definition & Description:**
 
@@ -1573,7 +1661,7 @@ WEO/YiW records
 According to schedule
 
 
-## 39. Number of community sensitization campaigns conducted
+## 41. Number of community sensitization campaigns conducted
 
 **Definition & Description:**
 
@@ -1616,7 +1704,7 @@ Attendance records
 According to schedule
 
 
-## 40. Number of communities sensitized on gender inclusion and safeguarding
+## 42. Number of communities sensitized on gender inclusion and safeguarding
 
 **Definition & Description:**
 
@@ -1657,7 +1745,7 @@ Programme records
 According to schedule
 
 
-## 41. Number of implementing partners that engage PWDs in aquaculture-related work.
+## 43. Number of implementing partners that engage PWDs in aquaculture-related work.
 
 **Definition & Description:**
 
@@ -1701,7 +1789,7 @@ Field surveys
 According to schedule
 
 
-## 42. Number of employers or enterprises that engage PWDs in aquaculture-related work.
+## 44. Number of employers or enterprises that engage PWDs in aquaculture-related work.
 
 **Definition & Description:**
 
@@ -1744,7 +1832,7 @@ Programme reports
 According to schedule
 
 
-## 43. Number of employers that provided reasonable accommodation to PWDs
+## 45. Number of employers that provided reasonable accommodation to PWDs
 
 **Definition & Description:**
 
@@ -1786,7 +1874,7 @@ Narrative reports
 According to schedule
 
 
-## 44. Number of young women PWDs engaged
+## 46. Number of young women PWDs engaged
 
 **Definition & Description:**
 
@@ -1829,7 +1917,7 @@ Programme reports
 According to schedule
 
 
-## 45. Percentage of PWD participants who report that workplaces are accessible and inclusive
+## 47. Percentage of PWD participants who report that workplaces are accessible and inclusive
 
 **Definition & Description:**
 
@@ -1873,7 +1961,7 @@ Narrative reports
 According to schedule
 
 
-## 46. Number of safeguarding incidents reportes through the GRM and percentage resolved with agreed timeframes
+## 48. Number of safeguarding incidents reportes through the GRM and percentage resolved with agreed timeframes
 
 **Definition & Description:**
 
@@ -1917,7 +2005,7 @@ Narrative reports
 According to schedule
 
 
-## 47. Number of youth mobilised into the program (community entry, sensitization, selection)
+## 49. Number of youth mobilised into the program (community entry, sensitization, selection)
 
 **Definition & Description:**
 
@@ -1960,7 +2048,7 @@ Attendance records
 According to schedule
 
 
-## 48. Number of gender focal persons trained on GALS and EMAP
+## 50. Number of gender focal persons trained on GALS and EMAP
 
 **Definition & Description:**
 
@@ -2005,7 +2093,7 @@ Programme reports
 According to schedule
 
 
-## 49. Number of young women in women-led cooperatives/clusters trained in gender, financial literacy and business mentoring
+## 51. Number of young women in women-led cooperatives/clusters trained in gender, financial literacy and business mentoring
 
 **Definition & Description:**
 
@@ -2049,7 +2137,7 @@ Programme reports
 According to schedule
 
 
-## 50. Number of young women trained in gender transformative trainings
+## 52. Number of young women trained in gender transformative trainings
 
 **Definition & Description:**
 
@@ -2093,7 +2181,7 @@ Programme reports
 According to schedule
 
 
-## 51. Number of young women trained to identify and respond to safeguarding issues
+## 53. Number of young women trained to identify and respond to safeguarding issues
 
 **Definition & Description:**
 
@@ -2137,7 +2225,7 @@ Programme reports
 According to schedule
 
 
-## 52. Number of young women trained in mentorship and digital literacy
+## 54. Number of young women trained in mentorship and digital literacy
 
 **Definition & Description:**
 
@@ -2181,7 +2269,7 @@ Programme reports
 According to schedule
 
 
-## 53. Number of WAN leadership bootcamps and exchange visits held
+## 55. Number of WAN leadership bootcamps and exchange visits held
 
 **Definition & Description:**
 
@@ -2225,7 +2313,7 @@ Programme reports
 According to schedule
 
 
-## 54. Number of women-led cooperatives/clusters with developed gender-responsive governance frameworks
+## 56. Number of women-led cooperatives/clusters with developed gender-responsive governance frameworks
 
 **Definition & Description:**
 
@@ -2268,7 +2356,7 @@ Programme reports
 According to schedule
 
 
-## 55. Number of sites/partners with institutionalized safeguarding and occupational health standards
+## 57. Number of sites/partners with institutionalized safeguarding and occupational health standards
 
 **Definition & Description:**
 
@@ -2311,13 +2399,64 @@ Narrative reports
 According to schedule
 
 
-## 56. Applicable to CEL
+## 58. Number of enterprises prepared and referred to TechnoServe for Catalytic Fund or Micro Investment Fund support
+
+**Definition & Description:**
+
+Definition: Number of enterprises prepared by CEL and referred to TechnoServe for Catalytic Fund or Micro Investment Fund support during the reporting period.
+
+Prepared and referred: the enterprise has completed finance-readiness support (diagnosis, growth plan and referral checklist) and its referral has been submitted to TechnoServe.
+
+A referral is not funding and is not a job outcome. Each enterprise is counted once, even if referred to both funds (shown as "Both" in the fund-type disaggregation).
+
+**Disaggregation:**
+
+Fund type (Catalytic Fund, Micro Investment Fund, Both)
+Referral status (referred, pending)
+Sex of owner
+Disability status of owner
+Location
+
+**Unit of Measurement:**
+
+Number (enterprises)
+
+**Data Type:**
+
+Integer
+
+**Data Collection method:**
+
+Referral register and checklist review
+enterprise verification
+TechnoServe feedback
+
+**Data Source:**
+
+Referral register
+
+Enterprise growth plans
+
+TechnoServe feedback
+
+**Frequency:**
+
+According to schedule
 
 
-## 57. To Be Confirmed (Not directly in CEL's Consolidated Plan)
+## 59. Applicable to CEL
 
 
-## 58. New output indicators (in CEL's Consolidated Plan)
+## 60. To Be Confirmed (Not directly in CEL's Consolidated Plan)
 
 
-## 59. Not treated as WEO indicators (CEL's Consolidated Plan)
+## 61. New output indicators (in CEL's Consolidated Plan)
+
+
+## 62. Not treated as WEO indicators (CEL's Consolidated Plan)
+
+
+## Formulas
+
+No formulas in this sheet (all cells are typed values).
+
