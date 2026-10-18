@@ -465,8 +465,8 @@ with st.expander("SAWA Programme Overview — Strategic Context & Delivery Model
             st.markdown(f"**{_mech_name}** — {_mech_desc}")
 
     st.caption(
-        "GTAs = Gender Action Learning System (GALS) + Economic & Mothers' "
-        "Empowerment in Agriculture Programme (EMAP)."
+        "GTAs = Gender Action Learning System (GALS) + Engaging Men through "
+        "Accountable Practice (EMAP)."
     )
 
 # ── How CEL Structures BDS & WAN Delivery ────────────────────────────────────
