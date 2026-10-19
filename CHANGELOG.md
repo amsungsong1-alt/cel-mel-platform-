@@ -5,6 +5,66 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 
 ## Unreleased
 
+### Added
+- `scripts/seed_from_workbook.py` — Phase 2 of 6: an idempotent importer
+  that reads the real `SAWA_IP_MEL_System_Tool_CEL_v3_*.xlsx` workbook
+  directly (not the Markdown export in `docs/mel_tool/`), replacing
+  `database/seed_mel_indicators.py`'s hand-parsed-from-Markdown data as
+  the authoritative source going forward. The workbook file itself is
+  gitignored (kept local only, per explicit decision) — the script takes
+  its path as a `--file` argument.
+  - Reads indicator metadata, quarterly targets, aggregation type, means
+    of verification and responsible roles from the three model sheets
+    (BDS/WAN/Cross-cutting IPTT) — never from Project IPTT, which is a
+    formula-driven consolidation. The 13 of 55 indicators never typed
+    into any model sheet ("Not in CEL scope") are sourced from Project
+    IPTT instead, the only place they appear, with no aggregation
+    type/MoV/responsible/targets synthesised for them (the workbook
+    genuinely defines none).
+  - `cel_scope` has no dedicated column anywhere in the workbook; it's
+    read from the font colour of each indicator's text in Project IPTT.
+    The 4-colour-plus-plain mapping was reverse-engineered from the real
+    file and verified to reproduce `00_README.md`'s documented 13-item
+    "Not in CEL scope" list exactly.
+  - A target cell's pale-yellow fill (`FFFFF2CC`) means "phasing to be
+    confirmed", per each model sheet's own on-sheet instructions — read
+    directly rather than guessed.
+  - Default mode is diff-only (read-only): prints exactly what would
+    change against the live `mel_indicators`/`mel_indicator_targets`
+    tables, writes nothing. `--apply` takes an automatic JSON backup of
+    every row before changing anything; `--restore <backup.json>` undoes
+    an apply.
+  - Confirmed against real ground truth: re-extracting and diffing
+    against the existing (stale, v1-scheme) seed data surfaced a genuine
+    correction the old Markdown-sourced data had gotten wrong —
+    `phasing_confirmed` for the two TechnoServe-fund indicators was
+    recorded as confirmed when the real workbook's cell fill shows they
+    are not.
+  - 16 tests in `tests/test_seed_from_workbook.py`; the ones reading the
+    real `.xlsx` skip gracefully (not fail) when the file isn't present,
+    since it's gitignored by design.
+- `database/db.py` — `get_engine()`'s SQLite branch now enables
+  `PRAGMA foreign_keys = ON` via a connect-event listener, mirroring the
+  pattern already used for the Postgres branch's `prepare_threshold`
+  setting. **Real, pre-existing bug found while testing
+  `seed_from_workbook.py --apply`**: SQLite enforces foreign keys
+  per-connection, off by default. `schema.sql` sets this pragma, but only
+  on the separate raw `sqlite3` connection `_run_migrations()` uses via
+  `executescript()` — it never applied to the connections `run_query`/
+  `run_write` actually use (the SQLAlchemy engine had no equivalent
+  listener). The result: every `ON DELETE CASCADE` in the schema was
+  silently a no-op through `run_write()` on SQLite — deleting a parent row
+  left its child rows orphaned instead of cascading, even though Postgres
+  (production) genuinely does cascade and the schema comments promise
+  cascade behaviour everywhere. Caught concretely: applying the workbook
+  diff removed 3 stale indicators (including 2 with target rows) and the
+  target count only dropped by cascade on Postgres, not SQLite — a direct
+  row-count mismatch (83 vs. the expected 79) that traced back to this
+  gap. This is a latent, app-wide issue affecting any `DELETE` on a
+  parent table anywhere in local-dev SQLite use, not something specific to
+  the new script. All 68 pre-existing tests still pass with the pragma
+  enabled.
+
 ### Fixed
 - `database/db.py`/`app.py` — all diagnostic `print()` calls added in this
   session (migration start/success, every seed-step failure) now pass

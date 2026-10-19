@@ -85,10 +85,29 @@ def get_engine():
 
         return engine
 
-    return create_engine(
+    engine = create_engine(
         DATABASE_URL,
         connect_args={"check_same_thread": False},
     )
+
+    # SQLite enforces foreign keys per-connection, off by default. schema.sql
+    # sets PRAGMA foreign_keys = ON, but only on the separate raw sqlite3
+    # connection _run_migrations() uses via executescript() -- it does NOT
+    # carry over to connections made through this engine, which is what
+    # run_query/run_write actually use. Without this listener, every
+    # ON DELETE CASCADE in schema.sql is silently a no-op through run_write()
+    # on SQLite: deleting a parent row leaves its child rows orphaned instead
+    # of cascading, even though the schema comments promise cascade behaviour
+    # and Postgres (production) genuinely does cascade. Found via
+    # scripts/seed_from_workbook.py's --apply leaving 4 orphaned
+    # mel_indicator_targets rows after their parent mel_indicators rows were
+    # deleted -- a latent, pre-existing gap affecting any DELETE anywhere in
+    # the app when running locally against SQLite, not something new.
+    @event.listens_for(engine, "connect")
+    def _enable_foreign_keys(dbapi_conn, _):
+        dbapi_conn.execute("PRAGMA foreign_keys = ON")
+
+    return engine
 
 
 def get_connection():

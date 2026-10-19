@@ -73,8 +73,17 @@ BDS/WAN/Cross-cutting IPTT, A4 Onboarding Q2, A5 Training Q2, PIRS, Shared
 Measures 2.0, and the CEL IPTT user guide — 15 files for 14 sheets. Start
 with `docs/mel_tool/00_README.md`. The platform is being brought in line
 with this workbook's indicator model, formulas and workflow across a
-6-phase plan (Phase 1 in progress); see that folder for the authoritative
-business rules.
+6-phase plan (Phase 1 complete, Phase 2 in progress); see that folder for
+the authoritative business rules.
+
+`scripts/seed_from_workbook.py` reads the real `.xlsx` directly (the
+workbook file itself is gitignored, kept local only — re-add it to your
+checkout whenever you need to run this script) and diffs it against the
+live `mel_indicators`/`mel_indicator_targets` tables. Default mode only
+prints the diff; `--apply` writes it (after an automatic JSON backup;
+`--restore <backup>` undoes it). This is now the authoritative way to
+refresh indicator data from the workbook — `database/seed_mel_indicators.py`
+(hand-parsed from the Markdown export) is being phased out in its favour.
 
 ## Tests
 
