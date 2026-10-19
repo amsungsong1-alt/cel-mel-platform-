@@ -5,6 +5,23 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 
 ## Unreleased
 
+### Added
+- `pages/13_M_IPTT.py` — Module M, Phase 4 part 1 (page scaffold + the
+  read-only "Project IPTT" consolidated view). Shows all 55
+  `mel_indicators` (the real v3 scheme, cut over in Phase 3) with Y1 and
+  optional quarterly targets/achieved/percentage, computed live via
+  `utils/iptt_rules.py`'s `year1_value()`/`percentage()` — the same
+  Y1-from-quarters and blank-vs-zero formulas as the source workbook,
+  never a value cached or typed separately. RAG-coloured (red <70%, amber
+  70–99%, green ≥100%, matching the workbook's own thresholds). Targets
+  are read-only here (sourced from `scripts/seed_from_workbook.py`, not
+  hand-edited in the app); achieved values show "-" everywhere for now,
+  since `mel_indicator_actuals` has no entry UI yet — that's Phase 4's
+  next step. Added to the home page's module table (Middle Management,
+  Operational Excellence).
+  Verified end to end against the real v3-cutover data via
+  `streamlit.testing.v1.AppTest` (home page + Module M, zero exceptions).
+
 ### Fixed
 - `app.py` — **urgent**: removed the boot-time call to the old
   `database/seed_mel_indicators.seed()`. That function's `MEL_INDICATORS`
