@@ -72,16 +72,24 @@ if _needs_seed:
         print(f"Auto-seed skipped: {_e}\n{_traceback.format_exc()}", flush=True)
         st.warning(f"Auto-seed skipped: {_e}")
 
-# mel_indicators/mel_indicator_targets (Phase 2 workbook indicator model):
-# seed() checks each row individually before inserting (no delete+rebuild
-# like seed_sawa's partner_targets), so it's safe to call unconditionally
-# on every boot rather than gating it behind _needs_seed.
-try:
-    from database.seed_mel_indicators import seed as _seed_mel
-    _seed_mel()
-except Exception as _e:
-    print(f"MEL indicator seed skipped: {_e}\n{_traceback.format_exc()}", flush=True)
-    st.warning(f"MEL indicator seed skipped: {_e}")
+# mel_indicators/mel_indicator_targets: NOT auto-seeded here (removed, was
+# a real production bug). database/seed_mel_indicators.py's MEL_INDICATORS
+# data is the OLD v1-scheme workbook (56 indicators, OC1-13/OP1-39) --
+# superseded in Phase 3 by scripts/seed_from_workbook.py, which cut the
+# live database over to the real v3 scheme (55 indicators, OC1-15/OP1-36)
+# run directly against production. Because that old seed()'s idempotency
+# check only looks at "does this indicator_id exist", it had no way to
+# know OP37/OP38/OP39 etc. were REMOVED on purpose during the cutover --
+# every boot after the cutover silently reinserted them (and their 8
+# target rows) right back in, undoing it within minutes. Caught via an
+# AppTest render of Module M (Phase 4) showing "3 inserted" during what
+# should have been a no-op boot, then confirmed directly against
+# production with scripts/seed_from_workbook.py's diff mode.
+# mel_indicators now has exactly one source of truth: run
+# `scripts/seed_from_workbook.py --file <xlsx> --apply` by hand (the real
+# .xlsx, gitignored/local-only) whenever the workbook changes -- including
+# to bootstrap a brand new, never-seeded database. It is deliberately not
+# automatic; see that script's own module docstring for why.
 
 # mel_indicator_pirs (PIRS reference, Phase 1 part 3): same idempotent,
 # unconditional-seed pattern as mel_indicators above.

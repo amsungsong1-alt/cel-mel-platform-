@@ -5,6 +5,27 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 
 ## Unreleased
 
+### Fixed
+- `app.py` — **urgent**: removed the boot-time call to the old
+  `database/seed_mel_indicators.seed()`. That function's `MEL_INDICATORS`
+  data is the pre-cutover v1-scheme workbook (56 indicators,
+  OC1-13/OP1-39) — superseded in Phase 3 by
+  `scripts/seed_from_workbook.py`, which cut the live database over to the
+  real v3 scheme (55 indicators, OC1-15/OP1-36) directly against
+  production. That old `seed()`'s idempotency check only asks "does this
+  indicator_id exist" — it had no way to know `OP37`/`OP38`/`OP39` etc.
+  were removed on purpose during the cutover, so every boot since silently
+  reinserted them (and their target rows) right back in, undoing part of
+  the cutover within minutes of completing it. Caught via an `AppTest`
+  render of the new Module M page showing "3 inserted" during what should
+  have been a no-op boot, then confirmed directly against production:
+  `scripts/seed_from_workbook.py`'s diff mode showed 3 stale indicators
+  and 8 stale target rows had already resurrected. `mel_indicators` now
+  has exactly one source of truth going forward — run
+  `scripts/seed_from_workbook.py --apply` by hand (gitignored/local-only
+  `.xlsx`, deliberately not automatic) whenever the workbook changes,
+  including to bootstrap a brand new database.
+
 ### Added
 - `scripts/seed_from_workbook.py` — Phase 2 of 6: an idempotent importer
   that reads the real `SAWA_IP_MEL_System_Tool_CEL_v3_*.xlsx` workbook
