@@ -69,7 +69,7 @@ if _needs_seed:
         # st.warning() only renders in the browser — it never reaches
         # Streamlit Cloud's server-side log panel (stdout/stderr), so a
         # failure here was previously undiagnosable from logs alone.
-        print(f"Auto-seed skipped: {_e}\n{_traceback.format_exc()}")
+        print(f"Auto-seed skipped: {_e}\n{_traceback.format_exc()}", flush=True)
         st.warning(f"Auto-seed skipped: {_e}")
 
 # mel_indicators/mel_indicator_targets (Phase 2 workbook indicator model):
@@ -80,7 +80,7 @@ try:
     from database.seed_mel_indicators import seed as _seed_mel
     _seed_mel()
 except Exception as _e:
-    print(f"MEL indicator seed skipped: {_e}\n{_traceback.format_exc()}")
+    print(f"MEL indicator seed skipped: {_e}\n{_traceback.format_exc()}", flush=True)
     st.warning(f"MEL indicator seed skipped: {_e}")
 
 # mel_indicator_pirs (PIRS reference, Phase 1 part 3): same idempotent,
@@ -89,7 +89,7 @@ try:
     from database.seed_pirs import seed as _seed_pirs
     _seed_pirs()
 except Exception as _e:
-    print(f"PIRS seed skipped: {_e}\n{_traceback.format_exc()}")
+    print(f"PIRS seed skipped: {_e}\n{_traceback.format_exc()}", flush=True)
     st.warning(f"PIRS seed skipped: {_e}")
 
 # mel_proframe_results (ProFrame results framework, Phase 1 part 4): same
@@ -98,7 +98,7 @@ try:
     from database.seed_proframe import seed as _seed_proframe
     _seed_proframe()
 except Exception as _e:
-    print(f"ProFrame results seed skipped: {_e}\n{_traceback.format_exc()}")
+    print(f"ProFrame results seed skipped: {_e}\n{_traceback.format_exc()}", flush=True)
     st.warning(f"ProFrame results seed skipped: {_e}")
 
 # mel_shared_measures (Shared Measures 2.0 crosswalk, Phase 1 part 5): same
@@ -107,7 +107,7 @@ try:
     from database.seed_shared_measures import seed as _seed_sm
     _seed_sm()
 except Exception as _e:
-    print(f"Shared Measures seed skipped: {_e}\n{_traceback.format_exc()}")
+    print(f"Shared Measures seed skipped: {_e}\n{_traceback.format_exc()}", flush=True)
     st.warning(f"Shared Measures seed skipped: {_e}")
 
 # ── Brand ─────────────────────────────────────────────────────────────────────

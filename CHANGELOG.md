@@ -6,6 +6,21 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 ## Unreleased
 
 ### Fixed
+- `database/db.py`/`app.py` — all diagnostic `print()` calls added in this
+  session (migration start/success, every seed-step failure) now pass
+  `flush=True`. Discovered this was missing after a production report of
+  an indefinitely blank app: the server logs showed the app booting and
+  actively processing script reruns for 11+ minutes with no crash, but
+  `_run_migrations()`'s own "starting"/"committed" prints never appeared
+  even once — meaning the logging added specifically to diagnose this
+  class of issue wasn't reaching the log panel at all. `print()` is
+  block-buffered (not line-buffered) when stdout is redirected to a file
+  rather than a TTY, which is exactly Streamlit Cloud's log-capture setup;
+  without an explicit flush, output can sit in the buffer for the entire
+  life of a long-running process. (The blank-page report itself turned out
+  to be consistent with a stuck browser/websocket connection rather than a
+  backend hang — the server was clearly alive and serving — but this
+  logging gap was real and worth closing regardless.)
 - `database/db.py` — `_run_migrations()` is keyed on a hash of both schema
   files' content (`_schema_fingerprint()`), not on no arguments at all.
   Production reported `mel_proframe_results`/`mel_shared_measures` "does

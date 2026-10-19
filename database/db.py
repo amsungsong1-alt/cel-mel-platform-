@@ -219,7 +219,12 @@ def _run_migrations(schema_fingerprint: str) -> bool:
     # as the parameter name, which silently defeated the entire point:
     # confirmed via a direct same-process test where changing the argument
     # value had NO effect on cache hits until this rename.
-    print(f"_run_migrations: starting (fingerprint {schema_fingerprint[:12]}...).")
+    # flush=True: print() is block-buffered (not line-buffered) when stdout
+    # is redirected to a log file rather than a TTY -- without this, these
+    # diagnostic prints can sit unflushed for the life of the process and
+    # never actually reach Streamlit Cloud's log panel, which is exactly
+    # what happened the first time this logging was added.
+    print(f"_run_migrations: starting (fingerprint {schema_fingerprint[:12]}...).", flush=True)
     if IS_POSTGRES:
         # Strip '--' line comments before splitting on ';' — a semicolon
         # inside a comment (e.g. "-- one row; not two") would otherwise
@@ -1208,7 +1213,7 @@ def _run_migrations(schema_fingerprint: str) -> bool:
                 _tc.execute(text("CREATE INDEX IF NOT EXISTS idx_rs_quarter ON report_sections(fiscal_year, quarter)"))
         except Exception:
             pass
-        print("_run_migrations: Postgres transaction committed successfully.")
+        print("_run_migrations: Postgres transaction committed successfully.", flush=True)
         return True
 
     schema = SCHEMA_PATH.read_text()
@@ -1991,7 +1996,7 @@ def _run_migrations(schema_fingerprint: str) -> bool:
         pass
     conn.commit()
     conn.close()
-    print("_run_migrations: SQLite migration committed successfully.")
+    print("_run_migrations: SQLite migration committed successfully.", flush=True)
     return True
 
 
