@@ -40,6 +40,23 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 - A Step 1 gap audit of all 11 workbook-area-to-app mappings was done against
   this v3 export (reported in-conversation, not as a repo file) and approved
   as a 6-phase plan. This commit is Phase 1, part 1 of 6.
+- `mel_shared_measures` — Phase 1 part 5 of 6 (final part of Phase 1): a new
+  table + `database/seed_shared_measures.py` seeding all 46 rows of
+  `docs/mel_tool/13_Shared_Measures_2.0.md`, AIL's own crosswalk sheet,
+  grouped under an SM code/sub-code (e.g. `SM 1` / `SM 1.1`) where the
+  workbook assigns one. The last 13 rows are "SAWA programme-specific
+  indicators" with no AIL SM code at all — stored as such, not left
+  ambiguous. This doc's field-level detail (definition/disaggregation/
+  unit/etc.) duplicates `mel_indicator_pirs` almost verbatim for the
+  matched rows, so only the SM grouping itself is stored — the crosswalk's
+  actual value, not a second copy of PIRS content. `indicator_id` links by
+  exact normalised statement match — 20 of 46; the rest flagged as "not yet
+  linked", not guessed, same precedent as the PIRS/ProFrame tables. Plus a
+  read-only "Shared Measures 2.0 — Crosswalk" table on the home page with
+  an SM-group filter.
+  Parsed programmatically (not hand-typed). Verified against SQLite and
+  real Postgres 15. 7 new tests in `tests/test_seed_shared_measures.py`.
+  **This completes Phase 1 (parts 1–5) of the 6-phase v3 adoption plan.**
 - `mel_proframe_results` — Phase 1 part 4 of 6: a new table + `database/seed_proframe.py`
   seeding the 63-row "Results framework" section of `docs/mel_tool/02_ProFrame.md`
   (12 result areas: 1 Impact, 5 Outcome, 6 Output), including the 2 new

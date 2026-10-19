@@ -101,6 +101,15 @@ except Exception as _e:
     print(f"ProFrame results seed skipped: {_e}\n{_traceback.format_exc()}")
     st.warning(f"ProFrame results seed skipped: {_e}")
 
+# mel_shared_measures (Shared Measures 2.0 crosswalk, Phase 1 part 5): same
+# idempotent, unconditional-seed pattern as mel_indicators above.
+try:
+    from database.seed_shared_measures import seed as _seed_sm
+    _seed_sm()
+except Exception as _e:
+    print(f"Shared Measures seed skipped: {_e}\n{_traceback.format_exc()}")
+    st.warning(f"Shared Measures seed skipped: {_e}")
+
 # ── Brand ─────────────────────────────────────────────────────────────────────
 NAVY = "#4A5568"
 GOLD = "#F5A820"
@@ -439,6 +448,46 @@ with st.expander("🎯 ProFrame — Results Framework (v3, 12 result areas)", ex
                     f"</span>",
                     unsafe_allow_html=True,
                 )
+
+# ── Shared Measures 2.0 — Crosswalk ────────────────────────────────────────────
+# Phase 1 part 5 (final part of Phase 1). Read-only: which AIL Shared
+# Measures 2.0 code (and sub-code) each CEL indicator rolls up to, from
+# docs/mel_tool/13_Shared_Measures_2.0.md. The last 13 rows are SAWA-only
+# (no SM code at all) — shown as such, not blank/confusing. A plain table,
+# not expanders, since this is lookup data, not long-form prose.
+with st.expander("🔗 Shared Measures 2.0 — Crosswalk (v3, 46 entries)", expanded=False):
+    _sm_rows = run_query(
+        """SELECT s.row_number, s.sm_group, s.sm_subcode, s.statement, s.indicator_id
+           FROM mel_shared_measures s
+           JOIN projects pr ON pr.project_id = s.project_id
+           WHERE pr.name = 'SAWA'
+           ORDER BY s.row_number""",
+        {},
+    )
+    if not _sm_rows:
+        st.caption("Shared Measures crosswalk not seeded yet — reload once the SAWA project exists.")
+    else:
+        _n_sm_linked = sum(1 for r in _sm_rows if r["indicator_id"])
+        st.caption(
+            f"{len(_sm_rows)} entries from AIL's Shared Measures 2.0 sheet. "
+            f"{_n_sm_linked} are linked to an IM/OC/OP indicator by exact wording match; "
+            f"the other {len(_sm_rows) - _n_sm_linked} use wording that doesn't exactly "
+            "match any IPTT sheet statement — shown as 'not yet linked', not guessed. "
+            "The last 13 rows are SAWA programme-specific indicators with no AIL SM code."
+        )
+        _sm_groups = ["All"] + sorted({r["sm_group"] or "No SM code (SAWA-specific)" for r in _sm_rows})
+        _sm_filter = st.selectbox("Filter by SM group", _sm_groups, key="sm_group_filter")
+        st.markdown(
+            "| # | SM code | CEL indicator | Linked ID |\n"
+            "|---|---|---|---|\n"
+            + "\n".join(
+                f"| {r['row_number']} | {r['sm_subcode'] or r['sm_group'] or '—'} "
+                f"| {r['statement']} | {r['indicator_id'] or 'not yet linked'} |"
+                for r in _sm_rows
+                if _sm_filter == "All"
+                or (r["sm_group"] or "No SM code (SAWA-specific)") == _sm_filter
+            )
+        )
 
 # ── CEL Project Portfolio by Sector ──────────────────────────────────────────
 st.markdown("#### CEL Project Portfolio")

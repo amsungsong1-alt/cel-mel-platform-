@@ -605,3 +605,21 @@ CREATE TABLE IF NOT EXISTS mel_proframe_results (
 CREATE UNIQUE INDEX IF NOT EXISTS idx_pfr_key          ON mel_proframe_results(project_id, area_label, proframe_number, indicator_statement);
 CREATE INDEX IF NOT EXISTS idx_pfr_indicator_id        ON mel_proframe_results(indicator_id);
 CREATE INDEX IF NOT EXISTS idx_pfr_proframe_number     ON mel_proframe_results(proframe_number);
+
+-- Shared Measures 2.0 — see schema.sql's comment for the full rationale
+-- (46 rows, last 13 are SAWA-only with no SM code, 20/46 matched to
+-- indicator_id).
+CREATE TABLE IF NOT EXISTS mel_shared_measures (
+    id                      INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    project_id              INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    row_number              INTEGER NOT NULL,
+    sm_group                TEXT,
+    sm_group_description    TEXT,
+    sm_subcode              TEXT,
+    sm_subcode_description  TEXT,
+    statement               TEXT    NOT NULL,
+    indicator_id            TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_sm_key           ON mel_shared_measures(project_id, row_number);
+CREATE INDEX IF NOT EXISTS idx_sm_indicator_id         ON mel_shared_measures(indicator_id);
+CREATE INDEX IF NOT EXISTS idx_sm_subcode              ON mel_shared_measures(sm_subcode);

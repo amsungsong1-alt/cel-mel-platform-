@@ -808,3 +808,30 @@ CREATE TABLE IF NOT EXISTS mel_proframe_results (
 CREATE UNIQUE INDEX IF NOT EXISTS idx_pfr_key          ON mel_proframe_results(project_id, area_label, proframe_number, indicator_statement);
 CREATE INDEX IF NOT EXISTS idx_pfr_indicator_id        ON mel_proframe_results(indicator_id);
 CREATE INDEX IF NOT EXISTS idx_pfr_proframe_number     ON mel_proframe_results(proframe_number);
+
+-- Shared Measures 2.0 — docs/mel_tool/13_Shared_Measures_2.0.md, AIL's own
+-- crosswalk sheet. 46 rows; the last 13 are "SAWA PROGRAMME-SPECIFIC
+-- INDICATORS" with no SM code at all (CEL/SAWA-only, not a Foundation
+-- shared measure) — sm_group/sm_group_description/sm_subcode/
+-- sm_subcode_description are NULL for those. indicator_id links to
+-- mel_indicators by exact normalised statement match, same precedent as
+-- mel_indicator_pirs/mel_proframe_results — left NULL where wording
+-- diverges (not guessed): 20 of 46 matched. This doc's field-level detail
+-- (definition/disaggregation/unit/etc.) duplicates mel_indicator_pirs
+-- almost verbatim for the matched rows, so only the SM grouping itself is
+-- stored here — the crosswalk's actual value-add, not a second copy of
+-- PIRS content.
+CREATE TABLE IF NOT EXISTS mel_shared_measures (
+    id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id              INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    row_number              INTEGER NOT NULL,  -- the sheet's own 1-46 numbering
+    sm_group                TEXT,               -- 'SM 1' ... 'SM 9', or NULL
+    sm_group_description    TEXT,
+    sm_subcode              TEXT,               -- 'SM 1.1' etc., or NULL
+    sm_subcode_description  TEXT,
+    statement               TEXT    NOT NULL,
+    indicator_id            TEXT                -- 'IM1' | 'OC7' | 'OP29' ... ; NULL if unmatched
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_sm_key           ON mel_shared_measures(project_id, row_number);
+CREATE INDEX IF NOT EXISTS idx_sm_indicator_id         ON mel_shared_measures(indicator_id);
+CREATE INDEX IF NOT EXISTS idx_sm_subcode              ON mel_shared_measures(sm_subcode);
