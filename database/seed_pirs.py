@@ -77,9 +77,9 @@ PIRS_ENTRIES = [
 ]
 
 # 28/58 entries matched to a mel_indicators.indicator_id by exact
-# normalised statement text; the rest (indicator_id=None) need a human to confirm
-# the mapping -- flagged, not guessed.# matching (confirmed by inspection, not a parsing gap). The remaining 30
-# need a human to confirm the mapping -- left unmatched deliberately.
+# normalised statement text (confirmed by inspection, not a parsing gap);
+# the remaining 30 (indicator_id=None) need a human to confirm the mapping
+# -- flagged, not guessed.
 
 
 def seed(project_id: int | None = None) -> None:

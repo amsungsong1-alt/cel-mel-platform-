@@ -92,6 +92,15 @@ except Exception as _e:
     print(f"PIRS seed skipped: {_e}\n{_traceback.format_exc()}")
     st.warning(f"PIRS seed skipped: {_e}")
 
+# mel_proframe_results (ProFrame results framework, Phase 1 part 4): same
+# idempotent, unconditional-seed pattern as mel_indicators above.
+try:
+    from database.seed_proframe import seed as _seed_proframe
+    _seed_proframe()
+except Exception as _e:
+    print(f"ProFrame results seed skipped: {_e}\n{_traceback.format_exc()}")
+    st.warning(f"ProFrame results seed skipped: {_e}")
+
 # ── Brand ─────────────────────────────────────────────────────────────────────
 NAVY = "#4A5568"
 GOLD = "#F5A820"
@@ -340,11 +349,16 @@ with st.expander("📖 PIRS — Indicator Reference (v3, 58 entries)", expanded=
             "Filter by keyword", key="pirs_filter",
             help="Matches against the indicator statement only.",
         )
+        # st.container (not a nested st.expander) -- Streamlit discourages
+        # nesting expanders inside expanders, and it renders poorly on
+        # narrow/phone screens; a bordered container keeps this section
+        # phone-light instead.
         for _r in _pirs_rows:
             if _pirs_query and _pirs_query.lower() not in _r["statement"].lower():
                 continue
             _badge = _r["indicator_id"] or "not yet linked"
-            with st.expander(f"{_r['pirs_number']}. [{_badge}] {_r['statement']}"):
+            with st.container(border=True):
+                st.markdown(f"**{_r['pirs_number']}. [{_badge}] {_r['statement']}**")
                 st.markdown(f"**Definition:** {_r['definition']}")
                 st.markdown(f"**Disaggregation:** {_r['disaggregation']}")
                 c1, c2, c3 = st.columns(3)
@@ -353,6 +367,78 @@ with st.expander("📖 PIRS — Indicator Reference (v3, 58 entries)", expanded=
                 c3.markdown(f"**Frequency:** {_r['frequency']}")
                 st.markdown(f"**Collection method:** {_r['data_collection_method']}")
                 st.markdown(f"**Data source:** {_r['data_source']}")
+
+# ── ProFrame — Results Framework (v3) ──────────────────────────────────────────
+# Phase 1 part 4. Read-only: goal, key result statements, assumptions, risks
+# and indicator rows per result area, from docs/mel_tool/02_ProFrame.md's
+# "Results framework" section, including the 2 new TechnoServe indicator
+# rows (#9, #10 in area 2.1). The "#" column is the ProFrame sheet's own
+# numbering, not the IPTT ID — it is flagged inline wherever it repeats,
+# never silently treated as a stable key.
+with st.expander("🎯 ProFrame — Results Framework (v3, 12 result areas)", expanded=False):
+    _pfr_rows = run_query(
+        """SELECT r.id, r.area_label, r.level, r.key_result_statement, r.assumptions,
+                  r.risks, r.proframe_number, r.indicator_statement, r.indicator_id,
+                  r.key_measure, r.cel_scope, r.note
+           FROM mel_proframe_results r
+           JOIN projects pr ON pr.project_id = r.project_id
+           WHERE pr.name = 'SAWA'
+           ORDER BY r.id""",
+        {},
+    )
+    if not _pfr_rows:
+        st.caption("ProFrame results framework not seeded yet — reload once the SAWA project exists.")
+    else:
+        _pfr_dupe_numbers = {
+            d["proframe_number"]
+            for d in run_query(
+                """SELECT r.proframe_number FROM mel_proframe_results r
+                   JOIN projects pr ON pr.project_id = r.project_id
+                   WHERE pr.name = 'SAWA'
+                   GROUP BY r.proframe_number HAVING COUNT(*) > 1""",
+                {},
+            )
+        }
+        st.caption(
+            f"The **#** column is the ProFrame sheet's own numbering, not an IM/OC/OP "
+            f"indicator ID — {len(_pfr_dupe_numbers)} numbers repeat across (and in one "
+            f"case within) result areas: {', '.join(str(n) for n in sorted(_pfr_dupe_numbers))}. "
+            "Marked with ⚠ below; never used as a lookup key."
+        )
+        _pfr_areas: dict[str, list] = {}
+        for _r in _pfr_rows:
+            _pfr_areas.setdefault(_r["area_label"], []).append(_r)
+
+        # A selector (not nested expanders) -- each area's assumptions/risks
+        # run long, and showing all 12 at once would be heavy on a phone;
+        # one area at a time in a plain container keeps this phone-light.
+        _pfr_area_labels = list(_pfr_areas.keys())
+        _pfr_selected = st.selectbox(
+            "Result area", _pfr_area_labels, key="proframe_area_select",
+        )
+        _area_rows = _pfr_areas[_pfr_selected]
+        _first = _area_rows[0]
+        with st.container(border=True):
+            st.markdown(f"**{_first['level']} — {_pfr_selected}**")
+            if _first["key_result_statement"]:
+                st.markdown(f"**Key result statement:** {_first['key_result_statement']}")
+            if _first["assumptions"]:
+                st.markdown("**Assumptions:**")
+                st.markdown(_first["assumptions"])
+            if _first["risks"]:
+                st.markdown("**Risks:**")
+                st.markdown(_first["risks"])
+            st.markdown("**Indicators:**")
+            for _row in _area_rows:
+                _flag = " ⚠" if _row["proframe_number"] in _pfr_dupe_numbers else ""
+                _badge = _row["indicator_id"] or "not yet linked"
+                st.markdown(
+                    f"- **#{_row['proframe_number']}{_flag}** [{_badge}] {_row['indicator_statement']}"
+                    f"  \n  <span style='font-size:0.78em;color:#666;'>"
+                    f"{_row['cel_scope'] or ''}{' · ' + _row['note'] if _row['note'] else ''}"
+                    f"</span>",
+                    unsafe_allow_html=True,
+                )
 
 # ── CEL Project Portfolio by Sector ──────────────────────────────────────────
 st.markdown("#### CEL Project Portfolio")

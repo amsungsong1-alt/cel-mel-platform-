@@ -40,6 +40,35 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 - A Step 1 gap audit of all 11 workbook-area-to-app mappings was done against
   this v3 export (reported in-conversation, not as a repo file) and approved
   as a 6-phase plan. This commit is Phase 1, part 1 of 6.
+- `mel_proframe_results` — Phase 1 part 4 of 6: a new table + `database/seed_proframe.py`
+  seeding the 63-row "Results framework" section of `docs/mel_tool/02_ProFrame.md`
+  (12 result areas: 1 Impact, 5 Outcome, 6 Output), including the 2 new
+  TechnoServe indicator rows (#9 Catalytic Fund, #10 Micro Investment Fund,
+  linked to OP38/OP39) added in v3. Plus a read-only "ProFrame — Results
+  Framework" expander on the home page with a per-area selector.
+  `indicator_id` links each row to `mel_indicators` by exact normalised
+  statement match — 47 of 63. The ProFrame `#` column is flagged inline
+  (⚠) everywhere it repeats: discovered during parsing that area "3.2
+  Training and Skills" repeats `#30`/`#31`/`#32` *twice each* for two
+  different indicators within that single area — not just across areas as
+  `00_README.md` already documented — so the table's natural key is
+  `(area, #, indicator_statement)`, not `(area, #)`. Combined with the
+  cross-area repeats, the full set matches `00_README.md`'s "Items to
+  settle" list exactly: 9, 10, 30, 31, 32, 37, 43, 44, 45, 46, 47.
+  Parsed programmatically (not hand-typed), same precedent as the earlier
+  seeds. Verified against SQLite and real Postgres 15. 9 new tests in
+  `tests/test_seed_proframe.py`.
+- Fixed a leftover malformed comment fragment in `database/seed_pirs.py`
+  (duplicated/glued sentence from the original generation pass, harmless
+  to Python but confusing to read).
+- `app.py` — both the PIRS and ProFrame reference sections now use
+  `st.container(border=True)` instead of a nested `st.expander` for each
+  entry's detail — Streamlit discourages nesting expanders (renders poorly
+  on narrow/phone screens, per the standing "keep pages phone-light"
+  instruction), even though it doesn't raise an error (confirmed via
+  `AppTest`, which is how this was caught before it reached users). PIRS
+  keeps its keyword filter; ProFrame now uses a per-area selector instead
+  of showing all 12 areas' lengthy assumptions/risks text at once.
 - `mel_indicator_pirs` — Phase 1 part 3 of 6: a new table + `database/seed_pirs.py`
   seeding the 58 Performance Indicator Reference Sheet entries from
   `docs/mel_tool/12_PIRS.md` (definition, disaggregation, unit, data type,

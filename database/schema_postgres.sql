@@ -579,3 +579,29 @@ CREATE TABLE IF NOT EXISTS mel_indicator_pirs (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_pirs_key        ON mel_indicator_pirs(project_id, pirs_number);
 CREATE INDEX IF NOT EXISTS idx_pirs_indicator_id      ON mel_indicator_pirs(indicator_id);
+
+-- ProFrame results framework — see schema.sql's comment for the full
+-- rationale (12 result areas, 63 rows, 47/63 matched to indicator_id;
+-- #30/#31/#32 repeat twice each within one area, so the unique key below
+-- includes indicator_statement, not just (area, #)).
+CREATE TABLE IF NOT EXISTS mel_proframe_results (
+    id                      INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    project_id              INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    area_label              TEXT    NOT NULL,
+    level                   TEXT    NOT NULL CHECK(level IN ('Impact','Outcome','Output')),
+    key_result_statement    TEXT,
+    assumptions             TEXT,
+    risks                   TEXT,
+    proframe_number         INTEGER NOT NULL,
+    indicator_statement     TEXT    NOT NULL,
+    indicator_id            TEXT,
+    key_measure             TEXT,
+    disaggregation          TEXT,
+    markers                 TEXT,
+    means_of_verification   TEXT,
+    cel_scope               TEXT,
+    note                    TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_pfr_key          ON mel_proframe_results(project_id, area_label, proframe_number, indicator_statement);
+CREATE INDEX IF NOT EXISTS idx_pfr_indicator_id        ON mel_proframe_results(indicator_id);
+CREATE INDEX IF NOT EXISTS idx_pfr_proframe_number     ON mel_proframe_results(proframe_number);

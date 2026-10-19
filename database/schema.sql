@@ -772,3 +772,39 @@ CREATE TABLE IF NOT EXISTS mel_indicator_pirs (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_pirs_key        ON mel_indicator_pirs(project_id, pirs_number);
 CREATE INDEX IF NOT EXISTS idx_pirs_indicator_id      ON mel_indicator_pirs(indicator_id);
+
+-- ProFrame results framework — docs/mel_tool/02_ProFrame.md's "Results
+-- framework" section: 12 result areas (1 Impact, 5 Outcome, 6 Output),
+-- 63 indicator rows. proframe_number is the ProFrame sheet's own "#"
+-- column — NOT the IPTT ID, and the workbook itself warns some numbers
+-- repeat across areas (9, 10, 30, 31, 32, 37, 43, 44, 45, 46, 47 — see
+-- 00_README.md's "Items to settle"). Area "3.2 Training and Skills" even
+-- repeats #30/#31/#32 TWICE EACH for two different indicators within that
+-- single area — the # column isn't unique even within one area, so the
+-- natural key is (area, #, indicator_statement), not just (area, #).
+-- Assumptions/risks are area-level text, repeated on every row in that
+-- area for simplicity (small read-only reference table, not a performance
+-- path). indicator_id links to mel_indicators by exact normalised
+-- statement match, same precedent as mel_indicator_pirs — left NULL where
+-- wording diverges (not guessed): 47 of 63 matched.
+CREATE TABLE IF NOT EXISTS mel_proframe_results (
+    id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id              INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    area_label              TEXT    NOT NULL,  -- e.g. '2.1 Work, Enterprise development and Income'
+    level                   TEXT    NOT NULL CHECK(level IN ('Impact','Outcome','Output')),
+    key_result_statement    TEXT,
+    assumptions             TEXT,
+    risks                   TEXT,
+    proframe_number         INTEGER NOT NULL,  -- repeats across AND within areas; see comment above
+    indicator_statement     TEXT    NOT NULL,
+    indicator_id            TEXT,              -- 'IM1' | 'OC7' | 'OP29' ... ; NULL if unmatched
+    key_measure             TEXT,
+    disaggregation          TEXT,
+    markers                 TEXT,
+    means_of_verification   TEXT,
+    cel_scope               TEXT,
+    note                    TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_pfr_key          ON mel_proframe_results(project_id, area_label, proframe_number, indicator_statement);
+CREATE INDEX IF NOT EXISTS idx_pfr_indicator_id        ON mel_proframe_results(indicator_id);
+CREATE INDEX IF NOT EXISTS idx_pfr_proframe_number     ON mel_proframe_results(proframe_number);
