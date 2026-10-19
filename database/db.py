@@ -8,6 +8,7 @@ Nothing else needs to change — run_query/run_write/insert_returning_id all
 work identically against either engine.
 """
 from pathlib import Path
+import hashlib
 import os
 import sqlite3
 import streamlit as st
@@ -20,6 +21,22 @@ _HERE = Path(__file__).parent
 DB_PATH = _HERE / "cel_mel.db"
 SCHEMA_PATH = _HERE / "schema.sql"
 SCHEMA_PATH_POSTGRES = _HERE / "schema_postgres.sql"
+
+
+def _schema_fingerprint() -> str:
+    """Hash of both schema files' current content.
+
+    Passed into _run_migrations() as its @st.cache_resource key. A new
+    table/column added to either schema file changes this hash, which
+    forces a fresh migration run even if the Python *process* itself
+    didn't restart across a deploy (st.cache_resource otherwise caches
+    purely on the fact that _run_migrations() takes no arguments — a
+    stale cached "already migrated" result would silently skip newly
+    added CREATE TABLE statements with no error and no crash)."""
+    h = hashlib.sha256()
+    h.update(SCHEMA_PATH.read_bytes())
+    h.update(SCHEMA_PATH_POSTGRES.read_bytes())
+    return h.hexdigest()
 
 
 def _database_url() -> str:
@@ -81,16 +98,18 @@ def get_connection():
 
 
 def init_db():
-    """Create all tables and apply migrations — exactly once per process.
+    """Create all tables and apply migrations — once per process per schema
+    version (see _schema_fingerprint()).
 
     Every page calls this on every load, for every concurrent user session.
     Postgres DDL (ALTER TABLE) takes a strong lock, so if this ran fresh each
     time, multiple sessions hitting it at once (e.g. right after a reboot)
     could deadlock against each other. st.cache_resource makes the actual
-    work below run once and caches the result; concurrent first-callers
-    block on Streamlit's cache lock rather than racing Postgres locks.
+    work below run once per fingerprint and caches the result; concurrent
+    first-callers block on Streamlit's cache lock rather than racing
+    Postgres locks.
     """
-    _run_migrations()
+    _run_migrations(_schema_fingerprint())
 
 
 # ── Shared Module C (Data Collection Plan) backfill data ─────────────────────
@@ -189,7 +208,18 @@ _NEW_DCP = [
 
 
 @st.cache_resource
-def _run_migrations() -> bool:
+def _run_migrations(schema_fingerprint: str) -> bool:
+    # schema_fingerprint is unused in the body below -- it exists purely as
+    # the @st.cache_resource key (see _schema_fingerprint()'s docstring),
+    # so a schema-file change forces a fresh run even without a process
+    # restart. IMPORTANT: this parameter must NOT start with "_" -- that's
+    # a documented st.cache_resource convention meaning "exclude this
+    # argument from the cache key" (for passing unhashable objects like DB
+    # connections). An earlier version of this fix used "_schema_fingerprint"
+    # as the parameter name, which silently defeated the entire point:
+    # confirmed via a direct same-process test where changing the argument
+    # value had NO effect on cache hits until this rename.
+    print(f"_run_migrations: starting (fingerprint {schema_fingerprint[:12]}...).")
     if IS_POSTGRES:
         # Strip '--' line comments before splitting on ';' — a semicolon
         # inside a comment (e.g. "-- one row; not two") would otherwise
@@ -1178,6 +1208,7 @@ def _run_migrations() -> bool:
                 _tc.execute(text("CREATE INDEX IF NOT EXISTS idx_rs_quarter ON report_sections(fiscal_year, quarter)"))
         except Exception:
             pass
+        print("_run_migrations: Postgres transaction committed successfully.")
         return True
 
     schema = SCHEMA_PATH.read_text()
@@ -1960,6 +1991,7 @@ def _run_migrations() -> bool:
         pass
     conn.commit()
     conn.close()
+    print("_run_migrations: SQLite migration committed successfully.")
     return True
 
 

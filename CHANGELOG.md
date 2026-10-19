@@ -6,6 +6,31 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 ## Unreleased
 
 ### Fixed
+- `database/db.py` — `_run_migrations()` is keyed on a hash of both schema
+  files' content (`_schema_fingerprint()`), not on no arguments at all.
+  Production reported `mel_proframe_results`/`mel_shared_measures` "does
+  not exist" immediately after deploying the commit that added them, even
+  though `mel_indicators`/`mel_indicator_pirs` (added in earlier deploys)
+  were fine — and no crash, meaning `_run_migrations()` returned normally
+  without ever creating the two newest tables. A zero-argument
+  `@st.cache_resource`-decorated migration function has exactly one
+  failure mode that fits: if Streamlit Cloud ever reuses a process across
+  a deploy without clearing its resource cache, the cached "already
+  migrated" result silently skips any newly-added schema content with no
+  error. Fixed by passing a hash of the schema files as the cache key, so
+  any schema change forces a fresh run regardless of process lifetime.
+  First attempt at this fix used `_schema_fingerprint` (leading
+  underscore) as the parameter name — `st.cache_resource` has a
+  documented convention that underscore-prefixed parameters are *excluded*
+  from the cache key (for passing unhashable objects like DB connections),
+  which silently defeated the entire fix. Caught by directly testing the
+  caching behavior in isolation before trusting it: a same-process test
+  (migrate → drop the new table → migrate again under a different
+  fingerprint) showed zero effect under the first attempt, and the
+  corrected non-underscore parameter name fixes it, confirmed by the same
+  test. Also added explicit `print()` logging at the start and successful
+  end of `_run_migrations()` (both engines) so a future occurrence is
+  immediately visible in Streamlit Cloud's log panel.
 - `database/seed_mel_indicators.py` — `seed()` no longer hardcodes
   `project_id=1`. The production deploy's `projects` table has its SAWA row
   at a different id (the auto-increment sequence had advanced past 1 for
