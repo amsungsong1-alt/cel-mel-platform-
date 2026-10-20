@@ -5,6 +5,26 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 
 ## Unreleased
 
+### Added
+- `database/seed_a2_roles.py` + 4 new tables (`mel_data_flow_stages`,
+  `mel_roles`, `mel_sheet_responsibilities`, `mel_data_uses`) — Phase 5
+  part 1: a role directory, parsed from
+  `docs/mel_tool/05_A2_Data_Flow_and_Roles.md`. Mirrors the sheet's own
+  four sections: the 7-stage data flow (participants → Agri-Impact), the
+  11 key roles, the per-model-sheet collect/verify/review summary, and the
+  6 ways CEL uses the data. `person_name`/`backup` show "to confirm" where
+  the workbook itself leaves them blank — only "MEAL Officer" has a
+  confirmed name in the source; the other 10 roles are intentionally left
+  unconfirmed, never defaulted or guessed. Read-only "👥 A2 — Data Flow &
+  Roles" expander on the home page with a view selector (plain containers/
+  tables, not nested expanders, same phone-light lesson as PIRS/ProFrame).
+  All four seed loops share one helper (`_seed_table()`) that fetches
+  existing keys in a single bulk query up front — built this way from the
+  start this time, not retrofitted after a performance incident like the
+  three Phase 1 seed modules were. Verified against SQLite and real
+  Postgres 15 (fresh DB + idempotency). 9 new tests in
+  `tests/test_seed_a2_roles.py`.
+
 ### Fixed
 - `database/db.py` — **urgent, production**: `_run_migrations()`'s main
   schema script and ALTER-TABLE migration list now run as one batched

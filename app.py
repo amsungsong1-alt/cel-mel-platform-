@@ -118,6 +118,15 @@ except Exception as _e:
     print(f"Shared Measures seed skipped: {_e}\n{_traceback.format_exc()}", flush=True)
     st.warning(f"Shared Measures seed skipped: {_e}")
 
+# A2 Data Flow & Roles (role directory, Phase 5 part 1): same idempotent,
+# unconditional-seed pattern as mel_indicators above.
+try:
+    from database.seed_a2_roles import seed as _seed_a2
+    _seed_a2()
+except Exception as _e:
+    print(f"A2 Data Flow & Roles seed skipped: {_e}\n{_traceback.format_exc()}", flush=True)
+    st.warning(f"A2 Data Flow & Roles seed skipped: {_e}")
+
 # ── Brand ─────────────────────────────────────────────────────────────────────
 NAVY = "#4A5568"
 GOLD = "#F5A820"
@@ -498,6 +507,95 @@ with st.expander("🔗 Shared Measures 2.0 — Crosswalk (v3, 46 entries)", expa
                 for r in _sm_rows
                 if _sm_filter == "All"
                 or (r["sm_group"] or "No SM code (SAWA-specific)") == _sm_filter
+            )
+        )
+
+# ── A2 — Data Flow & Roles ──────────────────────────────────────────────────
+# Phase 5 part 1. Read-only: the 7-stage data flow, the 11 key roles, the
+# per-model-sheet collect/verify/review summary, and the 6 ways CEL uses
+# the data, from docs/mel_tool/05_A2_Data_Flow_and_Roles.md.
+# person_name/backup show "to confirm" where the workbook itself leaves
+# them blank — never defaulted or guessed.
+with st.expander("👥 A2 — Data Flow & Roles (v3)", expanded=False):
+    _a2_view = st.selectbox(
+        "View",
+        ["Data flow (7 stages)", "Key roles (11)", "Sheet responsibilities", "How CEL uses the data"],
+        key="a2_view_select",
+    )
+
+    if _a2_view == "Data flow (7 stages)":
+        _stages = run_query(
+            """SELECT s.* FROM mel_data_flow_stages s
+               JOIN projects pr ON pr.project_id = s.project_id
+               WHERE pr.name = 'SAWA' ORDER BY s.stage_number""",
+            {},
+        )
+        for s in _stages:
+            with st.container(border=True):
+                st.markdown(f"**{s['stage_number']}. {s['stage_name']}** — {s['who']}")
+                st.markdown(f"{s['what_happens']}")
+                st.markdown(
+                    f"<span style='font-size:0.82em;color:#666;'>"
+                    f"📄 {s['output_evidence']} · ✅ {s['control_check']} · 🕒 {s['timing']}"
+                    f"</span>",
+                    unsafe_allow_html=True,
+                )
+
+    elif _a2_view == "Key roles (11)":
+        _roles = run_query(
+            """SELECT r.* FROM mel_roles r
+               JOIN projects pr ON pr.project_id = r.project_id
+               WHERE pr.name = 'SAWA' ORDER BY r.id""",
+            {},
+        )
+        _n_confirmed = sum(1 for r in _roles if r["person_name"])
+        st.caption(
+            f"{len(_roles)} roles. {_n_confirmed} have a confirmed name in the workbook; "
+            f"the other {len(_roles) - _n_confirmed} are proposed, name and backup to confirm."
+        )
+        for r in _roles:
+            with st.container(border=True):
+                name = r["person_name"] or "*to confirm*"
+                backup = r["backup"] or "*to confirm*"
+                st.markdown(f"**{r['role_name']}** — {name}  \n*Backup:* {backup}")
+                st.markdown(r["responsibilities"] or "")
+                st.markdown(
+                    f"<span style='font-size:0.82em;color:#666;'>"
+                    f"➡ sends to: {r['sends_to'] or '—'} · ⬅ receives from: {r['receives_from'] or '—'}"
+                    f"</span>",
+                    unsafe_allow_html=True,
+                )
+
+    elif _a2_view == "Sheet responsibilities":
+        _sheets = run_query(
+            """SELECT sr.* FROM mel_sheet_responsibilities sr
+               JOIN projects pr ON pr.project_id = sr.project_id
+               WHERE pr.name = 'SAWA' ORDER BY sr.id""",
+            {},
+        )
+        st.markdown(
+            "| Sheet | Collect | Verify | Review | Indicators |\n"
+            "|---|---|---|---|---|\n"
+            + "\n".join(
+                f"| {s['sheet_name']} | {s['collect_role']} | {s['verify_role']} | "
+                f"{s['review_role']} | {s['indicator_count']} |"
+                for s in _sheets
+            )
+        )
+
+    else:  # How CEL uses the data
+        _uses = run_query(
+            """SELECT du.* FROM mel_data_uses du
+               JOIN projects pr ON pr.project_id = du.project_id
+               WHERE pr.name = 'SAWA' ORDER BY du.id""",
+            {},
+        )
+        st.markdown(
+            "| Use | Who | Frequency | Source |\n"
+            "|---|---|---|---|\n"
+            + "\n".join(
+                f"| {u['use_label']} | {u['who']} | {u['frequency']} | {u['source']} |"
+                for u in _uses
             )
         )
 

@@ -623,3 +623,52 @@ CREATE TABLE IF NOT EXISTS mel_shared_measures (
 CREATE UNIQUE INDEX IF NOT EXISTS idx_sm_key           ON mel_shared_measures(project_id, row_number);
 CREATE INDEX IF NOT EXISTS idx_sm_indicator_id         ON mel_shared_measures(indicator_id);
 CREATE INDEX IF NOT EXISTS idx_sm_subcode              ON mel_shared_measures(sm_subcode);
+
+-- A2 Data Flow & Roles — see schema.sql's comment for the full rationale.
+CREATE TABLE IF NOT EXISTS mel_data_flow_stages (
+    id              INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    project_id      INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    stage_number    INTEGER NOT NULL,
+    stage_name      TEXT    NOT NULL,
+    who             TEXT,
+    what_happens    TEXT,
+    output_evidence TEXT,
+    control_check   TEXT,
+    timing          TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_dfs_key ON mel_data_flow_stages(project_id, stage_number);
+
+CREATE TABLE IF NOT EXISTS mel_roles (
+    id              INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    project_id      INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    role_name       TEXT    NOT NULL,
+    person_name     TEXT,
+    responsibilities TEXT,
+    sends_to        TEXT,
+    receives_from   TEXT,
+    backup          TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_roles_key ON mel_roles(project_id, role_name);
+
+CREATE TABLE IF NOT EXISTS mel_sheet_responsibilities (
+    id              INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    project_id      INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    sheet_name      TEXT    NOT NULL,
+    delivery_models TEXT,
+    collect_role    TEXT,
+    verify_role     TEXT,
+    review_role     TEXT,
+    indicator_count INTEGER
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_sr_key ON mel_sheet_responsibilities(project_id, sheet_name);
+
+CREATE TABLE IF NOT EXISTS mel_data_uses (
+    id          INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    project_id  INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    use_label   TEXT    NOT NULL,
+    who         TEXT,
+    what_we_do  TEXT,
+    frequency   TEXT,
+    source      TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_du_key ON mel_data_uses(project_id, use_label);
