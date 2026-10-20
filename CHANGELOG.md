@@ -6,6 +6,18 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 ## Unreleased
 
 ### Added
+- `pages/13_M_IPTT.py` — Phase 4 part 3 (final part): Excel export of the
+  consolidated IPTT table. Exports every indicator and quarter regardless
+  of the on-screen level filter/quarterly-breakdown toggle, matching the
+  real workbook's Project IPTT sheet content most closely. Same
+  `pd.ExcelWriter(..., engine="openpyxl")` + `st.download_button` pattern
+  already used in Module A. Verified the exported bytes are a valid,
+  re-readable `.xlsx` with correct data (56 rows including header, 20
+  columns) and that the page still renders with zero exceptions with the
+  export wired in. **This completes Phase 4** (Module M: consolidated
+  read-only view, achieved-value entry, Excel export) of the 6-phase v3
+  adoption plan.
+
 - `pages/13_M_IPTT.py` — Phase 4 part 2: achieved-value entry for
   `mel_indicator_actuals`, which previously had zero rows and no UI at
   all. One tab per model sheet (BDS/WAN/Cross-cutting IPTT), matching the

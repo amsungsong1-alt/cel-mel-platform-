@@ -21,6 +21,7 @@ Phase 5 (A2 Data Flow & Roles), wired on top of this entry surface.
 """
 from __future__ import annotations
 
+import io
 import re
 from datetime import datetime, timezone
 
@@ -125,11 +126,49 @@ if not _rows:
 _n_with_y1_target = sum(1 for r in _rows if r["Y1 Target"] is not None)
 _n_with_achievement = sum(1 for r in _rows if r["Y1 Achieved"] is not None)
 _n_on_track = sum(1 for r in _rows if isinstance(r["Y1 %"], (int, float)) and r["Y1 %"] >= 1.0)
-st.caption(
-    f"{len(_rows)} indicators · {_n_with_y1_target} with a Y1 target · "
-    f"{_n_with_achievement} with a Y1 achievement reported · "
-    f"{_n_on_track} at or above 100% of Y1 target"
-)
+
+_col_summary, _col_export = st.columns([4, 1])
+with _col_summary:
+    st.caption(
+        f"{len(_rows)} indicators · {_n_with_y1_target} with a Y1 target · "
+        f"{_n_with_achievement} with a Y1 achievement reported · "
+        f"{_n_on_track} at or above 100% of Y1 target"
+    )
+with _col_export:
+    def _build_iptt_excel(rows: list[dict]) -> bytes:
+        """Full consolidated table, every indicator and quarter, regardless
+        of the on-screen filter/quarterly-breakdown toggle — matches the
+        real workbook's Project IPTT sheet content most closely."""
+        export_cols = [
+            "ID", "Level", "Indicator", "Model sheet", "CEL scope",
+            "Y1 Target", "Y1 Achieved", "Y1 %",
+        ]
+        for q in (1, 2, 3, 4):
+            export_cols += [f"Q{q} Target", f"Q{q} Achieved", f"Q{q} %"]
+        records = []
+        for r in rows:
+            rec = {c: r[c] for c in ["ID", "Level", "Indicator", "Model sheet", "CEL scope",
+                                      "Y1 Target", "Y1 Achieved", "Y1 %"]}
+            for q in (1, 2, 3, 4):
+                qt = r["_q_target"].get(q)
+                qa = r["_q_achieved"].get(q)
+                rec[f"Q{q} Target"] = qt
+                rec[f"Q{q} Achieved"] = qa
+                rec[f"Q{q} %"] = percentage(qa, qt)
+            records.append(rec)
+        export_df = pd.DataFrame(records, columns=export_cols)
+        buf = io.BytesIO()
+        with pd.ExcelWriter(buf, engine="openpyxl") as writer:
+            export_df.to_excel(writer, sheet_name="Project IPTT", index=False)
+        return buf.getvalue()
+
+    st.download_button(
+        "⬇ Export Excel",
+        data=_build_iptt_excel(_rows),
+        file_name="SAWA_Project_IPTT.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        width="stretch",
+    )
 
 _level_filter = st.selectbox("Filter by level", ["All", "Impact", "Outcomes", "Outputs"])
 _show_quarterly = st.checkbox("Show quarterly breakdown (Q1–Q4)", value=False)
