@@ -8,25 +8,31 @@ as the source workbook, never a value typed or cached separately.
 
 Targets are read-only here: they come from scripts/seed_from_workbook.py
 (the real .xlsx), not hand-edited in the app, so there is exactly one
-source of truth for them. Achieved-value entry (mel_indicator_actuals,
-currently empty — no UI exists for it yet) is a separate, later step in
-this same Phase 4; this page is deliberately the consolidated/reporting
-half only, mirroring the real workbook's split between Project IPTT
-(formula-driven, read-only) and the three model sheets (where typing
-happens).
+source of truth for them.
+
+Achieved-value entry (below the consolidated view): one tab per model
+sheet (BDS/WAN/Cross-cutting IPTT), matching the workbook's own
+one-indicator-one-sheet rule — each indicator's achieved value can only be
+entered from the tab matching its model_sheet. tilapia_value/catfish_value
+are the species breakdown for 'Catfish and Tilapia' indicators;
+achieved_value is their sum when both are given, or stands alone
+otherwise. No Draft/Submitted/Verified/Approved workflow yet — that's
+Phase 5 (A2 Data Flow & Roles), wired on top of this entry surface.
 """
 from __future__ import annotations
 
 import re
+from datetime import datetime, timezone
 
 import pandas as pd
 import streamlit as st
 
-from database.db import init_db, run_query
+from database.db import init_db, run_query, run_write
 from utils.shared_widgets import project_selector
 from utils.auth import can_write_module
 from utils.nav_strip import render_nav_strip
 from utils.iptt_rules import year1_value, percentage
+from utils.num_parse import num_or_none
 
 st.set_page_config(page_title="IPTT — CEL MEL", layout="wide")
 init_db()
@@ -104,6 +110,7 @@ def _load_iptt_rows(project_id: int) -> list[dict]:
             "Y1 %": pct,
             "_sort": _sort_key(ind["indicator_id"], ind["level"]),
             "_q_target": tq, "_q_achieved": aq, "_agg": agg,
+            "_internal_id": ind["id"], "_fish_type": ind["fish_type"],
         })
     rows.sort(key=lambda r: r["_sort"])
     return rows
@@ -169,6 +176,119 @@ _styled = _df.style.map(_rag_style, subset=_pct_cols).format(
 st.dataframe(_styled, width="stretch", height=min(700, 60 + 35 * len(_visible)))
 
 st.caption(
-    "🔴 Below 70% · 🟠 70–99% · 🟢 100% or more — same thresholds as the source workbook. "
-    "Achieved values are blank (\"-\") until actuals entry is built (Phase 4, next step)."
+    "🔴 Below 70% · 🟠 70–99% · 🟢 100% or more — same thresholds as the source workbook."
 )
+
+# ── Achieved-value entry ────────────────────────────────────────────────────
+# One tab per model sheet, matching the workbook's one-indicator-one-sheet
+# rule: an indicator's achieved value can only be entered from the tab
+# whose name matches its model_sheet. No Draft/Submitted/Verified/Approved
+# workflow yet (Phase 5); saving writes directly.
+st.markdown("---")
+st.markdown("### ✏️ Enter achieved values")
+
+if not can_write_module("M"):
+    st.info("Your role doesn't have write access to Module M — viewing only.")
+else:
+    _entry_fy = 2026  # only fiscal year currently in the workbook data
+    _entry_quarter = st.selectbox(
+        "Quarter", [1, 2, 3, 4], format_func=lambda q: f"Q{q} (FY{_entry_fy})",
+        key="iptt_entry_quarter",
+    )
+
+    _model_sheets = ["BDS IPTT", "WAN IPTT", "Cross-cutting IPTT"]
+    _sheet_tabs = st.tabs(_model_sheets)
+    for _tab, _sheet_name in zip(_sheet_tabs, _model_sheets):
+        with _tab:
+            _sheet_rows = [r for r in _rows if r["Model sheet"] == _sheet_name]
+            if not _sheet_rows:
+                st.caption("No indicators assigned to this sheet.")
+                continue
+
+            _existing = run_query(
+                """SELECT i.indicator_id, a.achieved_value, a.tilapia_value, a.catfish_value,
+                          a.evidence_note, a.completeness_checked
+                   FROM mel_indicator_actuals a JOIN mel_indicators i ON i.id = a.indicator_id
+                   WHERE a.project_id=:pid AND a.fiscal_year=:fy AND a.quarter=:q""",
+                {"pid": project_id, "fy": _entry_fy, "q": _entry_quarter},
+            )
+            _existing_by_id = {e["indicator_id"]: e for e in _existing}
+
+            _entry_records = []
+            for r in _sheet_rows:
+                ex = _existing_by_id.get(r["ID"], {})
+                _entry_records.append({
+                    "ID": r["ID"],
+                    "Indicator": r["Indicator"],
+                    "Target": r["_q_target"].get(_entry_quarter),
+                    "Achieved": ex.get("achieved_value"),
+                    "Tilapia": ex.get("tilapia_value"),
+                    "Catfish": ex.get("catfish_value"),
+                    "Evidence note": ex.get("evidence_note") or "",
+                    "Complete": bool(ex.get("completeness_checked")),
+                })
+            _entry_df = pd.DataFrame(_entry_records)
+
+            _col_config = {
+                "ID": st.column_config.TextColumn(disabled=True, width="small"),
+                "Indicator": st.column_config.TextColumn(disabled=True, width="large"),
+                "Target": st.column_config.NumberColumn(disabled=True, width="small",
+                                                          help="Read-only — from the workbook import."),
+                "Achieved": st.column_config.NumberColumn(width="small"),
+                "Tilapia": st.column_config.NumberColumn(width="small",
+                    help="Species breakdown — only meaningful for 'Catfish and Tilapia' indicators. "
+                         "If both Tilapia and Catfish are filled in, Achieved is computed as their sum."),
+                "Catfish": st.column_config.NumberColumn(width="small"),
+                "Evidence note": st.column_config.TextColumn(width="medium"),
+                "Complete": st.column_config.CheckboxColumn(
+                    width="small", help="Completeness check done (CEL IPTT Guide §5 step 4)."),
+            }
+            _edited = st.data_editor(
+                _entry_df, column_config=_col_config, hide_index=True,
+                width="stretch", num_rows="fixed",
+                key=f"iptt_entry_{_sheet_name}_{_entry_quarter}",
+            )
+
+            if st.button(f"💾 Save {_sheet_name} — Q{_entry_quarter}",
+                         key=f"iptt_save_{_sheet_name}_{_entry_quarter}"):
+                editor = st.session_state.get("name") or st.session_state.get("username", "unknown")
+                now_iso = datetime.now(timezone.utc).isoformat(timespec="seconds")
+                _id_by_code = {r["ID"]: r["_internal_id"] for r in _sheet_rows}
+                n_saved = 0
+                for _, erow in _edited.iterrows():
+                    achieved = num_or_none(erow["Achieved"])
+                    tilapia = num_or_none(erow["Tilapia"])
+                    catfish = num_or_none(erow["Catfish"])
+                    if tilapia is not None and catfish is not None:
+                        achieved = tilapia + catfish
+                    if achieved is None and tilapia is None and catfish is None:
+                        continue  # nothing entered for this row — don't create a blank row
+                    evidence = (str(erow["Evidence note"]).strip() or None) if erow["Evidence note"] else None
+                    complete = bool(erow["Complete"])
+                    mel_id = _id_by_code[erow["ID"]]
+                    run_write(
+                        """INSERT INTO mel_indicator_actuals
+                           (indicator_id, project_id, fiscal_year, quarter, achieved_value,
+                            tilapia_value, catfish_value, evidence_note, completeness_checked,
+                            submitted_by, submitted_at)
+                           VALUES (:mid, :pid, :fy, :q, :achieved, :tilapia, :catfish, :evidence,
+                                   :complete, :editor, :now)
+                           ON CONFLICT(indicator_id, fiscal_year, quarter) DO UPDATE SET
+                               achieved_value=excluded.achieved_value,
+                               tilapia_value=excluded.tilapia_value,
+                               catfish_value=excluded.catfish_value,
+                               evidence_note=excluded.evidence_note,
+                               completeness_checked=excluded.completeness_checked,
+                               submitted_by=excluded.submitted_by,
+                               submitted_at=excluded.submitted_at""",
+                        {
+                            "mid": mel_id, "pid": project_id, "fy": _entry_fy, "q": _entry_quarter,
+                            "achieved": achieved, "tilapia": tilapia, "catfish": catfish,
+                            "evidence": evidence, "complete": complete,
+                            "editor": editor, "now": now_iso,
+                        },
+                    )
+                    n_saved += 1
+                st.success(f"Saved {n_saved} row(s) for {_sheet_name} Q{_entry_quarter}.")
+                _load_iptt_rows.clear()
+                st.rerun()

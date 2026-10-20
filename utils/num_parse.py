@@ -42,8 +42,23 @@ def num_or_none(val) -> float | None:
 
     Used by recompute_actual_year to distinguish 'no data yet' from
     'genuinely zero'.
+
+    NaN counts as empty too, not as a number. A blank cell in a
+    st.data_editor NumberColumn round-trips as float('nan'), not None,
+    the moment that column also holds any real numeric value elsewhere (a
+    pandas dtype-coercion artifact, not a deliberate value) — str(nan) is
+    "nan", which doesn't match the ("", "—") check below, and float("nan")
+    doesn't raise, so without this check nan would silently pass through
+    as a "real" value and get written to the database, corrupting the
+    blank-vs-zero distinction this whole function exists to protect. Found
+    via Module M's achieved-value entry, which is this codebase's first
+    NumberColumn (not TextColumn) use of this function.
     """
-    if val is None or str(val).strip() in ("", "—"):
+    if val is None:
+        return None
+    if isinstance(val, float) and val != val:  # val != val is True only for NaN
+        return None
+    if str(val).strip() in ("", "—"):
         return None
     try:
         return float(

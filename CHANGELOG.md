@@ -6,8 +6,38 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 ## Unreleased
 
 ### Added
-- `pages/13_M_IPTT.py` — Module M, Phase 4 part 1 (page scaffold + the
-  read-only "Project IPTT" consolidated view). Shows all 55
+- `pages/13_M_IPTT.py` — Phase 4 part 2: achieved-value entry for
+  `mel_indicator_actuals`, which previously had zero rows and no UI at
+  all. One tab per model sheet (BDS/WAN/Cross-cutting IPTT), matching the
+  workbook's one-indicator-one-sheet rule — an indicator's achieved value
+  can only be entered from the tab matching its `model_sheet`. A quarter
+  selector plus an editable grid (target shown read-only for reference,
+  achieved/tilapia/catfish/evidence-note/completeness-checked editable);
+  saving upserts into `mel_indicator_actuals` via
+  `ON CONFLICT (indicator_id, fiscal_year, quarter) DO UPDATE`, verified
+  on both SQLite and real Postgres 15 (insert then update-in-place, same
+  row, not a duplicate). `tilapia_value`/`catfish_value` sum into
+  `achieved_value` when both are given, per the already-decided schema
+  design. Gated behind `can_write_module("M")`; no
+  Draft/Submitted/Verified/Approved workflow yet (Phase 5 wires that in).
+  No formula values are typed in the Project IPTT view — achieved values
+  always originate from this entry surface.
+  - **Found and fixed a real, general bug while building this**:
+    `utils/num_parse.num_or_none()` returned `nan` itself (not `None`) for
+    a `NaN` input, rather than treating it as blank. `st.data_editor`'s
+    `NumberColumn` round-trips a blank cell as `float('nan')`, not `None`,
+    the moment that pandas column also holds any real numeric value
+    elsewhere (ordinary dtype coercion, not a deliberate value) — `str(nan)`
+    doesn't match the existing `("", "—")` blank check, and `float("nan")`
+    doesn't raise, so without this fix `NaN` would have silently reached
+    the database as `achieved_value`, corrupting the blank-vs-zero
+    distinction every Y1/percentage formula in this app depends on. This
+    is this codebase's first `NumberColumn` (not `TextColumn`) use of
+    `num_or_none()`, which is why the gap was never hit before. Caught via
+    a direct test of the save path with realistic mixed-blank data before
+    trusting it, not by accident. 7 new tests in `tests/test_num_parse.py`,
+    4 integration tests in `tests/test_iptt_module_m.py` (the latter skip
+    gracefully, not fail, when the real `.xlsx` isn't present).
   `mel_indicators` (the real v3 scheme, cut over in Phase 3) with Y1 and
   optional quarterly targets/achieved/percentage, computed live via
   `utils/iptt_rules.py`'s `year1_value()`/`percentage()` — the same
