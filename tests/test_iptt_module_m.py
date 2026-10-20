@@ -87,6 +87,33 @@ def _upsert_actual(mel_id, project_id, fy, quarter, achieved, tilapia, catfish,
     )
 
 
+def _upsert_actual_full(mel_id, project_id, fy, quarter, achieved, tilapia, catfish,
+                         evidence, complete, phone_pct=None, variance=None):
+    """Like _upsert_actual, but mirrors the Save handler's CURRENT full
+    upsert including phone_verification_pct/variance_explanation (CEL
+    IPTT Guide §5 step 4 and §7 field W, wired into the page in Phase 6)."""
+    db.run_write(
+        """INSERT INTO mel_indicator_actuals
+           (indicator_id, project_id, fiscal_year, quarter, achieved_value,
+            tilapia_value, catfish_value, evidence_note, completeness_checked,
+            phone_verification_pct, variance_explanation)
+           VALUES (:mid, :pid, :fy, :q, :achieved, :tilapia, :catfish, :evidence,
+                   :complete, :phone_pct, :variance)
+           ON CONFLICT(indicator_id, fiscal_year, quarter) DO UPDATE SET
+               achieved_value=excluded.achieved_value,
+               tilapia_value=excluded.tilapia_value,
+               catfish_value=excluded.catfish_value,
+               evidence_note=excluded.evidence_note,
+               completeness_checked=excluded.completeness_checked,
+               phone_verification_pct=excluded.phone_verification_pct,
+               variance_explanation=excluded.variance_explanation""",
+        {"mid": mel_id, "pid": project_id, "fy": fy, "q": quarter,
+         "achieved": achieved, "tilapia": tilapia, "catfish": catfish,
+         "evidence": evidence, "complete": complete,
+         "phone_pct": phone_pct, "variance": variance},
+    )
+
+
 def _transition_status(project_id, fy, quarter, sheet, from_status, to_status,
                         by_col, at_col, actor="Test Actor"):
     """Mirrors pages/13_M_IPTT.py's _transition_status(): batch-moves every
@@ -461,3 +488,111 @@ def test_unlock_is_a_no_op_when_no_rows_are_approved(seeded_db):
     assert n == 0
     row = db_.run_query("SELECT status FROM mel_indicator_actuals WHERE indicator_id=:m", {"m": ind["id"]})[0]
     assert row["status"] == "Draft"
+
+
+# ── CEL IPTT Guide gaps: phone verification, variance explanation, flags ──
+# (Phase 6, step 1 — pages/13_M_IPTT.py)
+
+@requires_real_workbook
+def test_phone_verification_pct_persists(seeded_db):
+    db_, pid = seeded_db
+    mel_id = db_.run_query(
+        "SELECT id FROM mel_indicators WHERE project_id=:p AND indicator_id='IM1'", {"p": pid}
+    )[0]["id"]
+    _upsert_actual_full(mel_id, pid, 2026, 1, 45.0, None, None, None, False, phone_pct=72.5)
+    row = db_.run_query("SELECT phone_verification_pct FROM mel_indicator_actuals WHERE indicator_id=:m",
+                         {"m": mel_id})[0]
+    assert row["phone_verification_pct"] == 72.5
+
+
+@requires_real_workbook
+def test_variance_explanation_persists(seeded_db):
+    db_, pid = seeded_db
+    mel_id = db_.run_query(
+        "SELECT id FROM mel_indicators WHERE project_id=:p AND indicator_id='IM1'", {"p": pid}
+    )[0]["id"]
+    _upsert_actual_full(mel_id, pid, 2026, 1, 45.0, None, None, None, False,
+                         variance="Delayed partner reporting this quarter.")
+    row = db_.run_query("SELECT variance_explanation FROM mel_indicator_actuals WHERE indicator_id=:m",
+                         {"m": mel_id})[0]
+    assert row["variance_explanation"] == "Delayed partner reporting this quarter."
+
+
+def _save_handler_flags(achieved, target, phone_pct, variance):
+    """Mirrors the Save handler's inline warning logic in
+    pages/13_M_IPTT.py exactly: flags low phone-verification agreement
+    (<80%, CEL IPTT Guide §5 step 4) and a missing variance explanation
+    when the quarter's % is outside 70-100% of target (§7 field W).
+    Returns (low_phone_verif: bool, missing_variance: bool)."""
+    from utils.iptt_rules import percentage
+    low_phone = phone_pct is not None and phone_pct < 80
+    q_pct = percentage(achieved, target)
+    missing_variance = isinstance(q_pct, (int, float)) and (q_pct < 0.70 or q_pct > 1.00) and not variance
+    return low_phone, missing_variance
+
+
+def test_save_flags_low_phone_verification_agreement():
+    low, _ = _save_handler_flags(achieved=50, target=100, phone_pct=65, variance=None)
+    assert low is True
+
+
+def test_save_does_not_flag_80_percent_phone_verification():
+    low, _ = _save_handler_flags(achieved=50, target=100, phone_pct=80, variance=None)
+    assert low is False
+
+
+def test_save_flags_missing_variance_explanation_below_70_percent():
+    _, missing = _save_handler_flags(achieved=50, target=100, phone_pct=None, variance=None)
+    assert missing is True
+
+
+def test_save_flags_missing_variance_explanation_above_100_percent():
+    _, missing = _save_handler_flags(achieved=150, target=100, phone_pct=None, variance=None)
+    assert missing is True
+
+
+def test_save_does_not_flag_variance_when_explanation_given():
+    _, missing = _save_handler_flags(achieved=50, target=100, phone_pct=None, variance="Partner delay.")
+    assert missing is False
+
+
+def test_save_does_not_flag_variance_within_70_to_100_percent():
+    _, missing = _save_handler_flags(achieved=85, target=100, phone_pct=None, variance=None)
+    assert missing is False
+
+
+def _compute_sheet_flags(rows: list[dict]) -> tuple[list[str], dict[str, list[str]]]:
+    """Mirrors pages/13_M_IPTT.py's data-quality flag computation exactly:
+    rows is [{"ID": ..., "Model sheet": ... or None, "CEL scope": ...}].
+    Returns (not_assigned_ids, sheet_conflicts)."""
+    from utils.iptt_rules import find_id_sheet_conflicts
+    ids_by_sheet: dict[str, list[str]] = {}
+    for r in rows:
+        if r["Model sheet"]:
+            ids_by_sheet.setdefault(r["Model sheet"], []).append(r["ID"])
+    conflicts = find_id_sheet_conflicts(ids_by_sheet)
+    not_assigned = [
+        r["ID"] for r in rows
+        if not r["Model sheet"] and r["CEL scope"] != "Not in CEL scope"
+    ]
+    return not_assigned, conflicts
+
+
+def test_not_assigned_flag_for_in_scope_indicator_with_no_sheet():
+    rows = [
+        {"ID": "OP99", "Model sheet": None, "CEL scope": "Applicable to CEL"},
+        {"ID": "OP2", "Model sheet": None, "CEL scope": "Not in CEL scope"},
+    ]
+    not_assigned, conflicts = _compute_sheet_flags(rows)
+    assert not_assigned == ["OP99"]
+    assert conflicts == {}
+
+
+def test_no_flags_when_every_indicator_is_correctly_assigned():
+    rows = [
+        {"ID": "IM1", "Model sheet": "BDS IPTT", "CEL scope": "Applicable to CEL"},
+        {"ID": "OP2", "Model sheet": None, "CEL scope": "Not in CEL scope"},
+    ]
+    not_assigned, conflicts = _compute_sheet_flags(rows)
+    assert not_assigned == []
+    assert conflicts == {}

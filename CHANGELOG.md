@@ -6,6 +6,24 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 ## Unreleased
 
 ### Added
+- `pages/13_M_IPTT.py` — Phase 6 step 1: three CEL IPTT Guide rules that
+  already had schema support (`phone_verification_pct`,
+  `variance_explanation` on `mel_indicator_actuals`) or a written-but-
+  never-called function (`utils.iptt_rules.find_id_sheet_conflicts`), now
+  wired into Module M. Entry grid gained **Phone verif. %** (§5 step 4 —
+  phone-call verification comparing partner-reported results against what
+  participants say; flagged on Save when below the 80% agreement
+  threshold) and **Variance explanation** (§7 field W; flagged on Save
+  when a quarter's achievement falls outside 70–100% of target with no
+  explanation). The consolidated table's Model sheet column now shows
+  "⚠ NOT ASSIGNED" for an in-CEL-scope indicator with no reporting sheet
+  and "⚠ CHECK: ..." for one assigned to more than one (§1, §5 step 6),
+  with a summary banner above the table — confirmed empty against the
+  real workbook's current data, i.e. no false positives. Confirmed via a
+  quick code check (not a gap): the Y1 formula already correctly branches
+  on `aggregation_type` (Incremental/Cumulative/Annual survey), so no
+  change was needed there. 10 new tests in `tests/test_iptt_module_m.py`.
+  Verified against SQLite and real Postgres 15.
 - `mel_plan_indicators.indicator_id` + "Y1×4 vs LoP Target cross-check"
   view — Phase 5 part 4 (second step, completes Phase 5): the hand-built
   crosswalk deferred from the first step. 27 of the 58 MEL Plan rows are

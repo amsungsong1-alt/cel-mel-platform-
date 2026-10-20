@@ -16,8 +16,17 @@ one-indicator-one-sheet rule — each indicator's achieved value can only be
 entered from the tab matching its model_sheet. tilapia_value/catfish_value
 are the species breakdown for 'Catfish and Tilapia' indicators;
 achieved_value is their sum when both are given, or stands alone
-otherwise. No Draft/Submitted/Verified/Approved workflow yet — that's
-Phase 5 (A2 Data Flow & Roles), wired on top of this entry surface.
+otherwise. Draft -> Submitted -> Verified -> Approved -> Unlock workflow
+(Phase 5, A2 Data Flow & Roles) sits on top of this entry surface.
+
+Phase 6 step 1: three CEL IPTT Guide (docs/mel_tool/14_CEL_IPTT_Guide.md)
+rules that existed in the schema but weren't wired into this page yet --
+phone-call verification (§5 step 4, phone_verification_pct, flagged below
+80% agreement), the variance explanation field (§7 field W, flagged when
+a quarter's % falls outside 70-100% of target with no explanation given),
+and the NOT ASSIGNED / "CHECK: in more than one sheet" data-quality flags
+(§1, §5 step 6) shown inline in the consolidated table's Model sheet
+column and summarised above it.
 """
 from __future__ import annotations
 
@@ -32,7 +41,7 @@ from database.db import init_db, run_query, run_write
 from utils.shared_widgets import project_selector
 from utils.auth import can, can_write_module
 from utils.nav_strip import render_nav_strip
-from utils.iptt_rules import year1_value, percentage
+from utils.iptt_rules import year1_value, percentage, find_id_sheet_conflicts
 from utils.num_parse import num_or_none
 
 st.set_page_config(page_title="IPTT — CEL MEL", layout="wide")
@@ -122,6 +131,43 @@ _rows = _load_iptt_rows(project_id)
 if not _rows:
     st.info("No indicators seeded yet for this project.")
     st.stop()
+
+# ── Data-quality flags (CEL IPTT Guide §1, §5 step 6) ────────────────────
+# "NOT ASSIGNED" = in-CEL-scope but no reporting sheet; "CHECK: in more
+# than one sheet" = the same indicator_id assigned to two sheets. The
+# schema's UNIQUE(project_id, indicator_id) on mel_indicators makes the
+# second case structurally near-impossible via the app's own UI (there is
+# no way to add one indicator to two sheets through this entry form), but
+# it is cheap insurance against a future bad re-import, and reuses
+# find_id_sheet_conflicts() (previously written, tested, and never
+# actually called from any page). Mutates the Model sheet field in place
+# on the (already-copied, since st.cache_data deep-copies its return
+# value) _rows list so both the on-screen table and the Excel export see
+# the same flags without duplicating the detection logic.
+_ids_by_sheet: dict[str, list[str]] = {}
+for _r in _rows:
+    if _r["Model sheet"] != "—":
+        _ids_by_sheet.setdefault(_r["Model sheet"], []).append(_r["ID"])
+_sheet_conflicts = find_id_sheet_conflicts(_ids_by_sheet)
+_not_assigned_ids = []
+for _r in _rows:
+    if _r["ID"] in _sheet_conflicts:
+        _r["Model sheet"] = f"⚠ CHECK: {_r['Model sheet']} + {len(_sheet_conflicts[_r['ID']]) - 1} more"
+    elif _r["Model sheet"] == "—" and _r["CEL scope"] != "Not in CEL scope":
+        _r["Model sheet"] = "⚠ NOT ASSIGNED"
+        _not_assigned_ids.append(_r["ID"])
+
+if _sheet_conflicts or _not_assigned_ids:
+    with st.container(border=True):
+        st.markdown("**⚠ Data-quality flags (CEL IPTT Guide §5 step 6 — resolve before submitting to AIL)**")
+        if _not_assigned_ids:
+            st.markdown(f"**NOT ASSIGNED:** {', '.join(_not_assigned_ids)}")
+        if _sheet_conflicts:
+            st.markdown("**CHECK: in more than one sheet:** " + "; ".join(
+                f"{iid} ({', '.join(sheets)})" for iid, sheets in _sheet_conflicts.items()
+            ))
+else:
+    st.caption("✅ No CHECK / NOT ASSIGNED flags.")
 
 _n_with_y1_target = sum(1 for r in _rows if r["Y1 Target"] is not None)
 _n_with_achievement = sum(1 for r in _rows if r["Y1 Achieved"] is not None)
@@ -246,7 +292,8 @@ else:
 
             _existing = run_query(
                 """SELECT i.indicator_id, a.achieved_value, a.tilapia_value, a.catfish_value,
-                          a.evidence_note, a.completeness_checked, a.status
+                          a.evidence_note, a.completeness_checked, a.status,
+                          a.phone_verification_pct, a.variance_explanation
                    FROM mel_indicator_actuals a JOIN mel_indicators i ON i.id = a.indicator_id
                    WHERE a.project_id=:pid AND a.fiscal_year=:fy AND a.quarter=:q""",
                 {"pid": project_id, "fy": _entry_fy, "q": _entry_quarter},
@@ -265,6 +312,8 @@ else:
                     "Catfish": ex.get("catfish_value"),
                     "Evidence note": ex.get("evidence_note") or "",
                     "Complete": bool(ex.get("completeness_checked")),
+                    "Phone verif. %": ex.get("phone_verification_pct"),
+                    "Variance explanation": ex.get("variance_explanation") or "",
                     "Status": ex.get("status") or ("—" if ex.get("achieved_value") is None else "Draft"),
                 })
             _entry_df = pd.DataFrame(_entry_records)
@@ -282,6 +331,14 @@ else:
                 "Evidence note": st.column_config.TextColumn(width="medium"),
                 "Complete": st.column_config.CheckboxColumn(
                     width="small", help="Completeness check done (CEL IPTT Guide §5 step 4)."),
+                "Phone verif. %": st.column_config.NumberColumn(
+                    width="small", min_value=0, max_value=100,
+                    help="Phone-call verification: % agreement between what the partner reported "
+                         "and what participants say (CEL IPTT Guide §5 step 4). 80% or more: "
+                         "accept. Below 80%: the partner reworks and resubmits."),
+                "Variance explanation": st.column_config.TextColumn(width="medium",
+                    help="Required when the quarter's achievement is below 70% or above 100% "
+                         "of target (CEL IPTT Guide §7, field W)."),
                 "Status": st.column_config.TextColumn(disabled=True, width="small",
                     help="Draft → Submitted → Verified → Approved. Changed via the buttons "
                          "below the table, not by editing this cell."),
@@ -297,8 +354,11 @@ else:
             if st.button(f"💾 Save {_sheet_name} — Q{_entry_quarter}",
                          key=f"iptt_save_{_sheet_name}_{_entry_quarter}"):
                 _id_by_code = {r["ID"]: r["_internal_id"] for r in _sheet_rows}
+                _target_by_code = {r["ID"]: r["_q_target"].get(_entry_quarter) for r in _sheet_rows}
                 n_saved = 0
                 n_locked = 0
+                _low_phone_verif = []   # CEL IPTT Guide §5 step 4: below 80% agreement
+                _missing_variance = []  # CEL IPTT Guide §7 field W: outside 70-100% of target
                 for _, erow in _edited.iterrows():
                     # Approved rows are locked against Save overwriting them
                     # silently — editing an approved figure must go through
@@ -316,7 +376,17 @@ else:
                         continue  # nothing entered for this row — don't create a blank row
                     evidence = (str(erow["Evidence note"]).strip() or None) if erow["Evidence note"] else None
                     complete = bool(erow["Complete"])
+                    phone_pct = num_or_none(erow["Phone verif. %"])
+                    variance = (str(erow["Variance explanation"]).strip() or None) \
+                        if erow["Variance explanation"] else None
                     mel_id = _id_by_code[erow["ID"]]
+
+                    if phone_pct is not None and phone_pct < 80:
+                        _low_phone_verif.append(erow["ID"])
+                    _q_pct = percentage(achieved, _target_by_code.get(erow["ID"]))
+                    if isinstance(_q_pct, (int, float)) and (_q_pct < 0.70 or _q_pct > 1.00) and not variance:
+                        _missing_variance.append(erow["ID"])
+
                     # submitted_by/submitted_at are NOT touched here — those
                     # belong to the explicit Submit workflow action below,
                     # not to every routine data-entry save (status stays
@@ -325,19 +395,23 @@ else:
                     run_write(
                         """INSERT INTO mel_indicator_actuals
                            (indicator_id, project_id, fiscal_year, quarter, achieved_value,
-                            tilapia_value, catfish_value, evidence_note, completeness_checked)
+                            tilapia_value, catfish_value, evidence_note, completeness_checked,
+                            phone_verification_pct, variance_explanation)
                            VALUES (:mid, :pid, :fy, :q, :achieved, :tilapia, :catfish, :evidence,
-                                   :complete)
+                                   :complete, :phone_pct, :variance)
                            ON CONFLICT(indicator_id, fiscal_year, quarter) DO UPDATE SET
                                achieved_value=excluded.achieved_value,
                                tilapia_value=excluded.tilapia_value,
                                catfish_value=excluded.catfish_value,
                                evidence_note=excluded.evidence_note,
-                               completeness_checked=excluded.completeness_checked""",
+                               completeness_checked=excluded.completeness_checked,
+                               phone_verification_pct=excluded.phone_verification_pct,
+                               variance_explanation=excluded.variance_explanation""",
                         {
                             "mid": mel_id, "pid": project_id, "fy": _entry_fy, "q": _entry_quarter,
                             "achieved": achieved, "tilapia": tilapia, "catfish": catfish,
                             "evidence": evidence, "complete": complete,
+                            "phone_pct": phone_pct, "variance": variance,
                         },
                     )
                     n_saved += 1
@@ -345,6 +419,16 @@ else:
                 if n_locked:
                     msg += f" {n_locked} approved row(s) were skipped (locked)."
                 st.success(msg)
+                if _low_phone_verif:
+                    st.warning(
+                        f"Below 80% phone-verification agreement — partner reworks and resubmits "
+                        f"(CEL IPTT Guide §5 step 4): {', '.join(_low_phone_verif)}"
+                    )
+                if _missing_variance:
+                    st.warning(
+                        f"Achievement below 70% or above 100% of target with no variance "
+                        f"explanation (CEL IPTT Guide §7, field W): {', '.join(_missing_variance)}"
+                    )
                 _load_iptt_rows.clear()
                 st.rerun()
 
