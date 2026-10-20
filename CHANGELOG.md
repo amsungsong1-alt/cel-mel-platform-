@@ -6,6 +6,37 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 ## Unreleased
 
 ### Added
+- `mel_plan_indicators.indicator_id` + "Y1×4 vs LoP Target cross-check"
+  view — Phase 5 part 4 (second step, completes Phase 5): the hand-built
+  crosswalk deferred from the first step. 27 of the 58 MEL Plan rows are
+  linked to a Project IPTT indicator (IM/OC/OP) by hand — each confirmed
+  either by an exact "CEL planner" code appearing in both this sheet's
+  notes and the matching Project IPTT row's own notes
+  (`docs/mel_tool/06_Project_IPTT.md`), or by an exact indicator-statement
+  match where no planner code was given. The other 31 rows (ambiguous
+  codes shared by several candidate rows, e.g. the repeated starter-pack
+  rows, or no code/statement match at all) are left unlinked on purpose —
+  guessing would be worse than "not yet linked", same principle as
+  `mel_proframe_results`/`mel_shared_measures`'s existing `indicator_id`
+  columns. For each linked row, the new view computes Y1×4 from that
+  indicator's own FY2026 targets (`utils.iptt_rules.year1_value`) and
+  compares it with the MEL Plan's own LoP Target
+  (`utils.iptt_rules.parse_lop_target`, which only resolves a plain
+  number — a percentage/formula like "86% of YiW (1,720)" is left
+  unparsed rather than guessing which figure inside it is "the" target),
+  flagging a mismatch without ever changing either figure. Run against
+  the real seeded workbook: 16 match, 3 genuinely mismatch (IM1, OC9,
+  OC10 — all three trace to a stale LoP Target the source doc's own notes
+  already flag with "[Previous value: ...]"), 8 aren't numerically
+  comparable. `seed_mel_plan.seed()` now also backfills `indicator_id` on
+  `mel_plan_indicators` rows that already existed before this column was
+  added (caught by a dedicated regression test before it could become a
+  real bug: the existing insert-missing-only seed pattern only inserts
+  new rows by `row_number`, so without the backfill step, rows already
+  seeded by the previous deploy would have kept `indicator_id` NULL
+  forever after the migration added the column). Verified against SQLite
+  (pytest, 6 new tests) and real Postgres 15, including that exact
+  already-seeded-then-migrated scenario.
 - `database/seed_mel_plan.py` + 2 new tables (`mel_plan_indicators`,
   `mel_agri_impact_questions`) — Phase 5 part 4 (first step): a read-only
   MEL Plan reference view (58 indicator rows: baseline, LoP target, data

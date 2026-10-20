@@ -8,6 +8,8 @@ import pytest
 from utils.iptt_rules import (
     find_id_sheet_conflicts,
     is_blank,
+    lop_target_mismatch,
+    parse_lop_target,
     percentage,
     year1_value,
 )
@@ -139,3 +141,53 @@ def test_flags_id_duplicated_within_the_same_sheet_too():
     # A row literally copied twice into the same sheet is the same hazard.
     ids_by_sheet = {"BDS IPTT": ["IM1", "IM1"]}
     assert find_id_sheet_conflicts(ids_by_sheet) == {"IM1": ["BDS IPTT", "BDS IPTT"]}
+
+
+# ── parse_lop_target ─────────────────────────────────────────────────────
+
+def test_parses_plain_integer_string():
+    assert parse_lop_target("2000") == 2000.0
+
+
+def test_parses_dollar_prefixed_value():
+    assert parse_lop_target("$90000000") == 90000000.0
+
+
+def test_parses_comma_formatted_value():
+    assert parse_lop_target("1,720") == 1720.0
+
+
+def test_returns_none_for_blank():
+    assert parse_lop_target(None) is None
+    assert parse_lop_target("") is None
+
+
+def test_returns_none_for_percentage_formula_rather_than_guessing():
+    # "86% of YiW (1,720)" contains a number, but it's not unambiguously
+    # "the" target -- must not be silently resolved to 1720 or 86.
+    assert parse_lop_target("86% of YiW (1,720)") is None
+
+
+def test_returns_none_for_other_non_numeric_text():
+    assert parse_lop_target("To be confirmed") is None
+
+
+# ── lop_target_mismatch ───────────────────────────────────────────────────
+
+def test_mismatch_false_when_equal():
+    assert lop_target_mismatch(2000.0, 2000.0) is False
+
+
+def test_mismatch_true_when_different():
+    # Real worked example: OC9 (fish MT) computed Y1x4 vs MEL Plan's stale LoP.
+    assert lop_target_mismatch(494.8, 50000.0) is True
+
+
+def test_mismatch_tolerates_tiny_float_noise():
+    assert lop_target_mismatch(2000.0, 2000.009) is False
+
+
+def test_mismatch_none_when_either_side_is_not_a_number():
+    assert lop_target_mismatch(None, 2000.0) is None
+    assert lop_target_mismatch(2000.0, None) is None
+    assert lop_target_mismatch(None, None) is None

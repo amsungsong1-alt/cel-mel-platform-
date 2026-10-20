@@ -14,6 +14,7 @@ achieved. Never collapse one into the other.
 """
 from __future__ import annotations
 
+import re
 from collections import defaultdict
 
 from utils.num_parse import num_or_none
@@ -92,3 +93,35 @@ def find_id_sheet_conflicts(ids_by_sheet: dict[str, list[str]]) -> dict[str, lis
         for indicator_id in ids:
             seen[indicator_id].append(sheet)
     return {iid: sheets for iid, sheets in seen.items() if len(sheets) > 1}
+
+
+def parse_lop_target(text: str | None) -> float | None:
+    """Parse a MEL Plan "LoP Target" cell to a plain number, or None when
+    it isn't one -- a formula/percentage like "86% of YiW (1,720)", or
+    blank.
+
+    Deliberately conservative: only a string that is entirely digits,
+    commas and an optional leading '$' is accepted. Anything with a '%'
+    sign or other text is left unparsed rather than guessing which of the
+    several numbers inside it is "the" target — see
+    docs/mel_tool/04_MEL_Plan.md, where several of those figures are
+    themselves still flagged "confirm" by CEL.
+    """
+    if not text:
+        return None
+    cleaned = text.strip().lstrip("$").replace(",", "")
+    if not re.fullmatch(r"\d+(\.\d+)?", cleaned):
+        return None
+    return float(cleaned)
+
+
+def lop_target_mismatch(y1x4: float | None, lop_target: float | None) -> bool | None:
+    """Compare a computed Y1×4 figure against the MEL Plan's own LoP
+    Target. Returns True (mismatch), False (match), or None when either
+    side isn't a number yet — e.g. no targets entered, or the LoP Target
+    is a percentage/formula parse_lop_target() declined to resolve. None
+    is "not comparable", never silently treated as a match.
+    """
+    if y1x4 is None or lop_target is None:
+        return None
+    return abs(y1x4 - lop_target) >= 0.01

@@ -914,7 +914,15 @@ CREATE TABLE IF NOT EXISTS mel_plan_indicators (
     data_sources            TEXT,
     responsible_collector   TEXT,
     cel_scope               TEXT,
-    planner_notes           TEXT
+    planner_notes           TEXT,
+    -- Nullable: only set for the rows where the MEL Plan's own "CEL
+    -- planner" code (or an exact indicator-statement match) confidently
+    -- identifies a single Project IPTT indicator (IM/OC/OP) -- see
+    -- MEL_PLAN_CROSSWALK in seed_mel_plan.py for why most rows are left
+    -- unmatched rather than guessed. idx_mpi_indicator is NOT created
+    -- here; see the sm_code / idx_mind_sm_code comment above for why
+    -- (added to pre-existing deployed tables via an ALTER in db.py).
+    indicator_id            TEXT
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_mpi_key ON mel_plan_indicators(project_id, row_number);
 

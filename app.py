@@ -146,6 +146,7 @@ GOLD = "#F5A820"
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
 from utils.auth import get_authenticator, can
+from utils.iptt_rules import lop_target_mismatch, parse_lop_target, year1_value
 
 try:
     authenticator, config = get_authenticator()
@@ -615,14 +616,16 @@ with st.expander("👥 A2 — Data Flow & Roles (v3)", expanded=False):
 # ── MEL Plan — LoP Targets & Agri-Impact Questions ───────────────────────────
 # Phase 5 part 4. Read-only LoP Targets reference, from
 # docs/mel_tool/04_MEL_Plan.md — row_number is the MEL Plan sheet's own
-# numbering, not an IM/OC/OP indicator ID (see mel_plan_indicators'
-# comment in schema.sql for why there is no automatic crosswalk). A
-# working "Things to confirm with Agri-Impact" log: seeded with the 3
-# questions already in the source doc, Editors/Admins can add more,
-# Admins can mark one Answered.
+# numbering, not an IM/OC/OP indicator ID. 27 of the 58 rows are linked to
+# a Project IPTT indicator by hand (see MEL_PLAN_INDICATORS'
+# indicator_id in seed_mel_plan.py for exactly how); the other 31 are left
+# unmatched on purpose rather than guessed. A working "Things to confirm
+# with Agri-Impact" log: seeded with the 3 questions already in the source
+# doc, Editors/Admins can add more, Admins can mark one Answered.
 with st.expander("📑 MEL Plan — LoP Targets & Agri-Impact Questions (v3)", expanded=False):
     _mp_view = st.selectbox(
-        "View", ["LoP Targets", "Questions for Agri-Impact"], key="mel_plan_view_select",
+        "View", ["LoP Targets", "Y1×4 vs LoP Target cross-check", "Questions for Agri-Impact"],
+        key="mel_plan_view_select",
     )
 
     if _mp_view == "LoP Targets":
@@ -635,12 +638,15 @@ with st.expander("📑 MEL Plan — LoP Targets & Agri-Impact Questions (v3)", e
         if not _mp_rows:
             st.caption("MEL Plan reference not seeded yet — reload once the SAWA project exists.")
         else:
+            _n_mp_linked = sum(1 for r in _mp_rows if r["indicator_id"])
             st.caption(
                 f"{len(_mp_rows)} indicator rows from the MEL Plan sheet. **Row** is the "
-                "sheet's own numbering, not an IM/OC/OP indicator ID — matching a row to a "
-                "Project IPTT indicator is a manual judgement call the source doc itself "
-                "still flags as 'confirm' in several rows, so it is not attempted here. "
-                "Baseline is blank for every row in the source."
+                "sheet's own numbering, not an IM/OC/OP indicator ID. "
+                f"{_n_mp_linked} rows are linked to a Project IPTT indicator by hand (see the "
+                "cross-check view); the other "
+                f"{len(_mp_rows) - _n_mp_linked} use wording or a planner code that doesn't "
+                "unambiguously match one IPTT indicator, so they're shown as 'not yet linked', "
+                "never guessed. Baseline is blank for every row in the source."
             )
             _mp_section = st.selectbox(
                 "Section", ["All", "Impact", "Outcome", "Output"], key="mel_plan_section_filter",
@@ -650,11 +656,12 @@ with st.expander("📑 MEL Plan — LoP Targets & Agri-Impact Questions (v3)", e
             _mp_filtered = [r for r in _mp_rows if _mp_section == "All" or r["section"] == _mp_section]
             if _mp_details:
                 st.markdown(
-                    "| Row | Indicator | LoP Target | Methods | Frequency | Sources | "
+                    "| Row | IPTT ID | Indicator | LoP Target | Methods | Frequency | Sources | "
                     "Responsible | CEL scope | Notes |\n"
-                    "|---|---|---|---|---|---|---|---|---|\n"
+                    "|---|---|---|---|---|---|---|---|---|---|\n"
                     + "\n".join(
-                        f"| {r['row_number']} | {r['indicator_text'].replace(chr(10), ' ')} | "
+                        f"| {r['row_number']} | {r['indicator_id'] or 'not yet linked'} | "
+                        f"{r['indicator_text'].replace(chr(10), ' ')} | "
                         f"{r['lop_target'] or '—'} | {r['data_collection_methods'] or '—'} | "
                         f"{r['frequency'] or '—'} | {r['data_sources'] or '—'} | "
                         f"{r['responsible_collector'] or '—'} | {r['cel_scope'] or '—'} | "
@@ -664,14 +671,71 @@ with st.expander("📑 MEL Plan — LoP Targets & Agri-Impact Questions (v3)", e
                 )
             else:
                 st.markdown(
-                    "| Row | Indicator | LoP Target | CEL scope |\n"
-                    "|---|---|---|---|\n"
+                    "| Row | IPTT ID | Indicator | LoP Target | CEL scope |\n"
+                    "|---|---|---|---|---|\n"
                     + "\n".join(
-                        f"| {r['row_number']} | {r['indicator_text'].replace(chr(10), ' ')} | "
+                        f"| {r['row_number']} | {r['indicator_id'] or 'not yet linked'} | "
+                        f"{r['indicator_text'].replace(chr(10), ' ')} | "
                         f"{r['lop_target'] or '—'} | {r['cel_scope'] or '—'} |"
                         for r in _mp_filtered
                     )
                 )
+
+    elif _mp_view == "Y1×4 vs LoP Target cross-check":
+        _mpx_rows = run_query(
+            """SELECT mp.row_number, mp.indicator_text, mp.lop_target, mp.indicator_id,
+                      mi.id AS mel_indicator_pk, mi.aggregation_type
+               FROM mel_plan_indicators mp
+               JOIN projects pr ON pr.project_id = mp.project_id
+               LEFT JOIN mel_indicators mi
+                      ON mi.project_id = mp.project_id AND mi.indicator_id = mp.indicator_id
+               WHERE pr.name = 'SAWA' AND mp.indicator_id IS NOT NULL
+               ORDER BY mp.row_number""",
+            {},
+        )
+        if not _mpx_rows:
+            st.caption("MEL Plan reference not seeded yet — reload once the SAWA project exists.")
+        else:
+            st.caption(
+                f"{len(_mpx_rows)} MEL Plan rows link to a Project IPTT indicator. For each, "
+                "Y1×4 is computed from that indicator's own FY2026 (Year 1) targets and "
+                "compared with the MEL Plan's LoP Target. This only **flags** a difference — "
+                "it never changes either figure; CEL decides which one (if either) is right. "
+                "A target with no numeric LoP Target (a percentage/formula, or blank) is shown "
+                "as not comparable, not silently treated as a match."
+            )
+            _mpx_lines = []
+            _n_match, _n_mismatch, _n_not_comparable = 0, 0, 0
+            for r in _mpx_rows:
+                _y1 = None
+                if r["mel_indicator_pk"]:
+                    _targets = run_query(
+                        """SELECT quarter, target_value FROM mel_indicator_targets
+                           WHERE indicator_id=:id AND fiscal_year=2026""",
+                        {"id": r["mel_indicator_pk"]},
+                    )
+                    _tq = {t["quarter"]: t["target_value"] for t in _targets}
+                    _y1 = year1_value(_tq.get(1), _tq.get(2), _tq.get(3), _tq.get(4),
+                                       r["aggregation_type"] or "Incremental")
+                _y1x4 = _y1 * 4 if _y1 is not None else None
+                _lop = parse_lop_target(r["lop_target"])
+                _mismatch = lop_target_mismatch(_y1x4, _lop)
+                if _mismatch is None:
+                    _status, _n_not_comparable = "— not comparable", _n_not_comparable + 1
+                elif not _mismatch:
+                    _status, _n_match = "✅ match", _n_match + 1
+                else:
+                    _status, _n_mismatch = f"⚠ mismatch ({_y1x4:g} ≠ {_lop:g})", _n_mismatch + 1
+                _mpx_lines.append(
+                    f"| {r['row_number']} | {r['indicator_id']} | "
+                    f"{r['indicator_text'].replace(chr(10), ' ')} | "
+                    f"{_y1x4 if _y1x4 is not None else '—'} | {r['lop_target'] or '—'} | {_status} |"
+                )
+            st.caption(f"✅ {_n_match} match · ⚠ {_n_mismatch} mismatch · — {_n_not_comparable} not comparable")
+            st.markdown(
+                "| Row | IPTT ID | Indicator | Y1×4 (computed) | LoP Target (MEL Plan) | Status |\n"
+                "|---|---|---|---|---|---|\n" + "\n".join(_mpx_lines)
+            )
 
     else:  # Questions for Agri-Impact
         _maiq_rows = run_query(

@@ -689,7 +689,8 @@ CREATE TABLE IF NOT EXISTS mel_plan_indicators (
     data_sources            TEXT,
     responsible_collector   TEXT,
     cel_scope               TEXT,
-    planner_notes           TEXT
+    planner_notes           TEXT,
+    indicator_id            TEXT
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_mpi_key ON mel_plan_indicators(project_id, row_number);
 
