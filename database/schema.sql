@@ -889,3 +889,50 @@ CREATE TABLE IF NOT EXISTS mel_data_uses (
     source      TEXT
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_du_key ON mel_data_uses(project_id, use_label);
+
+-- MEL Plan — docs/mel_tool/04_MEL_Plan.md (Phase 5 part 4). row_number is
+-- the sheet's own row numbering (12-71, with gaps), NOT an IM/OC/OP
+-- indicator ID: the MEL Plan sheet identifies indicators by free-text
+-- "CEL planner" code (e.g. "PI.3") in planner_notes, not by IPTT code, so
+-- there is deliberately no indicator_id column here -- cross-referencing
+-- a MEL Plan row to a Project IPTT indicator is a manual, human judgement
+-- call (several rows are themselves flagged "to confirm" in the source),
+-- not an automatic join. baseline is NULL for every row: the workbook
+-- itself leaves the Baseline column blank throughout. lop_target is TEXT,
+-- not REAL: several LoP targets are formulas/percentages ("86% of YiW
+-- (1,720)"), not plain numbers.
+CREATE TABLE IF NOT EXISTS mel_plan_indicators (
+    id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id              INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    row_number              INTEGER NOT NULL,
+    section                 TEXT    NOT NULL CHECK(section IN ('Impact','Outcome','Output')),
+    indicator_text          TEXT    NOT NULL,
+    baseline                TEXT,
+    lop_target              TEXT,
+    data_collection_methods TEXT,
+    frequency               TEXT,
+    data_sources            TEXT,
+    responsible_collector   TEXT,
+    cel_scope               TEXT,
+    planner_notes           TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_mpi_key ON mel_plan_indicators(project_id, row_number);
+
+-- "Things to confirm with Agri-Impact" — seeded with the 3 questions
+-- already in docs/mel_tool/04_MEL_Plan.md, but a working log from there:
+-- Editors/Admins can add new questions, Admins can mark one Answered with
+-- an answer_text. Not re-seeded over if a question's status changes --
+-- the seed step only inserts missing question_text values (see
+-- seed_mel_plan.py), so an answered question is never reset to Open.
+CREATE TABLE IF NOT EXISTS mel_agri_impact_questions (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id    INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    question_text TEXT    NOT NULL,
+    status        TEXT    NOT NULL DEFAULT 'Open' CHECK(status IN ('Open','Answered')),
+    answer_text   TEXT,
+    raised_by     TEXT,
+    raised_at     TEXT,
+    answered_by   TEXT,
+    answered_at   TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_maiq_project ON mel_agri_impact_questions(project_id);

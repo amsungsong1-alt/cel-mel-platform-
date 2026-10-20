@@ -19,6 +19,8 @@ It addresses three of Laudon's six strategic business objectives:
   • Improved Decision Making  — Modules F, G     (quality-assured evidence)
   • Customer/Supplier Intimacy— Module A         (partner commitments & delivery)
 """
+from datetime import datetime, timezone
+
 import streamlit as st
 from database.db import init_db, run_query, run_write
 from utils.nav_strip import render_nav_strip
@@ -126,6 +128,17 @@ try:
 except Exception as _e:
     print(f"A2 Data Flow & Roles seed skipped: {_e}\n{_traceback.format_exc()}", flush=True)
     st.warning(f"A2 Data Flow & Roles seed skipped: {_e}")
+
+# MEL Plan (LoP targets reference + Agri-Impact questions log, Phase 5
+# part 4): same idempotent, unconditional-seed pattern as mel_indicators
+# above. Only the insert-if-missing step is unconditional -- an already
+# Answered Agri-Impact question is never reset by this running again.
+try:
+    from database.seed_mel_plan import seed as _seed_mel_plan
+    _seed_mel_plan()
+except Exception as _e:
+    print(f"MEL Plan seed skipped: {_e}\n{_traceback.format_exc()}", flush=True)
+    st.warning(f"MEL Plan seed skipped: {_e}")
 
 # ── Brand ─────────────────────────────────────────────────────────────────────
 NAVY = "#4A5568"
@@ -598,6 +611,119 @@ with st.expander("👥 A2 — Data Flow & Roles (v3)", expanded=False):
                 for u in _uses
             )
         )
+
+# ── MEL Plan — LoP Targets & Agri-Impact Questions ───────────────────────────
+# Phase 5 part 4. Read-only LoP Targets reference, from
+# docs/mel_tool/04_MEL_Plan.md — row_number is the MEL Plan sheet's own
+# numbering, not an IM/OC/OP indicator ID (see mel_plan_indicators'
+# comment in schema.sql for why there is no automatic crosswalk). A
+# working "Things to confirm with Agri-Impact" log: seeded with the 3
+# questions already in the source doc, Editors/Admins can add more,
+# Admins can mark one Answered.
+with st.expander("📑 MEL Plan — LoP Targets & Agri-Impact Questions (v3)", expanded=False):
+    _mp_view = st.selectbox(
+        "View", ["LoP Targets", "Questions for Agri-Impact"], key="mel_plan_view_select",
+    )
+
+    if _mp_view == "LoP Targets":
+        _mp_rows = run_query(
+            """SELECT mp.* FROM mel_plan_indicators mp
+               JOIN projects pr ON pr.project_id = mp.project_id
+               WHERE pr.name = 'SAWA' ORDER BY mp.row_number""",
+            {},
+        )
+        if not _mp_rows:
+            st.caption("MEL Plan reference not seeded yet — reload once the SAWA project exists.")
+        else:
+            st.caption(
+                f"{len(_mp_rows)} indicator rows from the MEL Plan sheet. **Row** is the "
+                "sheet's own numbering, not an IM/OC/OP indicator ID — matching a row to a "
+                "Project IPTT indicator is a manual judgement call the source doc itself "
+                "still flags as 'confirm' in several rows, so it is not attempted here. "
+                "Baseline is blank for every row in the source."
+            )
+            _mp_section = st.selectbox(
+                "Section", ["All", "Impact", "Outcome", "Output"], key="mel_plan_section_filter",
+            )
+            _mp_details = st.checkbox("Show collection details (methods, frequency, sources, notes)",
+                                       key="mel_plan_show_details")
+            _mp_filtered = [r for r in _mp_rows if _mp_section == "All" or r["section"] == _mp_section]
+            if _mp_details:
+                st.markdown(
+                    "| Row | Indicator | LoP Target | Methods | Frequency | Sources | "
+                    "Responsible | CEL scope | Notes |\n"
+                    "|---|---|---|---|---|---|---|---|---|\n"
+                    + "\n".join(
+                        f"| {r['row_number']} | {r['indicator_text'].replace(chr(10), ' ')} | "
+                        f"{r['lop_target'] or '—'} | {r['data_collection_methods'] or '—'} | "
+                        f"{r['frequency'] or '—'} | {r['data_sources'] or '—'} | "
+                        f"{r['responsible_collector'] or '—'} | {r['cel_scope'] or '—'} | "
+                        f"{r['planner_notes'] or '—'} |"
+                        for r in _mp_filtered
+                    )
+                )
+            else:
+                st.markdown(
+                    "| Row | Indicator | LoP Target | CEL scope |\n"
+                    "|---|---|---|---|\n"
+                    + "\n".join(
+                        f"| {r['row_number']} | {r['indicator_text'].replace(chr(10), ' ')} | "
+                        f"{r['lop_target'] or '—'} | {r['cel_scope'] or '—'} |"
+                        for r in _mp_filtered
+                    )
+                )
+
+    else:  # Questions for Agri-Impact
+        _maiq_rows = run_query(
+            """SELECT q.* FROM mel_agri_impact_questions q
+               JOIN projects pr ON pr.project_id = q.project_id
+               WHERE pr.name = 'SAWA' ORDER BY (q.status = 'Answered'), q.id""",
+            {},
+        )
+        _n_open = sum(1 for q in _maiq_rows if q["status"] == "Open")
+        st.caption(f"{_n_open} open, {len(_maiq_rows) - _n_open} answered.")
+        for q in _maiq_rows:
+            with st.container(border=True):
+                _badge = "🟡 Open" if q["status"] == "Open" else "✅ Answered"
+                st.markdown(f"**{_badge}** — {q['question_text']}")
+                if q["raised_by"]:
+                    st.caption(f"Raised by: {q['raised_by']}")
+                if q["status"] == "Answered":
+                    st.markdown(f"**Answer:** {q['answer_text']}")
+                    st.caption(f"Answered by {q['answered_by']} · {q['answered_at']}")
+                elif can("admin"):
+                    with st.form(key=f"answer_maiq_{q['id']}", clear_on_submit=True):
+                        _answer = st.text_area("Answer", key=f"answer_text_{q['id']}")
+                        if st.form_submit_button("✅ Mark answered"):
+                            if not _answer.strip():
+                                st.error("Enter an answer before marking this question answered.")
+                            else:
+                                _actor = st.session_state.get("name") or st.session_state.get("username", "unknown")
+                                run_write(
+                                    """UPDATE mel_agri_impact_questions
+                                       SET status='Answered', answer_text=:a,
+                                           answered_by=:by, answered_at=:at
+                                       WHERE id=:id""",
+                                    {"a": _answer.strip(), "by": _actor,
+                                     "at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                                     "id": q["id"]},
+                                )
+                                st.rerun()
+
+        if can("write"):
+            with st.form(key="add_maiq_question", clear_on_submit=True):
+                _new_q = st.text_area("Add a new question for Agri-Impact")
+                if st.form_submit_button("➕ Add question") and _new_q.strip():
+                    _actor = st.session_state.get("name") or st.session_state.get("username", "unknown")
+                    _sawa_pid = run_query("SELECT project_id FROM projects WHERE name='SAWA'", {})[0]["project_id"]
+                    run_write(
+                        """INSERT INTO mel_agri_impact_questions
+                           (project_id, question_text, raised_by, raised_at)
+                           VALUES (:pid, :q, :by, :at)""",
+                        {"pid": _sawa_pid, "q": _new_q.strip(), "by": _actor,
+                         "at": datetime.now(timezone.utc).isoformat(timespec="seconds")},
+                    )
+                    st.rerun()
 
 # ── CEL Project Portfolio by Sector ──────────────────────────────────────────
 st.markdown("#### CEL Project Portfolio")

@@ -672,3 +672,36 @@ CREATE TABLE IF NOT EXISTS mel_data_uses (
     source      TEXT
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_du_key ON mel_data_uses(project_id, use_label);
+
+-- MEL Plan — see database/schema.sql's mel_plan_indicators /
+-- mel_agri_impact_questions comments (Phase 5 part 4) for why there is no
+-- indicator_id column and why lop_target is TEXT.
+CREATE TABLE IF NOT EXISTS mel_plan_indicators (
+    id                      INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    project_id              INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    row_number              INTEGER NOT NULL,
+    section                 TEXT    NOT NULL CHECK(section IN ('Impact','Outcome','Output')),
+    indicator_text          TEXT    NOT NULL,
+    baseline                TEXT,
+    lop_target              TEXT,
+    data_collection_methods TEXT,
+    frequency               TEXT,
+    data_sources            TEXT,
+    responsible_collector   TEXT,
+    cel_scope               TEXT,
+    planner_notes           TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_mpi_key ON mel_plan_indicators(project_id, row_number);
+
+CREATE TABLE IF NOT EXISTS mel_agri_impact_questions (
+    id            INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    project_id    INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    question_text TEXT    NOT NULL,
+    status        TEXT    NOT NULL DEFAULT 'Open' CHECK(status IN ('Open','Answered')),
+    answer_text   TEXT,
+    raised_by     TEXT,
+    raised_at     TEXT,
+    answered_by   TEXT,
+    answered_at   TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_maiq_project ON mel_agri_impact_questions(project_id);

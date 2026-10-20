@@ -6,6 +6,29 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 ## Unreleased
 
 ### Added
+- `database/seed_mel_plan.py` + 2 new tables (`mel_plan_indicators`,
+  `mel_agri_impact_questions`) — Phase 5 part 4 (first step): a read-only
+  MEL Plan reference view (58 indicator rows: baseline, LoP target, data
+  collection methods, frequency, sources, responsible role, CEL scope,
+  planner notes) and a working "Things to confirm with Agri-Impact"
+  questions log, both from `docs/mel_tool/04_MEL_Plan.md`. The MEL Plan
+  sheet identifies indicators by free-text "CEL planner" code (e.g.
+  "PI.3"), not by IM/OC/OP indicator ID, so `mel_plan_indicators`
+  deliberately has no `indicator_id` column and no automatic crosswalk to
+  Project IPTT — several rows are themselves flagged "confirm" in the
+  source, so matching one to an IPTT indicator stays a human judgement
+  call. `lop_target` is stored as text, not a number: several targets are
+  formulas/percentages ("86% of YiW (1,720)"). The questions log is
+  seeded with the 3 questions already in the source doc (status Open);
+  Editors/Admins can add more, Admins can mark one Answered with an answer
+  — re-seeding never resets an Answered question back to Open (same
+  insert-missing-only pattern as the A2 tables). New "📑 MEL Plan — LoP
+  Targets & Agri-Impact Questions (v3)" expander on the home page.
+  Deliberately deferred to a later step: flagging Y1×4-vs-LoP-target
+  mismatches, which needs a hand-built crosswalk to be worth doing
+  properly. Verified against SQLite and real Postgres 15 (fresh DB,
+  idempotency, and that re-seeding never resets an answered question). 10
+  new tests in `tests/test_seed_mel_plan.py`.
 - `pages/13_M_IPTT.py` — Phase 5 part 3: a 🔓 Unlock button (Admin-only,
   next to Submit/Verify/Approve) that reverts Approved rows for a
   sheet/quarter back to Verified, clearing `approved_by`/`approved_at` and
