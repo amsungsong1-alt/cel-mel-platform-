@@ -62,28 +62,58 @@ def seeded_db(monkeypatch):
 
 
 def _upsert_actual(mel_id, project_id, fy, quarter, achieved, tilapia, catfish,
-                    evidence, complete, editor="Test"):
-    """Mirrors the exact upsert statement in pages/13_M_IPTT.py's save handler."""
-    now_iso = datetime.now(timezone.utc).isoformat(timespec="seconds")
+                    evidence, complete):
+    """Mirrors the exact upsert statement in pages/13_M_IPTT.py's Save
+    handler. submitted_by/submitted_at are deliberately NOT part of this
+    (and not parameters here) -- those belong only to the Submit workflow
+    action, not to routine data-entry saves (status stays whatever it
+    already was; defaults to Draft on first insert via the column's own
+    DEFAULT)."""
     db.run_write(
         """INSERT INTO mel_indicator_actuals
            (indicator_id, project_id, fiscal_year, quarter, achieved_value,
-            tilapia_value, catfish_value, evidence_note, completeness_checked,
-            submitted_by, submitted_at)
+            tilapia_value, catfish_value, evidence_note, completeness_checked)
            VALUES (:mid, :pid, :fy, :q, :achieved, :tilapia, :catfish, :evidence,
-                   :complete, :editor, :now)
+                   :complete)
            ON CONFLICT(indicator_id, fiscal_year, quarter) DO UPDATE SET
                achieved_value=excluded.achieved_value,
                tilapia_value=excluded.tilapia_value,
                catfish_value=excluded.catfish_value,
                evidence_note=excluded.evidence_note,
-               completeness_checked=excluded.completeness_checked,
-               submitted_by=excluded.submitted_by,
-               submitted_at=excluded.submitted_at""",
+               completeness_checked=excluded.completeness_checked""",
         {"mid": mel_id, "pid": project_id, "fy": fy, "q": quarter,
          "achieved": achieved, "tilapia": tilapia, "catfish": catfish,
-         "evidence": evidence, "complete": complete, "editor": editor, "now": now_iso},
+         "evidence": evidence, "complete": complete},
     )
+
+
+def _transition_status(project_id, fy, quarter, sheet, from_status, to_status,
+                        by_col, at_col, actor="Test Actor"):
+    """Mirrors pages/13_M_IPTT.py's _transition_status(): batch-moves every
+    row in (project, fy, quarter, sheet) currently in from_status to
+    to_status, stamping by_col/at_col and writing an audit row to
+    mel_indicator_actuals_changelog for each. Returns the count moved."""
+    now_iso = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    rows = db.run_query(
+        f"""SELECT a.id FROM mel_indicator_actuals a
+            JOIN mel_indicators i ON i.id = a.indicator_id
+            WHERE a.project_id=:pid AND a.fiscal_year=:fy AND a.quarter=:q
+              AND i.model_sheet=:sheet AND a.status=:from_status""",
+        {"pid": project_id, "fy": fy, "q": quarter, "sheet": sheet, "from_status": from_status},
+    )
+    for row in rows:
+        db.run_write(
+            f"UPDATE mel_indicator_actuals SET status=:to_status, "
+            f"{by_col}=:actor, {at_col}=:now WHERE id=:aid",
+            {"to_status": to_status, "actor": actor, "now": now_iso, "aid": row["id"]},
+        )
+        db.run_write(
+            """INSERT INTO mel_indicator_actuals_changelog
+               (actual_id, field_changed, old_value, new_value, changed_by, changed_at)
+               VALUES (:aid, 'status', :old, :new, :actor, :now)""",
+            {"aid": row["id"], "old": from_status, "new": to_status, "actor": actor, "now": now_iso},
+        )
+    return len(rows)
 
 
 @requires_real_workbook
@@ -192,3 +222,147 @@ def test_y1_consolidation_reflects_a_saved_achieved_value(seeded_db):
     y1_target = year1_value(tq.get(1), tq.get(2), tq.get(3), tq.get(4), ind["aggregation_type"])
     pct = percentage(y1, y1_target)
     assert isinstance(pct, float)
+
+
+@requires_real_workbook
+def test_workflow_chain_moves_status_and_stamps_actor_and_timestamp(seeded_db):
+    db_, pid = seeded_db
+    ind = db_.run_query(
+        "SELECT id, model_sheet FROM mel_indicators WHERE project_id=:p AND indicator_id='IM1'", {"p": pid}
+    )[0]
+    _upsert_actual(ind["id"], pid, 2026, 1, 45.0, None, None, None, False)
+
+    n = _transition_status(pid, 2026, 1, ind["model_sheet"], "Draft", "Submitted",
+                             "submitted_by", "submitted_at", actor="Alice")
+    assert n == 1
+    row = db_.run_query("SELECT * FROM mel_indicator_actuals WHERE indicator_id=:m", {"m": ind["id"]})[0]
+    assert row["status"] == "Submitted"
+    assert row["submitted_by"] == "Alice"
+    assert row["submitted_at"] is not None
+    assert row["verified_by"] is None
+
+    n = _transition_status(pid, 2026, 1, ind["model_sheet"], "Submitted", "Verified",
+                             "verified_by", "verified_at", actor="Bob")
+    assert n == 1
+    row = db_.run_query("SELECT * FROM mel_indicator_actuals WHERE indicator_id=:m", {"m": ind["id"]})[0]
+    assert row["status"] == "Verified"
+    assert row["verified_by"] == "Bob"
+    assert row["approved_by"] is None
+
+    n = _transition_status(pid, 2026, 1, ind["model_sheet"], "Verified", "Approved",
+                             "approved_by", "approved_at", actor="Carol")
+    assert n == 1
+    row = db_.run_query("SELECT * FROM mel_indicator_actuals WHERE indicator_id=:m", {"m": ind["id"]})[0]
+    assert row["status"] == "Approved"
+    assert row["approved_by"] == "Carol"
+
+
+@requires_real_workbook
+def test_workflow_chain_writes_one_changelog_row_per_transition(seeded_db):
+    db_, pid = seeded_db
+    ind = db_.run_query(
+        "SELECT id, model_sheet FROM mel_indicators WHERE project_id=:p AND indicator_id='IM1'", {"p": pid}
+    )[0]
+    _upsert_actual(ind["id"], pid, 2026, 1, 45.0, None, None, None, False)
+
+    _transition_status(pid, 2026, 1, ind["model_sheet"], "Draft", "Submitted",
+                        "submitted_by", "submitted_at", actor="Alice")
+    _transition_status(pid, 2026, 1, ind["model_sheet"], "Submitted", "Verified",
+                        "verified_by", "verified_at", actor="Bob")
+    _transition_status(pid, 2026, 1, ind["model_sheet"], "Verified", "Approved",
+                        "approved_by", "approved_at", actor="Carol")
+
+    actual_id = db_.run_query(
+        "SELECT id FROM mel_indicator_actuals WHERE indicator_id=:m", {"m": ind["id"]}
+    )[0]["id"]
+    log = db_.run_query(
+        """SELECT old_value, new_value, changed_by FROM mel_indicator_actuals_changelog
+           WHERE actual_id=:a AND field_changed='status' ORDER BY id""",
+        {"a": actual_id},
+    )
+    assert [(r["old_value"], r["new_value"], r["changed_by"]) for r in log] == [
+        ("Draft", "Submitted", "Alice"),
+        ("Submitted", "Verified", "Bob"),
+        ("Verified", "Approved", "Carol"),
+    ]
+
+
+@requires_real_workbook
+def test_transition_is_a_no_op_when_no_rows_are_in_the_from_status(seeded_db):
+    # e.g. trying to Verify a sheet/quarter where nothing has been Submitted
+    # yet must move 0 rows, not raise and not touch unrelated rows.
+    db_, pid = seeded_db
+    ind = db_.run_query(
+        "SELECT id, model_sheet FROM mel_indicators WHERE project_id=:p AND indicator_id='IM1'", {"p": pid}
+    )[0]
+    _upsert_actual(ind["id"], pid, 2026, 1, 45.0, None, None, None, False)  # stays Draft
+
+    n = _transition_status(pid, 2026, 1, ind["model_sheet"], "Submitted", "Verified",
+                            "verified_by", "verified_at")
+    assert n == 0
+    row = db_.run_query("SELECT status FROM mel_indicator_actuals WHERE indicator_id=:m", {"m": ind["id"]})[0]
+    assert row["status"] == "Draft"
+
+
+@requires_real_workbook
+def test_transition_only_moves_rows_for_the_targeted_sheet_quarter_and_year(seeded_db):
+    # Two indicators on the same sheet, only one Submitted this quarter --
+    # the batch transition must not sweep up the other one.
+    db_, pid = seeded_db
+    inds = db_.run_query(
+        "SELECT id, indicator_id, model_sheet FROM mel_indicators WHERE project_id=:p AND indicator_id IN ('IM1','IM2')",
+        {"p": pid},
+    )
+    sheet = inds[0]["model_sheet"]
+    by_code = {r["indicator_id"]: r for r in inds}
+    _upsert_actual(by_code["IM1"]["id"], pid, 2026, 1, 45.0, None, None, None, False)
+    _upsert_actual(by_code["IM2"]["id"], pid, 2026, 1, 10.0, None, None, None, False)
+
+    db_.run_write(
+        "UPDATE mel_indicator_actuals SET status='Submitted' WHERE indicator_id=:m",
+        {"m": by_code["IM1"]["id"]},
+    )
+
+    n = _transition_status(pid, 2026, 1, sheet, "Submitted", "Verified", "verified_by", "verified_at")
+    assert n == 1
+    im1 = db_.run_query("SELECT status FROM mel_indicator_actuals WHERE indicator_id=:m",
+                         {"m": by_code["IM1"]["id"]})[0]
+    im2 = db_.run_query("SELECT status FROM mel_indicator_actuals WHERE indicator_id=:m",
+                         {"m": by_code["IM2"]["id"]})[0]
+    assert im1["status"] == "Verified"
+    assert im2["status"] == "Draft"
+
+
+@requires_real_workbook
+def test_save_handler_must_skip_rows_already_approved(seeded_db):
+    # Mirrors pages/13_M_IPTT.py's save-button guard: a row whose current
+    # status is Approved is locked and must not be silently overwritten by
+    # a routine save. The page checks _status_by_id before calling
+    # _upsert_actual at all, so this test exercises that same guard logic
+    # rather than _upsert_actual itself (which has no awareness of status).
+    db_, pid = seeded_db
+    ind = db_.run_query(
+        "SELECT id, model_sheet FROM mel_indicators WHERE project_id=:p AND indicator_id='IM1'", {"p": pid}
+    )[0]
+    _upsert_actual(ind["id"], pid, 2026, 1, 45.0, None, None, None, False)
+    _transition_status(pid, 2026, 1, ind["model_sheet"], "Draft", "Submitted", "submitted_by", "submitted_at")
+    _transition_status(pid, 2026, 1, ind["model_sheet"], "Submitted", "Verified", "verified_by", "verified_at")
+    _transition_status(pid, 2026, 1, ind["model_sheet"], "Verified", "Approved", "approved_by", "approved_at")
+
+    status_by_id = {
+        r["indicator_id"]: r["status"]
+        for r in db_.run_query(
+            "SELECT indicator_id, status FROM mel_indicator_actuals WHERE fiscal_year=2026 AND quarter=1", {}
+        )
+    }
+    assert status_by_id[ind["id"]] == "Approved"
+
+    skipped = 0
+    if status_by_id.get(ind["id"]) == "Approved":
+        skipped += 1
+    else:
+        _upsert_actual(ind["id"], pid, 2026, 1, 999.0, None, None, "overwrite attempt", False)
+    assert skipped == 1
+
+    row = db_.run_query("SELECT achieved_value FROM mel_indicator_actuals WHERE indicator_id=:m", {"m": ind["id"]})[0]
+    assert row["achieved_value"] == 45.0, "approved row's value must remain untouched"

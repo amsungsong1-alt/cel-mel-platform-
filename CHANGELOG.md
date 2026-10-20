@@ -6,6 +6,23 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 ## Unreleased
 
 ### Added
+- `pages/13_M_IPTT.py` — Phase 5 part 2: a Draft → Submitted → Verified →
+  Approved workflow on the achieved-value entry tabs (BDS/WAN/Cross-cutting
+  IPTT). Per-sheet-tab, per-quarter batch transitions (the whole sheet's
+  quarter moves together, matching A2's own process): 📤 Submit is
+  available to anyone with Module M write access; ✅ Verify and 🔒 Approve
+  are Admin-only (the app's Admin/Editor/Viewer system has no equivalent of
+  A2's distinct MEAL Officer/MEAL Lead/Program Lead roles, so both
+  verification steps are gated to Admin rather than invented role splits).
+  Every transition writes an audit row to `mel_indicator_actuals_changelog`
+  (`field_changed='status'`, old/new value, actor, timestamp). The entry
+  grid gained a read-only "Status" column, and the Save button no longer
+  stamps `submitted_by`/`submitted_at` on routine saves (that's the Submit
+  action's job now) and skips/locks any row already Approved rather than
+  silently overwriting it. Verified against SQLite and real Postgres 15
+  (full chain, changelog ordering, no-op on an empty from-status, and that
+  a batch transition only touches the targeted sheet/quarter/year). 5 new
+  tests in `tests/test_iptt_module_m.py`.
 - `database/seed_a2_roles.py` + 4 new tables (`mel_data_flow_stages`,
   `mel_roles`, `mel_sheet_responsibilities`, `mel_data_uses`) — Phase 5
   part 1: a role directory, parsed from

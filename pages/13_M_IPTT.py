@@ -30,7 +30,7 @@ import streamlit as st
 
 from database.db import init_db, run_query, run_write
 from utils.shared_widgets import project_selector
-from utils.auth import can_write_module
+from utils.auth import can, can_write_module
 from utils.nav_strip import render_nav_strip
 from utils.iptt_rules import year1_value, percentage
 from utils.num_parse import num_or_none
@@ -246,7 +246,7 @@ else:
 
             _existing = run_query(
                 """SELECT i.indicator_id, a.achieved_value, a.tilapia_value, a.catfish_value,
-                          a.evidence_note, a.completeness_checked
+                          a.evidence_note, a.completeness_checked, a.status
                    FROM mel_indicator_actuals a JOIN mel_indicators i ON i.id = a.indicator_id
                    WHERE a.project_id=:pid AND a.fiscal_year=:fy AND a.quarter=:q""",
                 {"pid": project_id, "fy": _entry_fy, "q": _entry_quarter},
@@ -265,6 +265,7 @@ else:
                     "Catfish": ex.get("catfish_value"),
                     "Evidence note": ex.get("evidence_note") or "",
                     "Complete": bool(ex.get("completeness_checked")),
+                    "Status": ex.get("status") or ("—" if ex.get("achieved_value") is None else "Draft"),
                 })
             _entry_df = pd.DataFrame(_entry_records)
 
@@ -281,6 +282,9 @@ else:
                 "Evidence note": st.column_config.TextColumn(width="medium"),
                 "Complete": st.column_config.CheckboxColumn(
                     width="small", help="Completeness check done (CEL IPTT Guide §5 step 4)."),
+                "Status": st.column_config.TextColumn(disabled=True, width="small",
+                    help="Draft → Submitted → Verified → Approved. Changed via the buttons "
+                         "below the table, not by editing this cell."),
             }
             _edited = st.data_editor(
                 _entry_df, column_config=_col_config, hide_index=True,
@@ -288,13 +292,21 @@ else:
                 key=f"iptt_entry_{_sheet_name}_{_entry_quarter}",
             )
 
+            _status_by_id = {e["indicator_id"]: e.get("status", "Draft") for e in _existing}
+
             if st.button(f"💾 Save {_sheet_name} — Q{_entry_quarter}",
                          key=f"iptt_save_{_sheet_name}_{_entry_quarter}"):
-                editor = st.session_state.get("name") or st.session_state.get("username", "unknown")
-                now_iso = datetime.now(timezone.utc).isoformat(timespec="seconds")
                 _id_by_code = {r["ID"]: r["_internal_id"] for r in _sheet_rows}
                 n_saved = 0
+                n_locked = 0
                 for _, erow in _edited.iterrows():
+                    # Approved rows are locked against Save overwriting them
+                    # silently — editing an approved figure must go through
+                    # an explicit unlock (quarter locking, a later step),
+                    # not a routine data-entry save.
+                    if _status_by_id.get(erow["ID"]) == "Approved":
+                        n_locked += 1
+                        continue
                     achieved = num_or_none(erow["Achieved"])
                     tilapia = num_or_none(erow["Tilapia"])
                     catfish = num_or_none(erow["Catfish"])
@@ -305,29 +317,106 @@ else:
                     evidence = (str(erow["Evidence note"]).strip() or None) if erow["Evidence note"] else None
                     complete = bool(erow["Complete"])
                     mel_id = _id_by_code[erow["ID"]]
+                    # submitted_by/submitted_at are NOT touched here — those
+                    # belong to the explicit Submit workflow action below,
+                    # not to every routine data-entry save (status stays
+                    # whatever it already was; defaults to Draft on first
+                    # insert via the column's own DEFAULT).
                     run_write(
                         """INSERT INTO mel_indicator_actuals
                            (indicator_id, project_id, fiscal_year, quarter, achieved_value,
-                            tilapia_value, catfish_value, evidence_note, completeness_checked,
-                            submitted_by, submitted_at)
+                            tilapia_value, catfish_value, evidence_note, completeness_checked)
                            VALUES (:mid, :pid, :fy, :q, :achieved, :tilapia, :catfish, :evidence,
-                                   :complete, :editor, :now)
+                                   :complete)
                            ON CONFLICT(indicator_id, fiscal_year, quarter) DO UPDATE SET
                                achieved_value=excluded.achieved_value,
                                tilapia_value=excluded.tilapia_value,
                                catfish_value=excluded.catfish_value,
                                evidence_note=excluded.evidence_note,
-                               completeness_checked=excluded.completeness_checked,
-                               submitted_by=excluded.submitted_by,
-                               submitted_at=excluded.submitted_at""",
+                               completeness_checked=excluded.completeness_checked""",
                         {
                             "mid": mel_id, "pid": project_id, "fy": _entry_fy, "q": _entry_quarter,
                             "achieved": achieved, "tilapia": tilapia, "catfish": catfish,
                             "evidence": evidence, "complete": complete,
-                            "editor": editor, "now": now_iso,
                         },
                     )
                     n_saved += 1
-                st.success(f"Saved {n_saved} row(s) for {_sheet_name} Q{_entry_quarter}.")
+                msg = f"Saved {n_saved} row(s) for {_sheet_name} Q{_entry_quarter}."
+                if n_locked:
+                    msg += f" {n_locked} approved row(s) were skipped (locked)."
+                st.success(msg)
                 _load_iptt_rows.clear()
                 st.rerun()
+
+            # ── Workflow: Draft → Submitted → Verified → Approved ────────
+            # Per-sheet, per-quarter batch transitions (matches the
+            # workbook's own process — A2 Data Flow & Roles stages 4-6
+            # submit/review/approve the whole sheet's quarter together, not
+            # indicator by indicator). Submit is available to anyone with
+            # Module M write access (same as Save); Verify/Approve are
+            # Admin-only — the app's role system has no equivalent of A2's
+            # separate MEAL Lead/Program Lead roles yet, so this is the
+            # safe default rather than guessing a finer-grained mapping.
+            # Every transition writes an audit row to
+            # mel_indicator_actuals_changelog, previously unused.
+            st.markdown("**Workflow**")
+            _can_verify_approve = can("admin")
+            _actor = st.session_state.get("name") or st.session_state.get("username", "unknown")
+
+            def _transition_status(from_status: str, to_status: str, by_col: str, at_col: str) -> int:
+                now_iso = datetime.now(timezone.utc).isoformat(timespec="seconds")
+                rows_to_move = run_query(
+                    f"""SELECT a.id FROM mel_indicator_actuals a
+                        JOIN mel_indicators i ON i.id = a.indicator_id
+                        WHERE a.project_id=:pid AND a.fiscal_year=:fy AND a.quarter=:q
+                          AND i.model_sheet=:sheet AND a.status=:from_status""",
+                    {"pid": project_id, "fy": _entry_fy, "q": _entry_quarter,
+                     "sheet": _sheet_name, "from_status": from_status},
+                )
+                for row in rows_to_move:
+                    run_write(
+                        f"UPDATE mel_indicator_actuals SET status=:to_status, "
+                        f"{by_col}=:actor, {at_col}=:now WHERE id=:aid",
+                        {"to_status": to_status, "actor": _actor, "now": now_iso, "aid": row["id"]},
+                    )
+                    run_write(
+                        """INSERT INTO mel_indicator_actuals_changelog
+                           (actual_id, field_changed, old_value, new_value, changed_by, changed_at)
+                           VALUES (:aid, 'status', :old, :new, :actor, :now)""",
+                        {"aid": row["id"], "old": from_status, "new": to_status,
+                         "actor": _actor, "now": now_iso},
+                    )
+                return len(rows_to_move)
+
+            _wf_cols = st.columns(3)
+            with _wf_cols[0]:
+                if st.button("📤 Submit", key=f"iptt_submit_{_sheet_name}_{_entry_quarter}",
+                             width="stretch"):
+                    n = _transition_status("Draft", "Submitted", "submitted_by", "submitted_at")
+                    (st.success if n else st.info)(
+                        f"{n} row(s) submitted." if n else "No Draft rows to submit."
+                    )
+                    _load_iptt_rows.clear()
+                    st.rerun()
+            with _wf_cols[1]:
+                if not _can_verify_approve:
+                    st.caption("🔒 Verify — Admin only")
+                elif st.button("✅ Verify", key=f"iptt_verify_{_sheet_name}_{_entry_quarter}",
+                               width="stretch"):
+                    n = _transition_status("Submitted", "Verified", "verified_by", "verified_at")
+                    (st.success if n else st.info)(
+                        f"{n} row(s) verified." if n else "No Submitted rows to verify."
+                    )
+                    _load_iptt_rows.clear()
+                    st.rerun()
+            with _wf_cols[2]:
+                if not _can_verify_approve:
+                    st.caption("🔒 Approve — Admin only")
+                elif st.button("🔒 Approve", key=f"iptt_approve_{_sheet_name}_{_entry_quarter}",
+                               width="stretch"):
+                    n = _transition_status("Verified", "Approved", "approved_by", "approved_at")
+                    (st.success if n else st.info)(
+                        f"{n} row(s) approved." if n else "No Verified rows to approve."
+                    )
+                    _load_iptt_rows.clear()
+                    st.rerun()
