@@ -226,6 +226,36 @@ _NEW_DCP = [
 ]
 
 
+def _execute_script(conn, sql_script: str) -> None:
+    """Run a whole multi-statement SQL script in ONE round trip to Postgres,
+    instead of one conn.execute(text(stmt)) call per statement.
+
+    Real production incident: _run_migrations() ran ~345 individual
+    statements this way (one SQLAlchemy conn.execute() per statement), each
+    paying a full network round trip to Supabase's pooler (~90ms observed)
+    -- over 30 seconds just for migrations, on every fresh process boot,
+    making the app appear to hang/never finish loading. Measured fix: using
+    psycopg3's own multi-statement execution (the simple query protocol,
+    which SQLAlchemy's text()+execute() does NOT use by default) for the
+    same 93-statement main schema script took 1.43s instead of 31.84s --
+    roughly 22x faster, same statements, same transaction.
+
+    Reaches past SQLAlchemy's Connection to the underlying psycopg3
+    connection and uses its cursor directly. Verified this still
+    participates in the SAME transaction engine.begin() opened (a forced
+    error after calling this correctly left no trace once rolled back) --
+    this is not a separate auto-committing connection.
+
+    Only safe for a script where no statement's behaviour depends on
+    reading back an EARLIER statement's result within the same call (e.g.
+    "look up a constraint name, then DROP CONSTRAINT <that name>") -- those
+    still need individual conn.execute() calls, same as before.
+    """
+    raw = conn.connection.driver_connection
+    with raw.cursor() as cur:
+        cur.execute(sql_script)
+
+
 @st.cache_resource
 def _run_migrations(schema_fingerprint: str) -> bool:
     # schema_fingerprint is unused in the body below -- it exists purely as
@@ -258,27 +288,21 @@ def _run_migrations(schema_fingerprint: str) -> bool:
             # session trying to migrate at the same time and auto-releases
             # at transaction end, so it can't leak on an exception.
             conn.execute(text("SELECT pg_advisory_xact_lock(823771)"))
-            for stmt in schema.split(";"):
-                stmt = stmt.strip()
-                if stmt:
-                    conn.execute(text(stmt))
+            _execute_script(conn, schema)
             # Migrate existing tables that predate these columns.
-            for stmt in (
-                "ALTER TABLE raw_data_analysis ADD COLUMN IF NOT EXISTS reporting_year INTEGER",
-                "ALTER TABLE data_collection_plan ADD COLUMN IF NOT EXISTS last_collected_date TEXT",
-                "ALTER TABLE data_collection_plan ADD COLUMN IF NOT EXISTS instrument_name TEXT",
-                "ALTER TABLE data_collection_plan ADD COLUMN IF NOT EXISTS logframe_row_id INTEGER REFERENCES logframe_rows(id) ON DELETE SET NULL",
-                "ALTER TABLE raw_data_analysis ADD COLUMN IF NOT EXISTS progression_stage TEXT",
-                "ALTER TABLE raw_data_analysis ADD COLUMN IF NOT EXISTS pillar TEXT",
-                "ALTER TABLE raw_data_analysis ADD COLUMN IF NOT EXISTS dqa_stage TEXT",
-                "ALTER TABLE raw_data_analysis ADD COLUMN IF NOT EXISTS disaggregation TEXT",
-                "ALTER TABLE raw_data_analysis ADD COLUMN IF NOT EXISTS partner_id INTEGER",
-                "ALTER TABLE mel_indicators ADD COLUMN IF NOT EXISTS sm_code TEXT",
-            ):
-                conn.execute(text(stmt))
-            conn.execute(text(
-                "CREATE INDEX IF NOT EXISTS idx_mind_sm_code ON mel_indicators(sm_code)"
-            ))
+            _execute_script(conn, """
+                ALTER TABLE raw_data_analysis ADD COLUMN IF NOT EXISTS reporting_year INTEGER;
+                ALTER TABLE data_collection_plan ADD COLUMN IF NOT EXISTS last_collected_date TEXT;
+                ALTER TABLE data_collection_plan ADD COLUMN IF NOT EXISTS instrument_name TEXT;
+                ALTER TABLE data_collection_plan ADD COLUMN IF NOT EXISTS logframe_row_id INTEGER REFERENCES logframe_rows(id) ON DELETE SET NULL;
+                ALTER TABLE raw_data_analysis ADD COLUMN IF NOT EXISTS progression_stage TEXT;
+                ALTER TABLE raw_data_analysis ADD COLUMN IF NOT EXISTS pillar TEXT;
+                ALTER TABLE raw_data_analysis ADD COLUMN IF NOT EXISTS dqa_stage TEXT;
+                ALTER TABLE raw_data_analysis ADD COLUMN IF NOT EXISTS disaggregation TEXT;
+                ALTER TABLE raw_data_analysis ADD COLUMN IF NOT EXISTS partner_id INTEGER;
+                ALTER TABLE mel_indicators ADD COLUMN IF NOT EXISTS sm_code TEXT;
+                CREATE INDEX IF NOT EXISTS idx_mind_sm_code ON mel_indicators(sm_code);
+            """)
             # Add 'Pending' to partner_visits.status. Don't assume the CHECK
             # constraint's name (guessing 'partner_visits_status_check' left
             # a differently-named old constraint in place in production,

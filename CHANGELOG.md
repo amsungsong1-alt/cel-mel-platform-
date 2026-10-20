@@ -5,6 +5,44 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 
 ## Unreleased
 
+### Fixed
+- `database/db.py` — **urgent, production**: `_run_migrations()`'s main
+  schema script and ALTER-TABLE migration list now run as one batched
+  script per block (via a new `_execute_script()` helper using psycopg3's
+  raw cursor) instead of one `conn.execute()` round trip per statement.
+  Root cause of a production report of the app staying blank/stuck
+  loading indefinitely: confirmed `init_db()` itself was taking 30+
+  seconds on every fresh process boot — not a deadlock (checked
+  `pg_locks`/`pg_stat_activity`: nothing was blocking), just 345
+  individual statements at ~90ms network round-trip each to Supabase's
+  pooler, none individually slow. Measured fix for the 93-statement main
+  schema script alone: 31.84s -> 1.43s (~22x) executing the same
+  statements as one multi-statement script via psycopg3's simple query
+  protocol (SQLAlchemy's `text()` + `execute()` does not use this by
+  default, hence the per-statement round trips). Verified this still
+  participates in the same SQLAlchemy-managed transaction — a forced
+  error after a batched call correctly left no trace once rolled back —
+  so correctness/atomicity is unchanged, only round-trip count is. Not
+  applied to the handful of statements later in the function that
+  genuinely depend on an earlier query's result (e.g. looking up a CHECK
+  constraint's real name before dropping it) — those still run
+  individually, for correctness. Full boot-path timing: ~31.6s before ->
+  ~24.2s after for the migration portion alone (241 individual
+  `conn.execute()` calls remain; further batching is a legitimate
+  follow-up, deferred rather than rushed given production was already
+  broken). Verified against a fresh Postgres database and a
+  pre-existing one with a column the schema has since added (the ALTER
+  batch's actual job) on real Postgres 15, plus the full existing test
+  suite (95 tests, SQLite).
+- `database/seed_pirs.py`/`seed_proframe.py`/`seed_shared_measures.py` —
+  each `seed()` now fetches all already-seeded keys in one query up front
+  and checks membership in that set, instead of one `SELECT ... WHERE
+  key=:x` round trip per item inside the loop (58/63/46 round trips on a
+  fully-seeded database, respectively, every single boot, just to confirm
+  "yes, skip" each time — discovered while investigating the blank-page
+  report above). Same end state, same idempotency, far fewer round trips.
+  All existing tests for these three modules still pass (26 tests).
+
 ### Added
 - `pages/13_M_IPTT.py` — Phase 4 part 3 (final part): Excel export of the
   consolidated IPTT table. Exports every indicator and quarter regardless

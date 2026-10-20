@@ -99,15 +99,25 @@ def seed(project_id: int | None = None) -> None:
             return
         project_id = existing_project[0]["project_id"]
 
+    # One round trip for every already-seeded row, not one per PIRS_ENTRIES
+    # item: on a fully-seeded database (the common case on every boot after
+    # the first), the old per-row "does this exist" SELECT inside the loop
+    # below made this call 58 round trips to confirm "yes, skip" every
+    # single time -- a real, measured contributor to cold-boot times
+    # exceeding a minute in production. Numbers only, no DB round trip
+    # per item below.
+    existing_numbers = {
+        r["pirs_number"]
+        for r in run_query(
+            "SELECT pirs_number FROM mel_indicator_pirs WHERE project_id=:pid", {"pid": project_id}
+        )
+    }
+
     n = 0
     for (pirs_number, statement, indicator_id, definition, disaggregation,
          unit_of_measure, data_type, data_collection_method, data_source,
          frequency) in PIRS_ENTRIES:
-        existing = run_query(
-            "SELECT id FROM mel_indicator_pirs WHERE project_id=:pid AND pirs_number=:n",
-            {"pid": project_id, "n": pirs_number},
-        )
-        if existing:
+        if pirs_number in existing_numbers:
             continue
         run_write(
             """INSERT INTO mel_indicator_pirs

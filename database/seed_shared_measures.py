@@ -80,14 +80,24 @@ def seed(project_id: int | None = None) -> None:
             return
         project_id = existing_project[0]["project_id"]
 
+    # One round trip for every already-seeded row, not one per
+    # SHARED_MEASURES item: on a fully-seeded database (the common case on
+    # every boot after the first), the old per-row "does this exist"
+    # SELECT inside the loop below made this call 46 round trips to
+    # confirm "yes, skip" every single time -- a real, measured
+    # contributor to cold-boot times exceeding a minute in production.
+    # Numbers only, no DB round trip per item below.
+    existing_numbers = {
+        r["row_number"]
+        for r in run_query(
+            "SELECT row_number FROM mel_shared_measures WHERE project_id=:pid", {"pid": project_id}
+        )
+    }
+
     n = 0
     for (row_number, sm_group, sm_group_description, sm_subcode,
          sm_subcode_description, statement, indicator_id) in SHARED_MEASURES:
-        existing = run_query(
-            "SELECT id FROM mel_shared_measures WHERE project_id=:pid AND row_number=:n",
-            {"pid": project_id, "n": row_number},
-        )
-        if existing:
+        if row_number in existing_numbers:
             continue
         run_write(
             """INSERT INTO mel_shared_measures

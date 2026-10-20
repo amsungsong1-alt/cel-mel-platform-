@@ -101,22 +101,30 @@ def seed(project_id: int | None = None) -> None:
             return
         project_id = existing_project[0]["project_id"]
 
+    # One round trip for every already-seeded row, not one per
+    # PROFRAME_RESULTS item: on a fully-seeded database (the common case
+    # on every boot after the first), the old per-row "does this exist"
+    # SELECT inside the loop below made this call 63 round trips to
+    # confirm "yes, skip" every single time -- a real, measured
+    # contributor to cold-boot times exceeding a minute in production.
+    # Keys only, no DB round trip per item below.
+    existing_keys = {
+        (r["area_label"], r["proframe_number"], r["indicator_statement"])
+        for r in run_query(
+            "SELECT area_label, proframe_number, indicator_statement "
+            "FROM mel_proframe_results WHERE project_id=:pid", {"pid": project_id}
+        )
+    }
+
     n = 0
     for (area_label, level, key_result_statement, assumptions, risks,
          proframe_number, indicator_statement, indicator_id, key_measure,
          disaggregation, markers, means_of_verification, cel_scope,
          note) in PROFRAME_RESULTS:
-        existing = run_query(
-            # #30/#31/#32 repeat twice each within one area for two
-            # different indicators, so (area, #) alone isn't a safe key —
-            # must include indicator_statement (matches idx_pfr_key).
-            """SELECT id FROM mel_proframe_results
-               WHERE project_id=:pid AND area_label=:area AND proframe_number=:n
-                 AND indicator_statement=:stmt""",
-            {"pid": project_id, "area": area_label, "n": proframe_number,
-             "stmt": indicator_statement},
-        )
-        if existing:
+        # #30/#31/#32 repeat twice each within one area for two different
+        # indicators, so (area, #) alone isn't a safe key — must include
+        # indicator_statement (matches idx_pfr_key).
+        if (area_label, proframe_number, indicator_statement) in existing_keys:
             continue
         run_write(
             """INSERT INTO mel_proframe_results
