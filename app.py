@@ -140,6 +140,17 @@ except Exception as _e:
     print(f"MEL Plan seed skipped: {_e}\n{_traceback.format_exc()}", flush=True)
     st.warning(f"MEL Plan seed skipped: {_e}")
 
+# A4 Onboarding Q2 + A5 Training Q2 schedules (Phase 6 step 2): same
+# idempotent, unconditional-seed pattern as mel_indicators above. Only the
+# insert-if-missing step is unconditional -- an in-app edit to a row's
+# Start/End/Status/Planned cohorts is never reset by this running again.
+try:
+    from database.seed_schedule import seed as _seed_schedule
+    _seed_schedule()
+except Exception as _e:
+    print(f"A4/A5 schedule seed skipped: {_e}\n{_traceback.format_exc()}", flush=True)
+    st.warning(f"A4/A5 schedule seed skipped: {_e}")
+
 # ── Brand ─────────────────────────────────────────────────────────────────────
 NAVY = "#4A5568"
 GOLD = "#F5A820"

@@ -706,3 +706,28 @@ CREATE TABLE IF NOT EXISTS mel_agri_impact_questions (
     answered_at   TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_maiq_project ON mel_agri_impact_questions(project_id);
+
+-- A4/A5 schedules — see database/schema.sql's mel_schedule_activities
+-- comment (Phase 6 step 2) for why this is one unified table and why
+-- Q2 target / per-cohort are computed live, not stored columns.
+CREATE TABLE IF NOT EXISTS mel_schedule_activities (
+    id                INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    project_id        INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    sheet             TEXT    NOT NULL CHECK(sheet IN ('A4 Onboarding Q2', 'A5 Training Q2')),
+    activity_number   INTEGER NOT NULL,
+    group_label       TEXT    NOT NULL,
+    activity          TEXT    NOT NULL,
+    note              TEXT,
+    indicator_id      TEXT,
+    planned_cohorts   INTEGER,
+    lead_role         TEXT,
+    support_role      TEXT,
+    location          TEXT,
+    start_date        TEXT,
+    end_date          TEXT,
+    status            TEXT    NOT NULL DEFAULT 'To confirm'
+                      CHECK(status IN ('Not started', 'In progress', 'Done', 'Delayed', 'To confirm')),
+    updated_by        TEXT,
+    updated_at        TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_msa_key ON mel_schedule_activities(project_id, sheet, activity_number);

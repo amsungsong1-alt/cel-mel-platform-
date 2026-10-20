@@ -10,6 +10,7 @@ from utils.iptt_rules import (
     is_blank,
     lop_target_mismatch,
     parse_lop_target,
+    per_cohort,
     percentage,
     year1_value,
 )
@@ -191,3 +192,26 @@ def test_mismatch_none_when_either_side_is_not_a_number():
     assert lop_target_mismatch(None, 2000.0) is None
     assert lop_target_mismatch(2000.0, None) is None
     assert lop_target_mismatch(None, None) is None
+
+
+# ── per_cohort ─────────────────────────────────────────────────────────────
+
+def test_per_cohort_rounds_up():
+    # Worked example: A5 OP9, target 135, e.g. 4 cohorts -> 34 per cohort.
+    assert per_cohort(135, 4) == 34
+
+
+def test_per_cohort_exact_division():
+    assert per_cohort(150, 3) == 50
+
+
+def test_per_cohort_none_when_cohorts_missing():
+    assert per_cohort(135, None) is None
+
+
+def test_per_cohort_none_when_target_missing():
+    assert per_cohort(None, 4) is None
+
+
+def test_per_cohort_none_when_cohorts_is_zero():
+    assert per_cohort(135, 0) is None

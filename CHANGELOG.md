@@ -6,6 +6,30 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 ## Unreleased
 
 ### Added
+- `pages/14_Q2_Schedule.py` + `database/seed_schedule.py` + 1 new table
+  (`mel_schedule_activities`) — Phase 6 step 2: A4 Onboarding Q2 and A5
+  Training Q2, transcribed from `docs/mel_tool/10_A4_Onboarding_Q2.md` and
+  `11_A5_Training_Q2.md` (10 activities each). An editable working log —
+  the source doc itself calls Start/End dates "proposals for the team to
+  confirm" — so Editors/Admins can update Start/End/Status (and Planned
+  cohorts for training rows) in-app; re-seeding never overwrites an
+  edited row (insert-missing-by-activity-number, same pattern as the MEL
+  Plan Agri-Impact questions log). Not a lettered module (A-M) in the
+  role system, so editing is gated on the generic `can("write")`
+  permission rather than inventing a new write_modules letter. Q2 target
+  (A4's OP27/OP22 banner, A5's per-training target) and per-cohort
+  (`utils.iptt_rules.per_cohort`, new — `ROUNDUP(target/cohorts)`) are
+  computed live from `mel_indicator_targets`, not stored, same rule
+  Module M's Y1 formula already follows — confirmed against the real
+  workbook to match exactly (OP27=135, OP22=2, OP9=135, OP31/OP29/OP30/
+  OP32=150). Each sheet has a Plotly Gantt chart (bar per activity,
+  colored by Status, today marked with a dashed line) below its table.
+  Verified against SQLite (pytest, 9 new seed tests + 5 new
+  `per_cohort` tests) and real Postgres 15.
+  Deferred (per explicit choice): a broader cross-module task-breakdown
+  tracker beyond this Q2 onboarding/training scope — no source material
+  for it exists in the v3 workbook, so it would need separate scoping,
+  not transcription, if ever wanted.
 - `pages/13_M_IPTT.py` — Phase 6 step 1: three CEL IPTT Guide rules that
   already had schema support (`phone_verification_pct`,
   `variance_explanation` on `mel_indicator_actuals`) or a written-but-

@@ -944,3 +944,45 @@ CREATE TABLE IF NOT EXISTS mel_agri_impact_questions (
     answered_at   TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_maiq_project ON mel_agri_impact_questions(project_id);
+
+-- A4 Onboarding Q2 + A5 Training Q2 — docs/mel_tool/10_A4_Onboarding_Q2.md
+-- and 11_A5_Training_Q2.md (Phase 6 step 2). One unified table for both
+-- sheets (sheet column distinguishes them): their columns overlap enough
+-- (activity/lead/support/location/start/end/status) that a second table
+-- would just duplicate the Gantt-rendering code, not the data. note holds
+-- A4's "Output / what done looks like" or A5's "Prerequisite / note" --
+-- same role (free-text context for the row), different wording per sheet.
+-- indicator_id/planned_cohorts are A5-only (NULL on every A4 row).
+--
+-- Q2 target and per-cohort are DELIBERATELY NOT COLUMNS HERE: the source
+-- sheets compute them live from the IPTT sheets via SUMIFS (A4 E8/E9, A5
+-- E18-E22) and ROUNDUP(target/cohorts) (A5 G18-G22) -- same "never a
+-- value typed or cached separately" rule Module M's Y1 formula follows.
+-- The page computes them at render time from mel_indicator_targets.
+--
+-- Start/End/Status/planned_cohorts are an editable working log (the
+-- source doc calls the dates "proposals for the team to confirm"):
+-- Editors/Admins can update them in-app. The seed step only inserts rows
+-- missing by (project_id, sheet, activity_number) -- it never overwrites
+-- an edited row, same pattern as mel_agri_impact_questions.
+CREATE TABLE IF NOT EXISTS mel_schedule_activities (
+    id                INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id        INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    sheet             TEXT    NOT NULL CHECK(sheet IN ('A4 Onboarding Q2', 'A5 Training Q2')),
+    activity_number   INTEGER NOT NULL,
+    group_label       TEXT    NOT NULL,
+    activity          TEXT    NOT NULL,
+    note              TEXT,
+    indicator_id      TEXT,
+    planned_cohorts   INTEGER,
+    lead_role         TEXT,
+    support_role      TEXT,
+    location          TEXT,
+    start_date        TEXT,
+    end_date          TEXT,
+    status            TEXT    NOT NULL DEFAULT 'To confirm'
+                      CHECK(status IN ('Not started', 'In progress', 'Done', 'Delayed', 'To confirm')),
+    updated_by        TEXT,
+    updated_at        TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_msa_key ON mel_schedule_activities(project_id, sheet, activity_number);

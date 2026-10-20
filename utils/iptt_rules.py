@@ -115,6 +115,20 @@ def parse_lop_target(text: str | None) -> float | None:
     return float(cleaned)
 
 
+def per_cohort(target, planned_cohorts) -> int | None:
+    """A5 Training Q2's ROUNDUP(target/cohorts) formula (G18-G22 in
+    docs/mel_tool/11_A5_Training_Q2.md): participants planned per cohort,
+    rounded up. None when either input is missing or cohorts is 0 or
+    less -- mirrors the formula's own IF(AND(ISNUMBER(target),
+    ISNUMBER(cohorts),cohorts>0),...,"") guard rather than raising.
+    """
+    t = num_or_none(target)
+    c = num_or_none(planned_cohorts)
+    if t is None or not c or c <= 0:
+        return None
+    return -(-int(t) // int(c))  # ceiling division, same as Excel ROUNDUP(x,0) for positive x
+
+
 def lop_target_mismatch(y1x4: float | None, lop_target: float | None) -> bool | None:
     """Compare a computed Y1×4 figure against the MEL Plan's own LoP
     Target. Returns True (mismatch), False (match), or None when either
