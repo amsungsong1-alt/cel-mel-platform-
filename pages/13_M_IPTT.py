@@ -358,7 +358,10 @@ else:
             # separate MEAL Lead/Program Lead roles yet, so this is the
             # safe default rather than guessing a finer-grained mapping.
             # Every transition writes an audit row to
-            # mel_indicator_actuals_changelog, previously unused.
+            # mel_indicator_actuals_changelog, previously unused. Unlock
+            # (also Admin-only) reverts Approved -> Verified so a mistake
+            # found after approval can be corrected without a direct
+            # database edit, rather than Approved being a dead end.
             st.markdown("**Workflow**")
             _can_verify_approve = can("admin")
             _actor = st.session_state.get("name") or st.session_state.get("username", "unknown")
@@ -388,7 +391,37 @@ else:
                     )
                 return len(rows_to_move)
 
-            _wf_cols = st.columns(3)
+            def _unlock_approved() -> int:
+                # Reverts Approved rows for this sheet/quarter back to
+                # Verified, clearing approved_by/approved_at (they're no
+                # longer accurate once unlocked) so a mistake found after
+                # approval can be corrected and re-approved, instead of
+                # requiring a direct database edit. Admin-only, audited the
+                # same way as every other transition.
+                now_iso = datetime.now(timezone.utc).isoformat(timespec="seconds")
+                rows_to_move = run_query(
+                    """SELECT a.id FROM mel_indicator_actuals a
+                        JOIN mel_indicators i ON i.id = a.indicator_id
+                        WHERE a.project_id=:pid AND a.fiscal_year=:fy AND a.quarter=:q
+                          AND i.model_sheet=:sheet AND a.status='Approved'""",
+                    {"pid": project_id, "fy": _entry_fy, "q": _entry_quarter, "sheet": _sheet_name},
+                )
+                for row in rows_to_move:
+                    run_write(
+                        """UPDATE mel_indicator_actuals
+                           SET status='Verified', approved_by=NULL, approved_at=NULL
+                           WHERE id=:aid""",
+                        {"aid": row["id"]},
+                    )
+                    run_write(
+                        """INSERT INTO mel_indicator_actuals_changelog
+                           (actual_id, field_changed, old_value, new_value, changed_by, changed_at)
+                           VALUES (:aid, 'status', 'Approved', 'Verified', :actor, :now)""",
+                        {"aid": row["id"], "actor": _actor, "now": now_iso},
+                    )
+                return len(rows_to_move)
+
+            _wf_cols = st.columns(4)
             with _wf_cols[0]:
                 if st.button("📤 Submit", key=f"iptt_submit_{_sheet_name}_{_entry_quarter}",
                              width="stretch"):
@@ -417,6 +450,17 @@ else:
                     n = _transition_status("Verified", "Approved", "approved_by", "approved_at")
                     (st.success if n else st.info)(
                         f"{n} row(s) approved." if n else "No Verified rows to approve."
+                    )
+                    _load_iptt_rows.clear()
+                    st.rerun()
+            with _wf_cols[3]:
+                if not _can_verify_approve:
+                    st.caption("🔒 Unlock — Admin only")
+                elif st.button("🔓 Unlock", key=f"iptt_unlock_{_sheet_name}_{_entry_quarter}",
+                               width="stretch", help="Reopens Approved rows for editing (reverts to Verified)."):
+                    n = _unlock_approved()
+                    (st.success if n else st.info)(
+                        f"{n} row(s) unlocked (back to Verified)." if n else "No Approved rows to unlock."
                     )
                     _load_iptt_rows.clear()
                     st.rerun()

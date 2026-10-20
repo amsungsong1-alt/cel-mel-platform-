@@ -6,6 +6,17 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 ## Unreleased
 
 ### Added
+- `pages/13_M_IPTT.py` — Phase 5 part 3: a 🔓 Unlock button (Admin-only,
+  next to Submit/Verify/Approve) that reverts Approved rows for a
+  sheet/quarter back to Verified, clearing `approved_by`/`approved_at` and
+  logging the reversal to `mel_indicator_actuals_changelog`. Before this,
+  an Approved row was a dead end — Save always skips Approved rows (Phase
+  5 part 2), so a mistake found after approval had no in-app fix. Unlock
+  closes that gap without allowing silent edits: a corrected value can
+  only be saved once the row is back at Verified, and it must be
+  re-approved from there. Verified against SQLite (pytest, 3 new tests)
+  and real Postgres 15 (unlock, unlock→correct→re-approve round-trip,
+  no-op when nothing is Approved).
 - `pages/13_M_IPTT.py` — Phase 5 part 2: a Draft → Submitted → Verified →
   Approved workflow on the achieved-value entry tabs (BDS/WAN/Cross-cutting
   IPTT). Per-sheet-tab, per-quarter batch transitions (the whole sheet's

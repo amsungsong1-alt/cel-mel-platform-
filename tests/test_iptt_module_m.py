@@ -224,6 +224,35 @@ def test_y1_consolidation_reflects_a_saved_achieved_value(seeded_db):
     assert isinstance(pct, float)
 
 
+def _unlock_approved(project_id, fy, quarter, sheet, actor="Test Actor"):
+    """Mirrors pages/13_M_IPTT.py's _unlock_approved(): reverts every
+    Approved row in (project, fy, quarter, sheet) back to Verified,
+    clearing approved_by/approved_at, with an audit row per row moved.
+    Returns the count moved."""
+    now_iso = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    rows = db.run_query(
+        """SELECT a.id FROM mel_indicator_actuals a
+            JOIN mel_indicators i ON i.id = a.indicator_id
+            WHERE a.project_id=:pid AND a.fiscal_year=:fy AND a.quarter=:q
+              AND i.model_sheet=:sheet AND a.status='Approved'""",
+        {"pid": project_id, "fy": fy, "q": quarter, "sheet": sheet},
+    )
+    for row in rows:
+        db.run_write(
+            """UPDATE mel_indicator_actuals
+               SET status='Verified', approved_by=NULL, approved_at=NULL
+               WHERE id=:aid""",
+            {"aid": row["id"]},
+        )
+        db.run_write(
+            """INSERT INTO mel_indicator_actuals_changelog
+               (actual_id, field_changed, old_value, new_value, changed_by, changed_at)
+               VALUES (:aid, 'status', 'Approved', 'Verified', :actor, :now)""",
+            {"aid": row["id"], "actor": actor, "now": now_iso},
+        )
+    return len(rows)
+
+
 @requires_real_workbook
 def test_workflow_chain_moves_status_and_stamps_actor_and_timestamp(seeded_db):
     db_, pid = seeded_db
@@ -366,3 +395,69 @@ def test_save_handler_must_skip_rows_already_approved(seeded_db):
 
     row = db_.run_query("SELECT achieved_value FROM mel_indicator_actuals WHERE indicator_id=:m", {"m": ind["id"]})[0]
     assert row["achieved_value"] == 45.0, "approved row's value must remain untouched"
+
+
+@requires_real_workbook
+def test_unlock_reverts_approved_row_to_verified_and_clears_approval_stamp(seeded_db):
+    db_, pid = seeded_db
+    ind = db_.run_query(
+        "SELECT id, model_sheet FROM mel_indicators WHERE project_id=:p AND indicator_id='IM1'", {"p": pid}
+    )[0]
+    _upsert_actual(ind["id"], pid, 2026, 1, 45.0, None, None, None, False)
+    _transition_status(pid, 2026, 1, ind["model_sheet"], "Draft", "Submitted", "submitted_by", "submitted_at")
+    _transition_status(pid, 2026, 1, ind["model_sheet"], "Submitted", "Verified", "verified_by", "verified_at")
+    _transition_status(pid, 2026, 1, ind["model_sheet"], "Verified", "Approved",
+                        "approved_by", "approved_at", actor="Carol")
+
+    n = _unlock_approved(pid, 2026, 1, ind["model_sheet"], actor="Dana")
+    assert n == 1
+    row = db_.run_query("SELECT * FROM mel_indicator_actuals WHERE indicator_id=:m", {"m": ind["id"]})[0]
+    assert row["status"] == "Verified"
+    assert row["approved_by"] is None
+    assert row["approved_at"] is None
+    assert row["verified_by"] == "Test Actor", "earlier verify stamp is untouched by unlock"
+
+    actual_id = row["id"]
+    log = db_.run_query(
+        """SELECT old_value, new_value, changed_by FROM mel_indicator_actuals_changelog
+           WHERE actual_id=:a AND field_changed='status' ORDER BY id""", {"a": actual_id},
+    )
+    assert log[-1] == {"old_value": "Approved", "new_value": "Verified", "changed_by": "Dana"}
+
+
+@requires_real_workbook
+def test_unlock_then_reapprove_round_trips_cleanly(seeded_db):
+    # A corrected value after unlock must be saveable (row is no longer
+    # locked once back at Verified) and re-approvable through the normal
+    # chain.
+    db_, pid = seeded_db
+    ind = db_.run_query(
+        "SELECT id, model_sheet FROM mel_indicators WHERE project_id=:p AND indicator_id='IM1'", {"p": pid}
+    )[0]
+    _upsert_actual(ind["id"], pid, 2026, 1, 45.0, None, None, None, False)
+    _transition_status(pid, 2026, 1, ind["model_sheet"], "Draft", "Submitted", "submitted_by", "submitted_at")
+    _transition_status(pid, 2026, 1, ind["model_sheet"], "Submitted", "Verified", "verified_by", "verified_at")
+    _transition_status(pid, 2026, 1, ind["model_sheet"], "Verified", "Approved", "approved_by", "approved_at")
+
+    _unlock_approved(pid, 2026, 1, ind["model_sheet"])
+    _upsert_actual(ind["id"], pid, 2026, 1, 50.0, None, None, "corrected", False)  # now allowed, status is Verified
+    n = _transition_status(pid, 2026, 1, ind["model_sheet"], "Verified", "Approved", "approved_by", "approved_at")
+    assert n == 1
+
+    row = db_.run_query("SELECT * FROM mel_indicator_actuals WHERE indicator_id=:m", {"m": ind["id"]})[0]
+    assert row["status"] == "Approved"
+    assert row["achieved_value"] == 50.0
+
+
+@requires_real_workbook
+def test_unlock_is_a_no_op_when_no_rows_are_approved(seeded_db):
+    db_, pid = seeded_db
+    ind = db_.run_query(
+        "SELECT id, model_sheet FROM mel_indicators WHERE project_id=:p AND indicator_id='IM1'", {"p": pid}
+    )[0]
+    _upsert_actual(ind["id"], pid, 2026, 1, 45.0, None, None, None, False)  # stays Draft
+
+    n = _unlock_approved(pid, 2026, 1, ind["model_sheet"])
+    assert n == 0
+    row = db_.run_query("SELECT status FROM mel_indicator_actuals WHERE indicator_id=:m", {"m": ind["id"]})[0]
+    assert row["status"] == "Draft"
