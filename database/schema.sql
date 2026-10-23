@@ -986,3 +986,72 @@ CREATE TABLE IF NOT EXISTS mel_schedule_activities (
     updated_at        TEXT
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_msa_key ON mel_schedule_activities(project_id, sheet, activity_number);
+
+-- A3 Results Framework (ToC) — docs/mel_tool/03_A3_Results_Framework_ToC.md
+-- (Phase 6 step 3). Only the ToC narrative that has no equivalent in
+-- ProFrame is stored here (goal, logic, pathways, results chain by
+-- delivery model, if-then logic) -- small, one-time transcription (~1
+-- page). Section 4, "Results framework by level", is NOT a table here at
+-- all: it is the sheet's "live links to ProFrame" (37 formulas, all of
+-- form =ProFrame!D{row} / =IF(ProFrame!X{row}="","",...)) -- the app's
+-- equivalent is a live GROUP BY mel_proframe_results.area_label query at
+-- render time (same area_label key mel_proframe_results already uses,
+-- e.g. '2.1 Work, Enterprise development and Income'), never a second
+-- copy of key_result_statement/assumptions/risks/indicator IDs.
+CREATE TABLE IF NOT EXISTS mel_a3_toc (
+    id                INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id        INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    goal              TEXT    NOT NULL,
+    logic             TEXT    NOT NULL,
+    not_reported_note TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_a3_toc_project ON mel_a3_toc(project_id);
+
+-- "CEL indicators (IDs)" and "Key measures" for each of the 12 result
+-- areas in section 4 -- despite sitting in the same table as the 3
+-- live-linked columns, these two are NOT among the 37 live-link formulas
+-- in docs/mel_tool/03_A3_Results_Framework_ToC.md (only key result
+-- statement/assumptions/risks are: columns C/E/F). They are hand-curated
+-- static text in the real workbook (e.g. Impact level lists only IM1-3,
+-- not IM4, even though ProFrame's Impact area has an IM4 row) -- so they
+-- are transcribed here, not computed from mel_proframe_results. area_label
+-- is the join key to mel_proframe_results.area_label (same key the
+-- existing ProFrame view already groups by).
+CREATE TABLE IF NOT EXISTS mel_a3_result_areas (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id    INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    area_label    TEXT    NOT NULL,
+    indicator_ids TEXT,
+    key_measures  TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_a3ra_key ON mel_a3_result_areas(project_id, area_label);
+
+CREATE TABLE IF NOT EXISTS mel_a3_pathways (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id    INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    pathway_label TEXT    NOT NULL,
+    description   TEXT    NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_a3p_key ON mel_a3_pathways(project_id, pathway_label);
+
+-- One row per delivery-model pathway (A-E), section 2's results chain.
+CREATE TABLE IF NOT EXISTS mel_a3_results_chain (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id      INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    pathway_letter  TEXT    NOT NULL CHECK(pathway_letter IN ('A', 'B', 'C', 'D', 'E')),
+    pathway_label   TEXT    NOT NULL,
+    delivery_models TEXT    NOT NULL,
+    outputs         TEXT,
+    outcomes        TEXT,
+    impact          TEXT,
+    key_measure     TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_a3rc_key ON mel_a3_results_chain(project_id, pathway_letter);
+
+CREATE TABLE IF NOT EXISTS mel_a3_if_then (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id  INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    sequence    INTEGER NOT NULL,
+    statement   TEXT    NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_a3if_key ON mel_a3_if_then(project_id, sequence);

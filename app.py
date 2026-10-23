@@ -151,6 +151,18 @@ except Exception as _e:
     print(f"A4/A5 schedule seed skipped: {_e}\n{_traceback.format_exc()}", flush=True)
     st.warning(f"A4/A5 schedule seed skipped: {_e}")
 
+# A3 Results Framework (ToC) narrative (Phase 6 step 3): same idempotent,
+# unconditional-seed pattern as mel_indicators above. Section 4 ("Results
+# framework by level") is not seeded anywhere -- it's a live query
+# against the already-seeded mel_proframe_results, same as the real
+# sheet's live-link formulas to ProFrame.
+try:
+    from database.seed_a3_toc import seed as _seed_a3_toc
+    _seed_a3_toc()
+except Exception as _e:
+    print(f"A3 Results Framework (ToC) seed skipped: {_e}\n{_traceback.format_exc()}", flush=True)
+    st.warning(f"A3 Results Framework (ToC) seed skipped: {_e}")
+
 # ── Brand ─────────────────────────────────────────────────────────────────────
 NAVY = "#4A5568"
 GOLD = "#F5A820"
@@ -493,6 +505,140 @@ with st.expander("🎯 ProFrame — Results Framework (v3, 12 result areas)", ex
                     f"{_row['cel_scope'] or ''}{' · ' + _row['note'] if _row['note'] else ''}"
                     f"</span>",
                     unsafe_allow_html=True,
+                )
+
+# ── A3 — Results Framework (ToC) ─────────────────────────────────────────────
+# Phase 6 step 3. Goal/logic/pathways/results chain/if-then logic are
+# one-time transcription from docs/mel_tool/03_A3_Results_Framework_ToC.md
+# (no equivalent in ProFrame). "Results framework by level" is the real
+# sheet's 37 live-link formulas to ProFrame, reproduced here as a live
+# query against the already-seeded mel_proframe_results grouped by
+# area_label -- never a second copy of key_result_statement/assumptions/
+# risks/indicator IDs/key measures.
+with st.expander("🔗 A3 — Results Framework / Theory of Change (v3)", expanded=False):
+    _a3_view = st.selectbox(
+        "View",
+        ["Theory of Change", "Results chain by delivery model", "If-then logic",
+         "Results framework by level (live-linked to ProFrame)"],
+        key="a3_view_select",
+    )
+
+    if _a3_view == "Theory of Change":
+        _a3_toc = run_query(
+            """SELECT t.* FROM mel_a3_toc t
+               JOIN projects pr ON pr.project_id = t.project_id
+               WHERE pr.name = 'SAWA'""",
+            {},
+        )
+        if not _a3_toc:
+            st.caption("A3 ToC not seeded yet — reload once the SAWA project exists.")
+        else:
+            _toc = _a3_toc[0]
+            with st.container(border=True):
+                st.markdown(f"**Goal:** {_toc['goal']}")
+            with st.container(border=True):
+                st.markdown(f"**Logic:** {_toc['logic']}")
+            _a3_pathways = run_query(
+                """SELECT p.* FROM mel_a3_pathways p
+                   JOIN projects pr ON pr.project_id = p.project_id
+                   WHERE pr.name = 'SAWA' ORDER BY p.id""",
+                {},
+            )
+            st.markdown("**Pathways to change:**")
+            for _p in _a3_pathways:
+                with st.container(border=True):
+                    st.markdown(f"**{_p['pathway_label']}:** {_p['description']}")
+
+    elif _a3_view == "Results chain by delivery model":
+        _a3_chain = run_query(
+            """SELECT c.* FROM mel_a3_results_chain c
+               JOIN projects pr ON pr.project_id = c.project_id
+               WHERE pr.name = 'SAWA' ORDER BY c.pathway_letter""",
+            {},
+        )
+        if not _a3_chain:
+            st.caption("A3 results chain not seeded yet — reload once the SAWA project exists.")
+        else:
+            for _c in _a3_chain:
+                with st.container(border=True):
+                    st.markdown(f"**{_c['pathway_letter']}. {_c['pathway_label']}** · {_c['key_measure']}")
+                    st.markdown(f"**Delivery models:**  \n{_c['delivery_models']}")
+                    if _c["outputs"]:
+                        st.markdown(f"**Outputs:**  \n{_c['outputs']}")
+                    if _c["outcomes"]:
+                        st.markdown(f"**Outcomes:**  \n{_c['outcomes']}")
+                    if _c["impact"]:
+                        st.markdown(f"**Impact:**  \n{_c['impact']}")
+            _a3_note = run_query(
+                """SELECT not_reported_note FROM mel_a3_toc t
+                   JOIN projects pr ON pr.project_id = t.project_id
+                   WHERE pr.name = 'SAWA'""",
+                {},
+            )
+            if _a3_note and _a3_note[0]["not_reported_note"]:
+                st.caption(_a3_note[0]["not_reported_note"])
+
+    elif _a3_view == "If-then logic":
+        _a3_if_then = run_query(
+            """SELECT i.* FROM mel_a3_if_then i
+               JOIN projects pr ON pr.project_id = i.project_id
+               WHERE pr.name = 'SAWA' ORDER BY i.sequence""",
+            {},
+        )
+        for _i in _a3_if_then:
+            st.markdown(f"- {_i['statement']}")
+
+    else:  # Results framework by level (live-linked to ProFrame)
+        _a3_level_rows = run_query(
+            """SELECT r.area_label, r.level, r.key_result_statement, r.assumptions, r.risks
+               FROM mel_proframe_results r
+               JOIN projects pr ON pr.project_id = r.project_id
+               WHERE pr.name = 'SAWA'
+               ORDER BY r.id""",
+            {},
+        )
+        _a3_areas_static = {
+            r["area_label"]: r for r in run_query(
+                """SELECT a.area_label, a.indicator_ids, a.key_measures FROM mel_a3_result_areas a
+                   JOIN projects pr ON pr.project_id = a.project_id
+                   WHERE pr.name = 'SAWA'""",
+                {},
+            )
+        }
+        if not _a3_level_rows:
+            st.caption("ProFrame not seeded yet — reload once the SAWA project exists.")
+        else:
+            st.caption(
+                "Key result statement, assumptions and risks are read live from ProFrame (the "
+                "source sheet's own live-link formulas — columns C/E/F of the 37 listed in "
+                "docs/mel_tool/03_A3_Results_Framework_ToC.md). CEL indicator IDs and key "
+                "measures are NOT among those formulas in the real workbook — they're the "
+                "sheet's own hand-curated text (e.g. the Impact level lists only IM1-IM3, not "
+                "IM4, even though ProFrame's Impact area has an IM4 row), so they're transcribed "
+                "here rather than computed."
+            )
+            _a3_level_areas: dict[str, list] = {}
+            for _r in _a3_level_rows:
+                _a3_level_areas.setdefault(_r["area_label"], []).append(_r)
+            _a3_level_selected = st.selectbox(
+                "Result area", list(_a3_level_areas.keys()), key="a3_level_area_select",
+            )
+            _level_first = _a3_level_areas[_a3_level_selected][0]
+            _level_static = _a3_areas_static.get(_a3_level_selected)
+            with st.container(border=True):
+                st.markdown(f"**{_level_first['level']} — {_a3_level_selected}**")
+                st.markdown(f"**Key result statement:** {_level_first['key_result_statement']}")
+                st.markdown(
+                    f"**CEL indicators (IDs):** {_level_static['indicator_ids'] if _level_static else '—'}"
+                )
+                if _level_first["assumptions"]:
+                    st.markdown("**Assumptions:**")
+                    st.markdown(_level_first["assumptions"])
+                if _level_first["risks"]:
+                    st.markdown("**Risks:**")
+                    st.markdown(_level_first["risks"])
+                st.markdown(
+                    f"**Key measures:** {(_level_static['key_measures'] if _level_static else None) or '—'}"
                 )
 
 # ── Shared Measures 2.0 — Crosswalk ────────────────────────────────────────────

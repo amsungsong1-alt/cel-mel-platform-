@@ -731,3 +731,56 @@ CREATE TABLE IF NOT EXISTS mel_schedule_activities (
     updated_at        TEXT
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_msa_key ON mel_schedule_activities(project_id, sheet, activity_number);
+
+-- A3 Results Framework (ToC) — see database/schema.sql's mel_a3_toc
+-- comment (Phase 6 step 3) for why section 4 ("Results framework by
+-- level") has no table here: it's computed live from mel_proframe_results.
+CREATE TABLE IF NOT EXISTS mel_a3_toc (
+    id                INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    project_id        INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    goal              TEXT    NOT NULL,
+    logic             TEXT    NOT NULL,
+    not_reported_note TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_a3_toc_project ON mel_a3_toc(project_id);
+
+-- See database/schema.sql's mel_a3_result_areas comment for why
+-- "CEL indicators (IDs)" and "Key measures" are transcribed here, not
+-- computed from mel_proframe_results.
+CREATE TABLE IF NOT EXISTS mel_a3_result_areas (
+    id            INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    project_id    INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    area_label    TEXT    NOT NULL,
+    indicator_ids TEXT,
+    key_measures  TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_a3ra_key ON mel_a3_result_areas(project_id, area_label);
+
+CREATE TABLE IF NOT EXISTS mel_a3_pathways (
+    id            INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    project_id    INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    pathway_label TEXT    NOT NULL,
+    description   TEXT    NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_a3p_key ON mel_a3_pathways(project_id, pathway_label);
+
+CREATE TABLE IF NOT EXISTS mel_a3_results_chain (
+    id              INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    project_id      INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    pathway_letter  TEXT    NOT NULL CHECK(pathway_letter IN ('A', 'B', 'C', 'D', 'E')),
+    pathway_label   TEXT    NOT NULL,
+    delivery_models TEXT    NOT NULL,
+    outputs         TEXT,
+    outcomes        TEXT,
+    impact          TEXT,
+    key_measure     TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_a3rc_key ON mel_a3_results_chain(project_id, pathway_letter);
+
+CREATE TABLE IF NOT EXISTS mel_a3_if_then (
+    id          INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    project_id  INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    sequence    INTEGER NOT NULL,
+    statement   TEXT    NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_a3if_key ON mel_a3_if_then(project_id, sequence);

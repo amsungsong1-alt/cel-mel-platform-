@@ -5,7 +5,59 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 
 ## Unreleased
 
+### Fixed
+- `database/seed_proframe.py` — **urgent, production data**: `indicator_id`
+  on 14 of the 63 ProFrame result rows was wrong, discovered while
+  building Phase 6 step 3's A3 live-link view (which cross-checks
+  ProFrame's groupings against the authoritative `06_Project_IPTT.md`).
+  Root cause: these links were computed in Phase 1, before Phase 3's
+  indicator-identity cutover to the real 55-indicator v3 scheme, and
+  never re-linked afterwards — 2 rows pointed at phantom IDs that don't
+  exist in the real scheme at all (`OP38`, `OP39`, leftover v1-scheme
+  codes), and several area groupings were substantively wrong (e.g.
+  "2.2 Aquaculture Production and Revenue" pointed at `OC7, OC8`, the
+  TechnoServe fund indicators, instead of `OC9, OC10`, fish production/
+  revenue). Re-linked by exact indicator-statement match against the real
+  workbook (5 more resolved via known wording changes since the cutover,
+  e.g. "program" → "programme"); the remaining ~15 unmatched rows are
+  genuinely out-of-CEL-scope ProFrame rows (regulatory/compliance,
+  starter-pack duplicates) with no real-scheme counterpart, left
+  unlinked rather than guessed. `seed_proframe.seed()` now also
+  backfills `indicator_id` on rows that already existed under the old
+  stale values — caught by a dedicated regression test before it could
+  become a real bug (same class of gap as the MEL Plan
+  `indicator_id` backfill fix, Phase 5 part 4 step 2: the existing
+  insert-missing-only pattern alone would never correct an
+  already-seeded row). Verified against SQLite and real Postgres 15,
+  including the exact already-seeded-then-fixed scenario. 2 of the
+  existing tests in `tests/test_seed_proframe.py` were asserting the old,
+  wrong values and are corrected; one (`test_every_matched_indicator_id_*`)
+  now cross-checks against the real workbook via
+  `scripts/seed_from_workbook.py` instead of the deprecated
+  `seed_mel_indicators.py`, which was itself a source of stale IDs.
+
 ### Added
+- `database/seed_a3_toc.py` + 5 new tables (`mel_a3_toc`, `mel_a3_pathways`,
+  `mel_a3_results_chain`, `mel_a3_if_then`, `mel_a3_result_areas`) —
+  Phase 6 step 3 (completes Phase 6): A3 Results Framework (ToC), from
+  `docs/mel_tool/03_A3_Results_Framework_ToC.md`. Goal, logic, pathways to
+  change, the 5-row results chain by delivery model (A-E), and the 4
+  if-then statements are one-time static transcription (no ProFrame
+  equivalent). The "Results framework by level" section (12 result areas)
+  is a hybrid, matching the real workbook's own formula inventory exactly:
+  key result statement/assumptions/risks genuinely are 3 of the sheet's 37
+  live-link formulas to ProFrame (columns C/E/F), so those are a live
+  query against `mel_proframe_results` grouped by `area_label` (the same
+  key the existing ProFrame view already groups by) — never a second
+  copy. CEL indicator IDs and key measures looked like they should be
+  live-linked too, but checking the formula inventory directly showed
+  they aren't (e.g. the Impact level's IDs column lists only `IM1-IM3`,
+  not `IM4`, even though ProFrame's Impact area has an `IM4` row) — those
+  12 rows are transcribed instead. New "🔗 A3 — Results Framework / Theory
+  of Change (v3)" expander on the home page. Verified against SQLite and
+  real Postgres 15 (all 12 areas' live-linked statement + transcribed IDs/
+  measures checked against the source doc exactly). 10 new tests in
+  `tests/test_seed_a3_toc.py`.
 - `pages/14_Q2_Schedule.py` + `database/seed_schedule.py` + 1 new table
   (`mel_schedule_activities`) — Phase 6 step 2: A4 Onboarding Q2 and A5
   Training Q2, transcribed from `docs/mel_tool/10_A4_Onboarding_Q2.md` and
