@@ -5,6 +5,39 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 
 ## Unreleased
 
+### Changed
+- `database/db.py` — further batched `_run_migrations()`'s Postgres
+  branch, the explicitly-deferred follow-up to the earlier urgent
+  migration-speed fix. Investigated all remaining individual
+  `conn.execute()`/`_tc.execute()` calls in that branch before touching
+  anything: the large majority turned out to be parameterized,
+  data-driven backfill/cleanup loops (historical one-off corrections —
+  partner name fixes, target-value corrections, review-protocol text,
+  sample Module K tasks, etc.), not simple static DDL — converting those
+  to a single round trip safely would need a larger VALUES-table rewrite
+  per loop (literal SQL string interpolation was deliberately avoided, to
+  not introduce SQL-injection-shaped code even though every value here is
+  a hardcoded Python constant), so they were left as-is rather than
+  risking a rushed rewrite for a "nice to have, not currently a live
+  complaint" task. Batched only what was genuinely safe and mechanical:
+  the `pg_advisory_xact_lock` call into the main schema script, the
+  orphaned `idx_rda_partner` index into its adjacent `ALTER` batch, the
+  `workplan_activities` table+3-index block, and all 7 of the
+  isolated-own-transaction blocks for `team_time_entries`,
+  `team_activity_log`, `participant_register`, `mel_activities`,
+  `learnings`, `qr_actuals` (creation), and `report_sections` — each was
+  3-5 fully static, back-to-back `CREATE TABLE`/`CREATE INDEX` statements
+  with no dependency between them, now one `_execute_script()` call per
+  block, same isolation and exception handling as before. `qr_actuals`'s
+  dynamic `DROP CONSTRAINT`-by-looked-up-name step kept its own nested
+  try/except deliberately, not batched, since merging it would silently
+  change what happens if that one step fails. Saves ~29 round trips (of
+  ~195) on every Postgres boot — roughly 2.6s at the ~90ms/round-trip rate
+  measured in the original investigation. Verified against SQLite (full
+  pytest suite) and real Postgres 15: migrations complete successfully
+  on both a fresh database and an already-migrated one, and every batched
+  table/column/index is present and correct afterwards.
+
 ### Fixed
 - `database/seed_proframe.py` — **urgent, production data**: `indicator_id`
   on 14 of the 63 ProFrame result rows was wrong, discovered while

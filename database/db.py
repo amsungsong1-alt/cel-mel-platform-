@@ -287,8 +287,7 @@ def _run_migrations(schema_fingerprint: str) -> bool:
             # rolling redeploy) — pg_advisory_xact_lock serializes any other
             # session trying to migrate at the same time and auto-releases
             # at transaction end, so it can't leak on an exception.
-            conn.execute(text("SELECT pg_advisory_xact_lock(823771)"))
-            _execute_script(conn, schema)
+            _execute_script(conn, "SELECT pg_advisory_xact_lock(823771);\n" + schema)
             # Migrate existing tables that predate these columns.
             _execute_script(conn, """
                 ALTER TABLE raw_data_analysis ADD COLUMN IF NOT EXISTS reporting_year INTEGER;
@@ -300,6 +299,7 @@ def _run_migrations(schema_fingerprint: str) -> bool:
                 ALTER TABLE raw_data_analysis ADD COLUMN IF NOT EXISTS dqa_stage TEXT;
                 ALTER TABLE raw_data_analysis ADD COLUMN IF NOT EXISTS disaggregation TEXT;
                 ALTER TABLE raw_data_analysis ADD COLUMN IF NOT EXISTS partner_id INTEGER;
+                CREATE INDEX IF NOT EXISTS idx_rda_partner ON raw_data_analysis(partner_id);
                 ALTER TABLE mel_indicators ADD COLUMN IF NOT EXISTS sm_code TEXT;
                 CREATE INDEX IF NOT EXISTS idx_mind_sm_code ON mel_indicators(sm_code);
                 ALTER TABLE mel_plan_indicators ADD COLUMN IF NOT EXISTS indicator_id TEXT;
@@ -365,10 +365,9 @@ def _run_migrations(schema_fingerprint: str) -> bool:
                 "ALTER TABLE partners ADD CONSTRAINT partners_tier_check "
                 "CHECK (tier IN ('Anchor','Technical','Implementing','Institutional Strengthening'))"
             ))
-            # Index must come after ADD COLUMN (schema.sql can't do it safely on existing DBs).
-            conn.execute(text(
-                "CREATE INDEX IF NOT EXISTS idx_rda_partner ON raw_data_analysis(partner_id)"
-            ))
+            # (idx_rda_partner's CREATE INDEX now lives in the ALTER batch
+            # above, right after the ADD COLUMN it depends on, in the same
+            # _execute_script() call -- was a separate round trip here.)
             # Backfill rows written before reporting_year existed, so every
             # query can filter on it directly without a NULL special case.
             conn.execute(
@@ -834,7 +833,7 @@ def _run_migrations(schema_fingerprint: str) -> bool:
                     "actual": _actual, "issue": _issue, "role": _role,
                 })
             # Ensure workplan_activities table exists (added after initial schema deploy).
-            conn.execute(text("""
+            _execute_script(conn, """
                 CREATE TABLE IF NOT EXISTS workplan_activities (
                     id              INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                     project_id      INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
@@ -849,11 +848,11 @@ def _run_migrations(schema_fingerprint: str) -> bool:
                                     CHECK(status IN ('Not Started','In Progress','Complete','Delayed')),
                     logframe_row_id INTEGER REFERENCES logframe_rows(id) ON DELETE SET NULL,
                     notes           TEXT
-                )
-            """))
-            conn.execute(text("CREATE INDEX IF NOT EXISTS idx_wa_project ON workplan_activities(project_id)"))
-            conn.execute(text("CREATE INDEX IF NOT EXISTS idx_wa_partner ON workplan_activities(partner_id)"))
-            conn.execute(text("CREATE INDEX IF NOT EXISTS idx_wa_quarter ON workplan_activities(quarter, fiscal_year)"))
+                );
+                CREATE INDEX IF NOT EXISTS idx_wa_project ON workplan_activities(project_id);
+                CREATE INDEX IF NOT EXISTS idx_wa_partner ON workplan_activities(partner_id);
+                CREATE INDEX IF NOT EXISTS idx_wa_quarter ON workplan_activities(quarter, fiscal_year);
+            """)
             # Remove the TBC placeholder row that was never confirmed.
             conn.execute(text("""
                 DELETE FROM partner_targets
@@ -1050,10 +1049,13 @@ def _run_migrations(schema_fingerprint: str) -> bool:
                        "due": _due, "asgn": _asgn, "code": _code or ""})
         # team_time_entries is created in a separate transaction so that any
         # privilege error on a manually-pre-created table cannot roll back the
-        # main migration above.
+        # main migration above. Each table's CREATE + its CREATE INDEX
+        # statements are one _execute_script() call (one round trip) instead
+        # of one conn.execute() per statement -- same isolation, same
+        # all-or-nothing exception handling per block, fewer round trips.
         try:
             with engine.begin() as _tc:
-                _tc.execute(text("""
+                _execute_script(_tc, """
                     CREATE TABLE IF NOT EXISTS team_time_entries (
                         id          INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                         project_id  INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
@@ -1064,18 +1066,18 @@ def _run_migrations(schema_fingerprint: str) -> bool:
                         task_id     INTEGER REFERENCES team_tasks(id) ON DELETE SET NULL,
                         logged_by   TEXT,
                         created_at  TEXT    NOT NULL
-                    )
-                """))
-                _tc.execute(text("CREATE INDEX IF NOT EXISTS idx_tte_project ON team_time_entries(project_id)"))
-                _tc.execute(text("CREATE INDEX IF NOT EXISTS idx_tte_role    ON team_time_entries(team_role)"))
-                _tc.execute(text("CREATE INDEX IF NOT EXISTS idx_tte_date    ON team_time_entries(entry_date)"))
+                    );
+                    CREATE INDEX IF NOT EXISTS idx_tte_project ON team_time_entries(project_id);
+                    CREATE INDEX IF NOT EXISTS idx_tte_role    ON team_time_entries(team_role);
+                    CREATE INDEX IF NOT EXISTS idx_tte_date    ON team_time_entries(entry_date);
+                """)
         except Exception:
             pass  # table already exists (created manually in Supabase SQL Editor)
         # Same isolated-transaction treatment for team_activity_log (Daily
         # Activity chart on the Time tab) — new table, same rationale as above.
         try:
             with engine.begin() as _tc:
-                _tc.execute(text("""
+                _execute_script(_tc, """
                     CREATE TABLE IF NOT EXISTS team_activity_log (
                         id          INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                         project_id  INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
@@ -1083,17 +1085,17 @@ def _run_migrations(schema_fingerprint: str) -> bool:
                         action_type TEXT    NOT NULL,
                         logged_by   TEXT,
                         logged_at   TEXT    NOT NULL
-                    )
-                """))
-                _tc.execute(text("CREATE INDEX IF NOT EXISTS idx_tal_project ON team_activity_log(project_id)"))
-                _tc.execute(text("CREATE INDEX IF NOT EXISTS idx_tal_role    ON team_activity_log(team_role)"))
-                _tc.execute(text("CREATE INDEX IF NOT EXISTS idx_tal_date    ON team_activity_log(logged_at)"))
+                    );
+                    CREATE INDEX IF NOT EXISTS idx_tal_project ON team_activity_log(project_id);
+                    CREATE INDEX IF NOT EXISTS idx_tal_role    ON team_activity_log(team_role);
+                    CREATE INDEX IF NOT EXISTS idx_tal_date    ON team_activity_log(logged_at);
+                """)
         except Exception:
             pass
         # Module L: Participant Register
         try:
             with engine.begin() as _tc:
-                _tc.execute(text("""
+                _execute_script(_tc, """
                     CREATE TABLE IF NOT EXISTS participant_register (
                         id                 INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                         project_id         INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
@@ -1125,18 +1127,18 @@ def _run_migrations(schema_fingerprint: str) -> bool:
                         registered_by      TEXT,
                         notes              TEXT,
                         created_at         TEXT NOT NULL
-                    )
-                """))
-                _tc.execute(text("CREATE INDEX IF NOT EXISTS idx_pr_project ON participant_register(project_id)"))
-                _tc.execute(text("CREATE INDEX IF NOT EXISTS idx_pr_quarter ON participant_register(fiscal_year, quarter)"))
-                _tc.execute(text("CREATE INDEX IF NOT EXISTS idx_pr_fish    ON participant_register(fish_type)"))
-                _tc.execute(text("CREATE INDEX IF NOT EXISTS idx_pr_stage   ON participant_register(progression_stage)"))
+                    );
+                    CREATE INDEX IF NOT EXISTS idx_pr_project ON participant_register(project_id);
+                    CREATE INDEX IF NOT EXISTS idx_pr_quarter ON participant_register(fiscal_year, quarter);
+                    CREATE INDEX IF NOT EXISTS idx_pr_fish    ON participant_register(fish_type);
+                    CREATE INDEX IF NOT EXISTS idx_pr_stage   ON participant_register(progression_stage);
+                """)
         except Exception:
             pass
         # Module L: MEL Activities log
         try:
             with engine.begin() as _tc:
-                _tc.execute(text("""
+                _execute_script(_tc, """
                     CREATE TABLE IF NOT EXISTS mel_activities (
                         id            INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                         project_id    INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
@@ -1155,16 +1157,16 @@ def _run_migrations(schema_fingerprint: str) -> bool:
                         follow_up     TEXT,
                         conducted_by  TEXT,
                         created_at    TEXT NOT NULL
-                    )
-                """))
-                _tc.execute(text("CREATE INDEX IF NOT EXISTS idx_ma_project ON mel_activities(project_id)"))
-                _tc.execute(text("CREATE INDEX IF NOT EXISTS idx_ma_quarter ON mel_activities(fiscal_year, quarter)"))
+                    );
+                    CREATE INDEX IF NOT EXISTS idx_ma_project ON mel_activities(project_id);
+                    CREATE INDEX IF NOT EXISTS idx_ma_quarter ON mel_activities(fiscal_year, quarter);
+                """)
         except Exception:
             pass
         # Module L: Learnings (§6.1 and §6.2)
         try:
             with engine.begin() as _tc:
-                _tc.execute(text("""
+                _execute_script(_tc, """
                     CREATE TABLE IF NOT EXISTS learnings (
                         id            INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                         project_id    INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
@@ -1179,17 +1181,17 @@ def _run_migrations(schema_fingerprint: str) -> bool:
                         reason        TEXT,
                         created_by    TEXT,
                         created_at    TEXT NOT NULL
-                    )
-                """))
-                _tc.execute(text("CREATE INDEX IF NOT EXISTS idx_lrn_project ON learnings(project_id)"))
-                _tc.execute(text("CREATE INDEX IF NOT EXISTS idx_lrn_quarter ON learnings(fiscal_year, quarter)"))
-                _tc.execute(text("CREATE INDEX IF NOT EXISTS idx_lrn_type    ON learnings(learning_type)"))
+                    );
+                    CREATE INDEX IF NOT EXISTS idx_lrn_project ON learnings(project_id);
+                    CREATE INDEX IF NOT EXISTS idx_lrn_quarter ON learnings(fiscal_year, quarter);
+                    CREATE INDEX IF NOT EXISTS idx_lrn_type    ON learnings(learning_type);
+                """)
         except Exception:
             pass
         # Module L: Quarterly Report Actuals (§7 reconciliation)
         try:
             with engine.begin() as _tc:
-                _tc.execute(text("""
+                _execute_script(_tc, """
                     CREATE TABLE IF NOT EXISTS qr_actuals (
                         id                 INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                         project_id         INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
@@ -1214,21 +1216,30 @@ def _run_migrations(schema_fingerprint: str) -> bool:
                         updated_by         TEXT,
                         updated_at         TEXT,
                         UNIQUE(project_id, fiscal_year, indicator_code)
-                    )
-                """))
-                _tc.execute(text("CREATE INDEX IF NOT EXISTS idx_qra_project ON qr_actuals(project_id)"))
-                _tc.execute(text("CREATE INDEX IF NOT EXISTS idx_qra_year    ON qr_actuals(fiscal_year)"))
+                    );
+                    CREATE INDEX IF NOT EXISTS idx_qra_project ON qr_actuals(project_id);
+                    CREATE INDEX IF NOT EXISTS idx_qra_year    ON qr_actuals(fiscal_year);
+                """)
         except Exception:
             pass
-        # qr_actuals — add submitting_org + quarterly target columns (idempotent)
+        # qr_actuals — add submitting_org + quarterly target columns
+        # (idempotent). The DROP CONSTRAINT IF EXISTS keeps its own nested
+        # try/except deliberately (NOT merged into a batch): it's an
+        # independent, best-effort step whose failure must not abort the
+        # CREATE UNIQUE INDEX that follows it, so batching it into one
+        # all-or-nothing _execute_script() call would silently change that
+        # error-recovery behaviour. The 5 static ADD COLUMN / DROP INDEX
+        # statements around it have no such constraint and are batched.
         try:
             with engine.begin() as _tc:
-                _tc.execute(text("ALTER TABLE qr_actuals ADD COLUMN IF NOT EXISTS submitting_org TEXT NOT NULL DEFAULT 'CEL'"))
-                _tc.execute(text("ALTER TABLE qr_actuals ADD COLUMN IF NOT EXISTS target_q1 TEXT"))
-                _tc.execute(text("ALTER TABLE qr_actuals ADD COLUMN IF NOT EXISTS target_q2 TEXT"))
-                _tc.execute(text("ALTER TABLE qr_actuals ADD COLUMN IF NOT EXISTS target_q3 TEXT"))
-                _tc.execute(text("ALTER TABLE qr_actuals ADD COLUMN IF NOT EXISTS target_q4 TEXT"))
-                _tc.execute(text("DROP INDEX IF EXISTS idx_qra_key"))
+                _execute_script(_tc, """
+                    ALTER TABLE qr_actuals ADD COLUMN IF NOT EXISTS submitting_org TEXT NOT NULL DEFAULT 'CEL';
+                    ALTER TABLE qr_actuals ADD COLUMN IF NOT EXISTS target_q1 TEXT;
+                    ALTER TABLE qr_actuals ADD COLUMN IF NOT EXISTS target_q2 TEXT;
+                    ALTER TABLE qr_actuals ADD COLUMN IF NOT EXISTS target_q3 TEXT;
+                    ALTER TABLE qr_actuals ADD COLUMN IF NOT EXISTS target_q4 TEXT;
+                    DROP INDEX IF EXISTS idx_qra_key;
+                """)
                 try:
                     _tc.execute(text("ALTER TABLE qr_actuals DROP CONSTRAINT IF EXISTS qr_actuals_project_id_fiscal_year_indicator_code_key"))
                 except Exception:
@@ -1239,7 +1250,7 @@ def _run_migrations(schema_fingerprint: str) -> bool:
         # Module L: Report Sections — narrative content per section, per quarter
         try:
             with engine.begin() as _tc:
-                _tc.execute(text("""
+                _execute_script(_tc, """
                     CREATE TABLE IF NOT EXISTS report_sections (
                         id            INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                         project_id    INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
@@ -1254,10 +1265,10 @@ def _run_migrations(schema_fingerprint: str) -> bool:
                         updated_by    TEXT,
                         updated_at    TEXT,
                         UNIQUE(project_id, fiscal_year, quarter, section_code)
-                    )
-                """))
-                _tc.execute(text("CREATE INDEX IF NOT EXISTS idx_rs_project ON report_sections(project_id)"))
-                _tc.execute(text("CREATE INDEX IF NOT EXISTS idx_rs_quarter ON report_sections(fiscal_year, quarter)"))
+                    );
+                    CREATE INDEX IF NOT EXISTS idx_rs_project ON report_sections(project_id);
+                    CREATE INDEX IF NOT EXISTS idx_rs_quarter ON report_sections(fiscal_year, quarter);
+                """)
         except Exception:
             pass
         print("_run_migrations: Postgres transaction committed successfully.", flush=True)
