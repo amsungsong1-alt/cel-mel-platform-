@@ -6,6 +6,54 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 ## Unreleased
 
 ### Changed
+- **Retired `qr_actuals`, rebuilt Module L's §7 Technical Reconciliation
+  against a new, dedicated schema.** `qr_actuals` had been deliberately kept
+  running after the Phase 3 indicator-identity cutover, conditioned on
+  Module L being rebuilt against the new IM/OC/OP scheme first — scoping
+  that rebuild found no production data in the table (an empty skeleton)
+  and that most of its ~22 CEL/TechnoServe lines have no real equivalent in
+  the new 55-indicator scheme at all (TechnoServe's own Y1 workplan totals
+  are reported "by partner, not as programme-wide totals" per
+  `docs/mel_tool/05_A2_Data_Flow_and_Roles.md`), so rather than force this
+  reconciliation onto Module M's `mel_indicator_actuals` (no org dimension,
+  wrong tool for this job), it now has its own tables: `mel_reconciliation_lines`
+  (identity: project/submitting_org/reconciliation_code, the new stable
+  `CEL-1..12`/`TS-1..10` codes this table owns, with the old pre-cutover
+  planner code kept only as `old_planner_code` history, plus an optional,
+  purely informational `cel_indicator_id` cross-reference — never a join
+  key — set for the 3 lines with a clear correspondence: `CEL-1`→`OP27`,
+  `TS-7`→`OC7`, `TS-8`→`OC8`), `mel_reconciliation_targets`, and
+  `mel_reconciliation_actuals` — normalized one-row-per-quarter like
+  `mel_indicator_targets`/`mel_indicator_actuals`, not `qr_actuals`' old
+  wide-row-per-year shape. Y1 totals and % are computed live via
+  `utils.iptt_rules.year1_value()`/`percentage()`, the same formulas Module
+  M uses, never re-derived. `database/seed_reconciliation.py` seeds the 12
+  CEL + 10 TechnoServe lines and their FY2026 Y1 targets once at boot
+  (insert-missing-only, never touching an edited actual), replacing the old
+  per-page-load `INSERT ... ON CONFLICT DO NOTHING` seeding that used to
+  live inside `pages/12_L_Quarterly_Report.py` itself. Tab 6 ("§7 Technical
+  Reconciliation") is rebuilt against the new tables with the same
+  user-facing shape (Y1 target, quarterly target/actual grid, tilapia/catfish
+  split for the 3 CEL lines that need it, CSV export, editable form), plus a
+  🔗 cross-reference badge where one exists. `utils/report_generator.py`'s
+  §7 narrative-report read now pulls from `mel_reconciliation_actuals`
+  joined to `mel_reconciliation_lines.old_planner_code` instead of
+  `qr_actuals`, filtering to the exact quarter directly (possible now that
+  actuals are one row per quarter). `qr_actuals` itself is fully retired —
+  removed from `database/schema.sql` and both of `database/db.py`'s
+  Postgres/SQLite incremental-migration blocks (it never had a
+  `schema_postgres.sql` entry of its own; Postgres created it only via that
+  now-removed migration block) — but deliberately NOT dropped from any
+  already-deployed database: leaving the now-unused table in production is
+  harmless and reversible, and actually dropping it is a separate, explicit
+  action for later, not bundled into this change. Verified against the full
+  pytest suite (SQLite) and a real local Postgres 15 instance (throwaway
+  role/database): migrations create the new tables and leave no
+  `qr_actuals`, seeding is idempotent and correctly produces the 3
+  cross-references and 3 fish-type-split lines, and the Tab 6 upsert path
+  (including the `fish_type_split`/`completeness_checked`-style Python
+  `bool` vs `int` binding that Postgres's native `BOOLEAN` column requires,
+  unlike SQLite) round-trips correctly.
 - `database/db.py` — further batched `_run_migrations()`'s Postgres
   branch, the explicitly-deferred follow-up to the earlier urgent
   migration-speed fix. Investigated all remaining individual

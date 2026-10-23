@@ -561,6 +561,54 @@ CREATE TABLE IF NOT EXISTS mel_indicator_actuals_changelog (
 );
 CREATE INDEX IF NOT EXISTS idx_iacl_actual ON mel_indicator_actuals_changelog(actual_id);
 
+-- Module L §7 Technical Reconciliation — see schema.sql's comment for the
+-- full rationale (separate from Module M's mel_indicators/targets/actuals
+-- above on purpose; replaces the retired qr_actuals table, which never had
+-- a Postgres CREATE TABLE of its own — it was created only via db.py's
+-- migration block, now removed along with it).
+CREATE TABLE IF NOT EXISTS mel_reconciliation_lines (
+    id                   INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    project_id           INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    submitting_org       TEXT    NOT NULL CHECK(submitting_org IN ('CEL','TechnoServe')),
+    reconciliation_code  TEXT    NOT NULL,
+    indicator_label      TEXT    NOT NULL,
+    unit                 TEXT,
+    old_planner_code     TEXT,
+    cel_indicator_id     TEXT,
+    fish_type_split      BOOLEAN NOT NULL DEFAULT FALSE,
+    aggregation_type     TEXT    NOT NULL DEFAULT 'Incremental'
+                         CHECK(aggregation_type IN ('Incremental','Cumulative','Annual survey (not summed)'))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_mrl_key ON mel_reconciliation_lines(project_id, submitting_org, reconciliation_code);
+CREATE INDEX IF NOT EXISTS idx_mrl_project    ON mel_reconciliation_lines(project_id);
+
+CREATE TABLE IF NOT EXISTS mel_reconciliation_targets (
+    id            INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    line_id       INTEGER NOT NULL REFERENCES mel_reconciliation_lines(id) ON DELETE CASCADE,
+    project_id    INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    fiscal_year   INTEGER NOT NULL,
+    quarter       INTEGER NOT NULL CHECK(quarter IN (1,2,3,4)),
+    target_value  DOUBLE PRECISION
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_mrt_key ON mel_reconciliation_targets(line_id, fiscal_year, quarter);
+CREATE INDEX IF NOT EXISTS idx_mrt_project    ON mel_reconciliation_targets(project_id);
+
+CREATE TABLE IF NOT EXISTS mel_reconciliation_actuals (
+    id              INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    line_id         INTEGER NOT NULL REFERENCES mel_reconciliation_lines(id) ON DELETE CASCADE,
+    project_id      INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    fiscal_year     INTEGER NOT NULL,
+    quarter         INTEGER NOT NULL CHECK(quarter IN (1,2,3,4)),
+    achieved_value  DOUBLE PRECISION,
+    tilapia_value   DOUBLE PRECISION,
+    catfish_value   DOUBLE PRECISION,
+    notes           TEXT,
+    updated_by      TEXT,
+    updated_at      TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_mra_key ON mel_reconciliation_actuals(line_id, fiscal_year, quarter);
+CREATE INDEX IF NOT EXISTS idx_mra_project    ON mel_reconciliation_actuals(project_id);
+
 -- Performance Indicator Reference Sheets (PIRS) — see schema.sql's comment
 -- for the indicator_id matching rationale (28/58 matched, not a hard FK).
 CREATE TABLE IF NOT EXISTS mel_indicator_pirs (

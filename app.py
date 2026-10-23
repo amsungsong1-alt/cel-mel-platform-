@@ -163,6 +163,18 @@ except Exception as _e:
     print(f"A3 Results Framework (ToC) seed skipped: {_e}\n{_traceback.format_exc()}", flush=True)
     st.warning(f"A3 Results Framework (ToC) seed skipped: {_e}")
 
+# Module L §7 Technical Reconciliation (CEL vs TechnoServe, replacing the
+# retired qr_actuals): same idempotent, unconditional-seed pattern as
+# mel_indicators above. Only the insert-if-missing step is unconditional --
+# an in-app edit to a line's actuals/notes is never reset by this running
+# again.
+try:
+    from database.seed_reconciliation import seed as _seed_reconciliation
+    _seed_reconciliation()
+except Exception as _e:
+    print(f"Reconciliation lines seed skipped: {_e}\n{_traceback.format_exc()}", flush=True)
+    st.warning(f"Reconciliation lines seed skipped: {_e}")
+
 # ── Brand ─────────────────────────────────────────────────────────────────────
 NAVY = "#4A5568"
 GOLD = "#F5A820"

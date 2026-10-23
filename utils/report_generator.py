@@ -139,9 +139,19 @@ def build_report(project_id: int, fiscal_year: int, quarter: int) -> bytes:
         "SELECT * FROM learnings WHERE project_id=:p AND fiscal_year=:fy AND quarter=:q ORDER BY learning_type, id",
         {"p": project_id, "fy": fiscal_year, "q": quarter},
     )
+    # qr_actuals retired -- Module L's §7 reconciliation now lives in
+    # mel_reconciliation_lines/actuals (old_planner_code is the pre-cutover
+    # code this function has always keyed CEL figures by, e.g. 'PIII.R1').
+    # Filtering to this exact quarter here (rather than fetching all 4 and
+    # picking one, as the old qr_actuals-backed query did) is possible
+    # because actuals are now one row per quarter, not one wide row per year.
     qra = run_query(
-        "SELECT * FROM qr_actuals WHERE project_id=:p AND fiscal_year=:fy ORDER BY submitting_org, indicator_code",
-        {"p": project_id, "fy": fiscal_year},
+        """SELECT l.old_planner_code AS indicator_code, l.submitting_org AS submitting_org,
+                  a.achieved_value
+           FROM mel_reconciliation_actuals a
+           JOIN mel_reconciliation_lines l ON l.id = a.line_id
+           WHERE a.project_id=:p AND a.fiscal_year=:fy AND a.quarter=:q""",
+        {"p": project_id, "fy": fiscal_year, "q": quarter},
     )
     tools = run_query(
         "SELECT instrument_name, stakeholder, frequency, responsible_party, rationale FROM data_collection_plan WHERE project_id=:p ORDER BY instrument_name",
@@ -162,8 +172,8 @@ def build_report(project_id: int, fiscal_year: int, quarter: int) -> bytes:
     def _act(code: str) -> str:
         r = qra_cel.get(code)
         if r:
-            v = r.get(q_col)
-            if v and str(v).strip():
+            v = r.get("achieved_value")
+            if v is not None and str(v).strip():
                 return str(v)
         r2 = rda_map.get(code)
         if r2:

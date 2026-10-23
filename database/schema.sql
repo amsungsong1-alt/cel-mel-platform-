@@ -609,43 +609,10 @@ CREATE INDEX IF NOT EXISTS idx_lrn_project ON learnings(project_id);
 CREATE INDEX IF NOT EXISTS idx_lrn_quarter ON learnings(fiscal_year, quarter);
 CREATE INDEX IF NOT EXISTS idx_lrn_type    ON learnings(learning_type);
 
--- Module L: Quarterly Report Actuals — one row per indicator per quarter per
--- fiscal year for the §7 technical reconciliation table. Stores CEL actuals
--- separately from raw_data_analysis because the reconciliation needs tilapia/
--- catfish fish-type breakdowns and a fixed set of CEL-owned indicators.
--- UNIQUE constraint prevents duplicate rows per (project, year, indicator).
-CREATE TABLE IF NOT EXISTS qr_actuals (
-    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
-    project_id          INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
-    fiscal_year         INTEGER NOT NULL,
-    submitting_org      TEXT NOT NULL DEFAULT 'CEL',  -- 'CEL' | 'TechnoServe' | partner name
-    indicator_code      TEXT NOT NULL,    -- e.g. 'PIII.R1', 'I.3', 'II.R7'
-    indicator_label     TEXT NOT NULL,    -- human-readable label
-    unit                TEXT,             -- persons / MT / USD / groups / enterprises
-    target_y1           TEXT,             -- Year 1 annual target
-    target_q1           TEXT,             -- Planned Q1 target (from workplan)
-    target_q2           TEXT,
-    target_q3           TEXT,
-    target_q4           TEXT,
-    actual_q1           TEXT,
-    actual_q1_tilapia   TEXT,
-    actual_q1_catfish   TEXT,
-    actual_q2           TEXT,
-    actual_q2_tilapia   TEXT,
-    actual_q2_catfish   TEXT,
-    actual_q3           TEXT,
-    actual_q3_tilapia   TEXT,
-    actual_q3_catfish   TEXT,
-    actual_q4           TEXT,
-    actual_q4_tilapia   TEXT,
-    actual_q4_catfish   TEXT,
-    notes               TEXT,
-    updated_by          TEXT,
-    updated_at          TEXT
-);
-CREATE UNIQUE INDEX IF NOT EXISTS idx_qra_key ON qr_actuals(project_id, fiscal_year, indicator_code, submitting_org);
-CREATE INDEX IF NOT EXISTS idx_qra_project  ON qr_actuals(project_id);
-CREATE INDEX IF NOT EXISTS idx_qra_year     ON qr_actuals(fiscal_year);
+-- Module L's old qr_actuals table (one wide row per indicator per fiscal
+-- year, old pre-cutover planner codes) was retired once Tab 6 ("§7 Technical
+-- Reconciliation") was rebuilt against mel_reconciliation_lines/targets/
+-- actuals below — see that block's comment for the replacement design.
 
 -- ── CEL SAWA MEL workbook indicator model (Phase 2) ───────────────────────────
 -- Source: docs/mel_tool/. Replaces logframe_rows as the indicator definition
@@ -752,6 +719,86 @@ CREATE TABLE IF NOT EXISTS mel_indicator_actuals_changelog (
     changed_at    TEXT    NOT NULL   -- ISO-8601 datetime
 );
 CREATE INDEX IF NOT EXISTS idx_iacl_actual ON mel_indicator_actuals_changelog(actual_id);
+
+-- Module L §7 Technical Reconciliation — CEL vs TechnoServe cross-org target/
+-- actual tracking. Deliberately a SEPARATE schema from mel_indicators/
+-- mel_indicator_targets/mel_indicator_actuals above (Module M), not a reuse
+-- of them: this reconciliation covers ~22 line items that are either (a)
+-- CEL's own figures under their pre-cutover planner code, or (b)
+-- TechnoServe's own Y1 workplan totals, reported "by partner, not as
+-- programme-wide totals" (docs/mel_tool/05_A2_Data_Flow_and_Roles.md) — most
+-- TechnoServe rows (youth mobilised, catfish MT, trading revenue, etc.) are
+-- external reference data with no corresponding CEL indicator in the real
+-- 55-indicator IM/OC/OP scheme at all, so forcing this onto
+-- mel_indicator_actuals (one achieved_value per indicator per quarter, no
+-- org dimension) would either lose the CEL/TechnoServe distinction or
+-- require bending Module M's schema for a different module's reporting
+-- need. Replaces qr_actuals (retired above), same tilapia/catfish species
+-- breakdown, now normalized one-row-per-quarter like mel_indicator_targets/
+-- actuals instead of qr_actuals' wide-row-per-year shape.
+--
+-- reconciliation_code is a short code THIS table assigns and owns (e.g.
+-- 'CEL-1', 'TS-3') — never the old pre-cutover planner code (I.1, III.3,
+-- PIII.R1, ...), which is kept only as free-text history in
+-- old_planner_code, same role planner_reference plays on mel_indicators.
+-- cel_indicator_id is an OPTIONAL, informational-only cross-reference to
+-- mel_indicators.indicator_id (e.g. 'OP27') for the few lines with a clear
+-- new-scheme correspondence; deliberately NOT a foreign key — Module M's
+-- tables must never be queried, joined against, or altered by this feature.
+CREATE TABLE IF NOT EXISTS mel_reconciliation_lines (
+    id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id           INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    submitting_org       TEXT    NOT NULL CHECK(submitting_org IN ('CEL','TechnoServe')),
+    reconciliation_code  TEXT    NOT NULL,   -- 'CEL-1'..'CEL-12' | 'TS-1'..'TS-10'
+    indicator_label      TEXT    NOT NULL,
+    unit                 TEXT,
+    old_planner_code     TEXT,               -- pre-cutover code, history only (e.g. 'PIII.R1')
+    cel_indicator_id     TEXT,               -- optional cross-ref only, e.g. 'OP27'; NULL = no mapping
+    fish_type_split      INTEGER NOT NULL DEFAULT 0 CHECK(fish_type_split IN (0,1)),
+    aggregation_type     TEXT    NOT NULL DEFAULT 'Incremental'
+                         CHECK(aggregation_type IN ('Incremental','Cumulative','Annual survey (not summed)'))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_mrl_key     ON mel_reconciliation_lines(project_id, submitting_org, reconciliation_code);
+CREATE INDEX IF NOT EXISTS idx_mrl_project         ON mel_reconciliation_lines(project_id);
+
+-- One row per line per quarter, mirroring mel_indicator_targets. Y1 totals
+-- are computed live via utils.iptt_rules.year1_value() from these four
+-- quarters, never stored separately — same rule Module M follows. Lines
+-- with no quarterly phasing known at seed time (the 12 CEL rows, which only
+-- ever had a Y1 figure) get that figure seeded into quarter 4 only; since
+-- aggregation_type is 'Incremental' and the other three quarters are simply
+-- absent (not zero), year1_value()'s sum-of-reported-quarters still returns
+-- exactly that Y1 figure.
+CREATE TABLE IF NOT EXISTS mel_reconciliation_targets (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    line_id       INTEGER NOT NULL REFERENCES mel_reconciliation_lines(id) ON DELETE CASCADE,
+    project_id    INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    fiscal_year   INTEGER NOT NULL,
+    quarter       INTEGER NOT NULL CHECK(quarter IN (1,2,3,4)),
+    target_value  REAL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_mrt_key ON mel_reconciliation_targets(line_id, fiscal_year, quarter);
+CREATE INDEX IF NOT EXISTS idx_mrt_project    ON mel_reconciliation_targets(project_id);
+
+-- One row per line per quarter, mirroring mel_indicator_actuals (minus the
+-- Draft/Submitted/Verified/Approved workflow and phone-verification QA
+-- fields, which Module L's §7 reconciliation UI has never had). A working
+-- log: Editors enter actuals over time, same as qr_actuals was.
+CREATE TABLE IF NOT EXISTS mel_reconciliation_actuals (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    line_id         INTEGER NOT NULL REFERENCES mel_reconciliation_lines(id) ON DELETE CASCADE,
+    project_id      INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    fiscal_year     INTEGER NOT NULL,
+    quarter         INTEGER NOT NULL CHECK(quarter IN (1,2,3,4)),
+    achieved_value  REAL,
+    tilapia_value   REAL,
+    catfish_value   REAL,
+    notes           TEXT,
+    updated_by      TEXT,
+    updated_at      TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_mra_key ON mel_reconciliation_actuals(line_id, fiscal_year, quarter);
+CREATE INDEX IF NOT EXISTS idx_mra_project    ON mel_reconciliation_actuals(project_id);
 
 -- Performance Indicator Reference Sheets (PIRS) — docs/mel_tool/12_PIRS.md.
 -- pirs_number is the PIRS sheet's own 1-58 sequential numbering, NOT an

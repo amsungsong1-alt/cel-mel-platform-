@@ -1188,65 +1188,13 @@ def _run_migrations(schema_fingerprint: str) -> bool:
                 """)
         except Exception:
             pass
-        # Module L: Quarterly Report Actuals (§7 reconciliation)
-        try:
-            with engine.begin() as _tc:
-                _execute_script(_tc, """
-                    CREATE TABLE IF NOT EXISTS qr_actuals (
-                        id                 INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                        project_id         INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
-                        fiscal_year        INTEGER NOT NULL,
-                        indicator_code     TEXT NOT NULL,
-                        indicator_label    TEXT NOT NULL,
-                        unit               TEXT,
-                        target_y1          TEXT,
-                        actual_q1          TEXT,
-                        actual_q1_tilapia  TEXT,
-                        actual_q1_catfish  TEXT,
-                        actual_q2          TEXT,
-                        actual_q2_tilapia  TEXT,
-                        actual_q2_catfish  TEXT,
-                        actual_q3          TEXT,
-                        actual_q3_tilapia  TEXT,
-                        actual_q3_catfish  TEXT,
-                        actual_q4          TEXT,
-                        actual_q4_tilapia  TEXT,
-                        actual_q4_catfish  TEXT,
-                        notes              TEXT,
-                        updated_by         TEXT,
-                        updated_at         TEXT,
-                        UNIQUE(project_id, fiscal_year, indicator_code)
-                    );
-                    CREATE INDEX IF NOT EXISTS idx_qra_project ON qr_actuals(project_id);
-                    CREATE INDEX IF NOT EXISTS idx_qra_year    ON qr_actuals(fiscal_year);
-                """)
-        except Exception:
-            pass
-        # qr_actuals — add submitting_org + quarterly target columns
-        # (idempotent). The DROP CONSTRAINT IF EXISTS keeps its own nested
-        # try/except deliberately (NOT merged into a batch): it's an
-        # independent, best-effort step whose failure must not abort the
-        # CREATE UNIQUE INDEX that follows it, so batching it into one
-        # all-or-nothing _execute_script() call would silently change that
-        # error-recovery behaviour. The 5 static ADD COLUMN / DROP INDEX
-        # statements around it have no such constraint and are batched.
-        try:
-            with engine.begin() as _tc:
-                _execute_script(_tc, """
-                    ALTER TABLE qr_actuals ADD COLUMN IF NOT EXISTS submitting_org TEXT NOT NULL DEFAULT 'CEL';
-                    ALTER TABLE qr_actuals ADD COLUMN IF NOT EXISTS target_q1 TEXT;
-                    ALTER TABLE qr_actuals ADD COLUMN IF NOT EXISTS target_q2 TEXT;
-                    ALTER TABLE qr_actuals ADD COLUMN IF NOT EXISTS target_q3 TEXT;
-                    ALTER TABLE qr_actuals ADD COLUMN IF NOT EXISTS target_q4 TEXT;
-                    DROP INDEX IF EXISTS idx_qra_key;
-                """)
-                try:
-                    _tc.execute(text("ALTER TABLE qr_actuals DROP CONSTRAINT IF EXISTS qr_actuals_project_id_fiscal_year_indicator_code_key"))
-                except Exception:
-                    pass
-                _tc.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS idx_qra_key ON qr_actuals(project_id, fiscal_year, indicator_code, submitting_org)"))
-        except Exception:
-            pass
+        # qr_actuals (Module L's old §7 reconciliation table) retired —
+        # replaced by mel_reconciliation_lines/targets/actuals, created
+        # directly in schema_postgres.sql's main script above (brand-new
+        # tables, no pre-existing production data to migrate). No DROP
+        # TABLE here: leaving the now-unused table in production is
+        # harmless and reversible; actually dropping it is a separate,
+        # explicit action, not bundled into this change.
         # Module L: Report Sections — narrative content per section, per quarter
         try:
             with engine.begin() as _tc:
@@ -1999,50 +1947,12 @@ def _run_migrations(schema_fingerprint: str) -> bool:
         conn.execute("CREATE INDEX IF NOT EXISTS idx_lrn_type    ON learnings(learning_type)")
     except Exception:
         pass
-    # Module L: Quarterly Report Actuals (§7 reconciliation)
-    try:
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS qr_actuals (
-                id                 INTEGER PRIMARY KEY AUTOINCREMENT,
-                project_id         INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
-                fiscal_year        INTEGER NOT NULL,
-                indicator_code     TEXT NOT NULL,
-                indicator_label    TEXT NOT NULL,
-                unit               TEXT,
-                target_y1          TEXT,
-                actual_q1          TEXT,
-                actual_q1_tilapia  TEXT,
-                actual_q1_catfish  TEXT,
-                actual_q2          TEXT,
-                actual_q2_tilapia  TEXT,
-                actual_q2_catfish  TEXT,
-                actual_q3          TEXT,
-                actual_q3_tilapia  TEXT,
-                actual_q3_catfish  TEXT,
-                actual_q4          TEXT,
-                actual_q4_tilapia  TEXT,
-                actual_q4_catfish  TEXT,
-                notes              TEXT,
-                updated_by         TEXT,
-                updated_at         TEXT,
-                UNIQUE(project_id, fiscal_year, indicator_code)
-            )
-        """)
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_qra_project ON qr_actuals(project_id)")
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_qra_year    ON qr_actuals(fiscal_year)")
-    except Exception:
-        pass
-    # qr_actuals — add submitting_org + quarterly target columns (idempotent)
-    try:
-        conn.execute("ALTER TABLE qr_actuals ADD COLUMN submitting_org TEXT NOT NULL DEFAULT 'CEL'")
-        conn.execute("ALTER TABLE qr_actuals ADD COLUMN target_q1 TEXT")
-        conn.execute("ALTER TABLE qr_actuals ADD COLUMN target_q2 TEXT")
-        conn.execute("ALTER TABLE qr_actuals ADD COLUMN target_q3 TEXT")
-        conn.execute("ALTER TABLE qr_actuals ADD COLUMN target_q4 TEXT")
-        conn.execute("DROP INDEX IF EXISTS idx_qra_key")
-        conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_qra_key ON qr_actuals(project_id, fiscal_year, indicator_code, submitting_org)")
-    except Exception:
-        pass
+    # qr_actuals (Module L's old §7 reconciliation table) retired —
+    # replaced by mel_reconciliation_lines/targets/actuals, created directly
+    # in schema.sql's main script (brand-new tables, no pre-existing
+    # production data to migrate). No DROP TABLE here: leaving the
+    # now-unused table around is harmless and reversible; actually dropping
+    # it is a separate, explicit action, not bundled into this change.
     # Module L: Report Sections — narrative content per section, per quarter
     try:
         conn.execute("""
