@@ -37,6 +37,28 @@ All notable changes to the CEL MEL Platform. Format loosely follows
   `seed_mel_indicators.py`, which was itself a source of stale IDs.
 
 ### Added
+- `pages/11_K_Team_Workspace.py` — Phase 6 follow-up: an optional "Link to
+  Q2 schedule activity" field on the Add Task form, alongside the existing
+  "Link to indicator" field, via a new `team_tasks.schedule_activity_id`
+  column (nullable, `ON DELETE SET NULL`). Manual-link-only per explicit
+  choice, after investigating Module K's existing `team_tasks` system
+  (per-role tasks with status/due-date/assigned-to, already linkable to a
+  Module B/E logframe indicator) and finding it already covers most of
+  what a "broader task-breakdown tracker" would need — the only real gap
+  was no way to tie a task to one of A4/A5's 20 Q2 schedule activities.
+  No tasks are auto-generated; a linked task shows a `[A5 Training Q2 #4]`
+  -style badge next to its existing indicator badge. The new column is
+  added entirely via an ALTER in `db.py` (not inline in `schema.sql`'s
+  `CREATE TABLE team_tasks`): it forward-references
+  `mel_schedule_activities`, which the script only defines later in the
+  same file — fine for SQLite (FKs aren't checked until insert) but
+  Postgres validates a `REFERENCES` target at `CREATE TABLE` time, so an
+  inline forward reference would fail on a fresh install. Verified
+  against SQLite and real Postgres 15 (including that Postgres's
+  `ON DELETE SET NULL` actually fires, which SQLite's plain-`ALTER`-added
+  column does not — matches this codebase's existing `logframe_row_id`
+  columns' same limitation, not a new one). 4 new tests in
+  `tests/test_team_tasks_schedule_link.py`.
 - `database/seed_a3_toc.py` + 5 new tables (`mel_a3_toc`, `mel_a3_pathways`,
   `mel_a3_results_chain`, `mel_a3_if_then`, `mel_a3_result_areas`) —
   Phase 6 step 3 (completes Phase 6): A3 Results Framework (ToC), from

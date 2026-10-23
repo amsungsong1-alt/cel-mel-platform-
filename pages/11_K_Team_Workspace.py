@@ -90,6 +90,24 @@ lf_options = ["None"] + [
 ]
 lf_code_to_id = {r["indicator_code"]: r["id"] for r in logframe_rows}
 
+# A4/A5 Q2 schedule activities (Phase 6 follow-up) -- manual-link-only, no
+# auto-generated tasks: a team member can optionally tie a task to one of
+# these 20 rows the same way an existing task can tie to a logframe
+# indicator, but nothing here creates a task on its own.
+schedule_activities = run_query(
+    "SELECT id, sheet, activity_number, activity FROM mel_schedule_activities "
+    "WHERE project_id=:pid ORDER BY sheet, activity_number",
+    {"pid": project_id},
+)
+sched_options = ["None"] + [
+    f"[{r['sheet']} #{r['activity_number']}] {r['activity'][:60]}"
+    for r in schedule_activities
+]
+sched_label_to_id = {
+    f"[{r['sheet']} #{r['activity_number']}] {r['activity'][:60]}": r["id"]
+    for r in schedule_activities
+}
+
 _username  = st.session_state.get("username", "Team")
 
 # Self-heals the Daily Activity table on every page load, independent of
@@ -895,9 +913,11 @@ with right:
         tasks = run_query(
             """SELECT tt.id, tt.task, tt.description, tt.status,
                       tt.due_date, tt.assigned_to, tt.created_by,
-                      lr.indicator_code
+                      lr.indicator_code, sa.sheet AS sched_sheet,
+                      sa.activity_number AS sched_number
                FROM team_tasks tt
                LEFT JOIN logframe_rows lr ON lr.id = tt.logframe_row_id
+               LEFT JOIN mel_schedule_activities sa ON sa.id = tt.schedule_activity_id
                WHERE tt.project_id=:pid AND tt.team_role=:r
                ORDER BY
                  CASE tt.status
@@ -919,11 +939,15 @@ with right:
                     f'{t["status"]}</span>'
                 )
                 ind_tag = f' · <b style="color:#F5A820;">[{t["indicator_code"]}]</b>' if t.get("indicator_code") else ""
+                sched_tag = (
+                    f' · <b style="color:#2E75B6;">[{t["sched_sheet"]} #{t["sched_number"]}]</b>'
+                    if t.get("sched_sheet") else ""
+                )
                 due_tag = f' · due {t["due_date"]}' if t.get("due_date") else ""
                 asgn    = f' · {t["assigned_to"]}' if t.get("assigned_to") else ""
                 with st.container():
                     st.markdown(
-                        f'{badge}{ind_tag}<br>'
+                        f'{badge}{ind_tag}{sched_tag}<br>'
                         f'<span style="font-size:0.95em;font-weight:600;">{t["task"]}</span>'
                         f'<span style="font-size:0.8em;color:#666;">{due_tag}{asgn}</span>',
                         unsafe_allow_html=True,
@@ -965,6 +989,7 @@ with right:
                     with tc2:
                         nt_asgn   = st.text_input("Assigned to", value=_username, help="Who's doing this specific task — can differ from who created it.")
                         nt_ind    = st.selectbox("Link to indicator (optional)", lf_options, key="nt_ind", help="Ties this task to a logframe indicator so it's traceable back to Module B/E — optional but useful for MEV-related tasks.")
+                    nt_sched = st.selectbox("Link to Q2 schedule activity (optional)", sched_options, key="nt_sched", help="Ties this task to an A4 Onboarding or A5 Training Q2 activity — optional, for breaking one of those 20 activities into your own finer-grained to-dos.")
                     if st.form_submit_button("Add task"):
                         if not nt_task.strip():
                             st.warning("Task name is required.")
@@ -973,13 +998,14 @@ with right:
                             if nt_ind != "None":
                                 code = nt_ind.lstrip("[").split("]")[0]
                                 lf_id = lf_code_to_id.get(code)
+                            sched_id = sched_label_to_id.get(nt_sched) if nt_sched != "None" else None
                             run_write(
                                 """INSERT INTO team_tasks
                                    (project_id, team_role, task, description, status,
                                     due_date, assigned_to, logframe_row_id,
-                                    created_at, created_by)
+                                    schedule_activity_id, created_at, created_by)
                                    VALUES (:pid, :role, :task, :desc, :st,
-                                           :due, :asgn, :lf, :now, :by)""",
+                                           :due, :asgn, :lf, :sched, :now, :by)""",
                                 {
                                     "pid":  project_id,
                                     "role": selected_role,
@@ -989,6 +1015,7 @@ with right:
                                     "due":  str(nt_due) if nt_due else None,
                                     "asgn": nt_asgn.strip() or None,
                                     "lf":   lf_id,
+                                    "sched": sched_id,
                                     "now":  str(_date.today()),
                                     "by":   _username,
                                 },

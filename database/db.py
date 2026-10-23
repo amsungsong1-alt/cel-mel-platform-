@@ -304,6 +304,8 @@ def _run_migrations(schema_fingerprint: str) -> bool:
                 CREATE INDEX IF NOT EXISTS idx_mind_sm_code ON mel_indicators(sm_code);
                 ALTER TABLE mel_plan_indicators ADD COLUMN IF NOT EXISTS indicator_id TEXT;
                 CREATE INDEX IF NOT EXISTS idx_mpi_indicator ON mel_plan_indicators(indicator_id);
+                ALTER TABLE team_tasks ADD COLUMN IF NOT EXISTS schedule_activity_id INTEGER REFERENCES mel_schedule_activities(id) ON DELETE SET NULL;
+                CREATE INDEX IF NOT EXISTS idx_tt_schedule ON team_tasks(schedule_activity_id);
             """)
             # Add 'Pending' to partner_visits.status. Don't assume the CHECK
             # constraint's name (guessing 'partner_visits_status_check' left
@@ -1279,6 +1281,7 @@ def _run_migrations(schema_fingerprint: str) -> bool:
         "ALTER TABLE raw_data_analysis ADD COLUMN partner_id INTEGER",
         "ALTER TABLE mel_indicators ADD COLUMN sm_code TEXT",
         "ALTER TABLE mel_plan_indicators ADD COLUMN indicator_id TEXT",
+        "ALTER TABLE team_tasks ADD COLUMN schedule_activity_id INTEGER",
     ):
         try:
             conn.execute(stmt)
@@ -1300,6 +1303,12 @@ def _run_migrations(schema_fingerprint: str) -> bool:
     try:
         conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_mpi_indicator ON mel_plan_indicators(indicator_id)"
+        )
+    except Exception:
+        pass
+    try:
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_tt_schedule ON team_tasks(schedule_activity_id)"
         )
     except Exception:
         pass

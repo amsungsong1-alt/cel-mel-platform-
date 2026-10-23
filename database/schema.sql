@@ -458,6 +458,14 @@ CREATE TABLE IF NOT EXISTS team_tasks (
     due_date        TEXT,
     assigned_to     TEXT,
     logframe_row_id INTEGER REFERENCES logframe_rows(id) ON DELETE SET NULL,
+    -- schedule_activity_id (optional link to an A4/A5 Q2 schedule
+    -- activity, Phase 6 follow-up) is deliberately NOT inline here: it's
+    -- a forward reference to mel_schedule_activities, which this script
+    -- only defines much further down -- fine for SQLite (FKs aren't
+    -- validated until insert) but Postgres validates a REFERENCES target
+    -- at CREATE TABLE time, so it would fail on a fresh install. Added
+    -- entirely via an ALTER in db.py instead, which runs after this
+    -- whole script (both tables already exist by then on every dialect).
     created_at      TEXT    NOT NULL,
     created_by      TEXT
 );
