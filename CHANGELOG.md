@@ -5,6 +5,32 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 
 ## Unreleased
 
+### Fixed
+- `database/seed_reconciliation.py` — **urgent, production**: fixed a
+  `psycopg.errors.UniqueViolation` on `idx_mrl_key` happening on every
+  boot. Root cause: app.py's boot-time seed calls run once per new
+  Streamlit session (not behind any cache/lock, unlike `_run_migrations()`
+  itself), so two sessions loading around the same moment — e.g. right
+  after this feature's own deploy — could both read an empty
+  existing-codes set before either had committed its INSERT, and the
+  second INSERT then hit the unique constraint. Fixed by making the
+  INSERT itself atomic (`ON CONFLICT (project_id, submitting_org,
+  reconciliation_code) DO NOTHING` on `mel_reconciliation_lines`, and the
+  equivalent on `mel_reconciliation_targets`) instead of a
+  check-then-insert, so it's correct regardless of how many sessions call
+  `seed()` concurrently. `insert_returning_id()` (which relies on
+  `lastrowid`/`lastval()`, unreliable or outright erroring on a
+  conflict-skipped INSERT) is no longer used here; `line_id` is now
+  always resolved via a separate `SELECT` by the natural key. Verified
+  against SQLite and real Postgres 15, reproducing the exact reported
+  INSERT shape. 1 new regression test in `tests/test_seed_reconciliation.py`
+  (confirmed it fails against the pre-fix INSERT, to prove it actually
+  exercises the bug). **This same check-then-insert shape is used by
+  every other `seed_*.py` module in this project** (`seed_pirs`,
+  `seed_proframe`, `seed_shared_measures`, `seed_a2_roles`,
+  `seed_mel_plan`, `seed_schedule`, `seed_a3_toc`) — all are equally
+  exposed to this race, not fixed here, flagged as a follow-up.
+
 ### Changed
 - **Retired `qr_actuals`, rebuilt Module L's §7 Technical Reconciliation
   against a new, dedicated schema.** `qr_actuals` had been deliberately kept

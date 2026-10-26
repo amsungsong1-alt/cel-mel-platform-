@@ -31,7 +31,7 @@ that doesn't exist.
 """
 from __future__ import annotations
 
-from database.db import run_query, run_write, insert_returning_id
+from database.db import run_query, run_write
 
 FISCAL_YEAR = 2026
 
@@ -76,7 +76,26 @@ TNS_LINES = [
 
 
 def _seed_org(org: str, lines: list[tuple], project_id: int) -> int:
-    existing_codes = {
+    # INSERT ... ON CONFLICT DO NOTHING on both tables below, not a
+    # check-then-insert (which this function used at first and which broke
+    # in production: app.py's boot code runs once per new Streamlit
+    # session, so two sessions loading around the same moment -- e.g.
+    # right after a deploy -- can both read an empty existing_codes set
+    # before either has committed its INSERT, and the second one's INSERT
+    # then hits idx_mrl_key's UNIQUE constraint. ON CONFLICT DO NOTHING is
+    # atomic at the database level, so this race can't happen regardless
+    # of how many sessions call seed() at once. insert_returning_id() is
+    # NOT used here because it relies on lastrowid/lastval(), which is
+    # unreliable (SQLite) or raises (Postgres: "lastval is not yet
+    # defined in this session") when the INSERT is a no-op -- line_id is
+    # always resolved via a separate SELECT by the natural key instead,
+    # which is correct whether this call just inserted the line or a
+    # concurrent/earlier one already had.
+    # Bulk existing-codes fetch is only used to count how many lines this
+    # call actually adds (for the boot-log message) -- it is NOT relied on
+    # to decide whether to skip the INSERT below, which is why it's safe
+    # even though a concurrent session could insert a code in between.
+    existing_codes_before = {
         r["reconciliation_code"] for r in run_query(
             "SELECT reconciliation_code FROM mel_reconciliation_lines "
             "WHERE project_id=:pid AND submitting_org=:org",
@@ -86,15 +105,16 @@ def _seed_org(org: str, lines: list[tuple], project_id: int) -> int:
     n = 0
     for (code, old_code, label, unit, y1, q2, q3, q4,
          fish_split, cel_id) in lines:
-        if code in existing_codes:
-            continue
-        line_id = insert_returning_id(
+        if code not in existing_codes_before:
+            n += 1
+        run_write(
             """INSERT INTO mel_reconciliation_lines
                (project_id, submitting_org, reconciliation_code, indicator_label,
                 unit, old_planner_code, cel_indicator_id, fish_type_split,
                 aggregation_type)
                VALUES (:pid, :org, :code, :label, :unit, :old_code, :cel_id,
-                       :fish_split, 'Incremental')""",
+                       :fish_split, 'Incremental')
+               ON CONFLICT (project_id, submitting_org, reconciliation_code) DO NOTHING""",
             {
                 "pid": project_id, "org": org, "code": code, "label": label,
                 "unit": unit, "old_code": old_code, "cel_id": cel_id,
@@ -109,11 +129,24 @@ def _seed_org(org: str, lines: list[tuple], project_id: int) -> int:
                 "fish_split": bool(fish_split),
             },
         )
+        existing_line = run_query(
+            "SELECT id FROM mel_reconciliation_lines "
+            "WHERE project_id=:pid AND submitting_org=:org AND reconciliation_code=:code",
+            {"pid": project_id, "org": org, "code": code},
+        )
+        if not existing_line:
+            # Insert above was skipped by ON CONFLICT and the row still
+            # isn't there -- only reachable if the schema itself is wrong
+            # (e.g. idx_mrl_key missing), not a normal race outcome.
+            raise RuntimeError(f"mel_reconciliation_lines row for {org}/{code} missing after insert")
+        line_id = existing_line[0]["id"]
+
         # Quarterly targets: CEL rows have no known phasing (whole Y1
         # figure goes under Q4 -- see this module's and schema.sql's
         # comments); TechnoServe rows use their real Q2-Q4 workplan split.
         # Either way, only non-null quarters are inserted -- a missing row
-        # reads back as None, same as an explicitly-null one.
+        # reads back as None, same as an explicitly-null one. Same
+        # ON CONFLICT DO NOTHING race-safety as the line insert above.
         quarters = (None, q2, q3, q4) if org == "TechnoServe" else (None, None, None, y1)
         for q, val in zip((1, 2, 3, 4), quarters):
             if val is None:
@@ -121,10 +154,10 @@ def _seed_org(org: str, lines: list[tuple], project_id: int) -> int:
             run_write(
                 """INSERT INTO mel_reconciliation_targets
                    (line_id, project_id, fiscal_year, quarter, target_value)
-                   VALUES (:lid, :pid, :fy, :q, :val)""",
+                   VALUES (:lid, :pid, :fy, :q, :val)
+                   ON CONFLICT (line_id, fiscal_year, quarter) DO NOTHING""",
                 {"lid": line_id, "pid": project_id, "fy": FISCAL_YEAR, "q": q, "val": val},
             )
-        n += 1
     return n
 
 

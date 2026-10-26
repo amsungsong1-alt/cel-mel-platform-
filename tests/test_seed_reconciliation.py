@@ -37,6 +37,46 @@ def seeded_db(monkeypatch):
         os.remove(path)
 
 
+def test_line_insert_tolerates_a_row_already_present_regardless_of_any_precheck(seeded_db):
+    # Regression test for a real production bug: app.py's boot code runs
+    # once per new Streamlit session, so two sessions loading around the
+    # same moment (e.g. right after a deploy) could both read an empty
+    # existing-codes set before either had committed, and the second
+    # session's INSERT then hit idx_mrl_key's UNIQUE constraint
+    # (psycopg.errors.UniqueViolation) because the original code did a
+    # check-then-insert instead of an atomic upsert.
+    #
+    # A Python-level existing-codes pre-check can't be used to prove this
+    # fixed, because it's recomputed fresh on every call and would
+    # correctly see a just-inserted row either way -- it can't reproduce
+    # the race's actual failure mode (two INSERTs reaching the database
+    # with neither having seen the other's row yet). What actually
+    # prevents the production error is the SQL's own
+    # "ON CONFLICT (project_id, submitting_org, reconciliation_code) DO
+    # NOTHING" clause, which is unconditional and database-enforced
+    # regardless of what any Python-side check saw -- so this runs that
+    # exact INSERT statement twice in a row for the same key, with no
+    # existing-codes gate in between (simulating two sessions' INSERTs
+    # both reaching Postgres back to back). The second one must not raise.
+    db_, _ = seeded_db
+    insert_sql = """INSERT INTO mel_reconciliation_lines
+        (project_id, submitting_org, reconciliation_code, indicator_label,
+         unit, old_planner_code, cel_indicator_id, fish_type_split, aggregation_type)
+        VALUES (:pid, :org, :code, :label, :unit, :old_code, :cel_id, :fish_split, 'Incremental')
+        ON CONFLICT (project_id, submitting_org, reconciliation_code) DO NOTHING"""
+    params = {
+        "pid": 1, "org": "CEL", "code": "CEL-1", "label": "Youth mobilised / WEO",
+        "unit": "persons", "old_code": "I.1", "cel_id": "OP27", "fish_split": False,
+    }
+    db_.run_write(insert_sql, params)  # "session 1": row already exists from the fixture seed
+    db_.run_write(insert_sql, params)  # "session 2": must not raise IntegrityError / UniqueViolation
+
+    rows = db_.run_query(
+        "SELECT COUNT(*) AS c FROM mel_reconciliation_lines WHERE reconciliation_code='CEL-1'", {}
+    )
+    assert rows[0]["c"] == 1
+
+
 def test_qr_actuals_table_no_longer_exists(seeded_db):
     db_, _ = seeded_db
     rows = db_.run_query(
