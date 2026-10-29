@@ -238,6 +238,42 @@ def test_seed_looks_up_sawa_project_id_by_name_not_hardcoded_1(monkeypatch):
     os.remove(path)
 
 
+def test_insert_tolerates_a_row_already_present_regardless_of_any_precheck(seeded_db):
+    # Regression test for the same production bug fixed in
+    # seed_reconciliation.py: two Streamlit sessions booting around the
+    # same moment could both read an empty existing-keys set before
+    # either had committed, and the second INSERT would hit idx_pfr_key's
+    # UNIQUE constraint. A Python-level pre-check can't reproduce this --
+    # what actually prevents the error is the SQL's own ON CONFLICT
+    # clause, exercised here by running the exact INSERT twice in a row
+    # for the same key with no existing-keys gate in between.
+    db_, _ = seeded_db
+    row = db_.run_query(
+        "SELECT area_label, proframe_number, indicator_statement FROM mel_proframe_results LIMIT 1", {}
+    )[0]
+    insert_sql = """INSERT INTO mel_proframe_results
+        (project_id, area_label, level, key_result_statement, assumptions, risks,
+         proframe_number, indicator_statement, indicator_id, key_measure, disaggregation,
+         markers, means_of_verification, cel_scope, note)
+        VALUES (:project_id, :area_label, 'Impact', 'x', 'x', 'x', :proframe_number,
+                :indicator_statement, NULL, 'x', 'x', 'x', 'x', 'x', 'x')
+        ON CONFLICT (project_id, area_label, proframe_number, indicator_statement) DO NOTHING"""
+    params = dict(project_id=1, area_label=row["area_label"], proframe_number=row["proframe_number"],
+                  indicator_statement=row["indicator_statement"])
+    db_.run_write(insert_sql, params)
+    db_.run_write(insert_sql, params)  # must not raise
+
+    # Filters on indicator_statement too, not just area_label+proframe_number
+    # -- #30/#31/#32 repeat twice each within one area for different
+    # indicators, so (area, #) alone could already legitimately be >1.
+    rows = db_.run_query(
+        "SELECT COUNT(*) AS c FROM mel_proframe_results "
+        "WHERE area_label=:a AND proframe_number=:n AND indicator_statement=:s",
+        {"a": row["area_label"], "n": row["proframe_number"], "s": row["indicator_statement"]},
+    )
+    assert rows[0]["c"] == 1
+
+
 def test_seed_skips_gracefully_when_no_sawa_project_exists_yet(monkeypatch):
     fd, path = tempfile.mkstemp(suffix=".db")
     os.close(fd)

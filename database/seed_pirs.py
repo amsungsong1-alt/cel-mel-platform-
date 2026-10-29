@@ -99,13 +99,18 @@ def seed(project_id: int | None = None) -> None:
             return
         project_id = existing_project[0]["project_id"]
 
-    # One round trip for every already-seeded row, not one per PIRS_ENTRIES
-    # item: on a fully-seeded database (the common case on every boot after
-    # the first), the old per-row "does this exist" SELECT inside the loop
-    # below made this call 58 round trips to confirm "yes, skip" every
-    # single time -- a real, measured contributor to cold-boot times
-    # exceeding a minute in production. Numbers only, no DB round trip
-    # per item below.
+    # Bulk existing-numbers fetch is only used to count how many rows this
+    # call actually adds (for the boot-log message) -- it does NOT gate the
+    # INSERT below, which always runs with ON CONFLICT DO NOTHING instead
+    # of a check-then-insert. Two Streamlit sessions booting around the
+    # same moment (e.g. right after a deploy) could otherwise both read an
+    # empty existing_numbers set before either had committed, and the
+    # second INSERT would hit idx_pirs_key's UNIQUE constraint --
+    # confirmed to actually happen in production for a different seed
+    # module (seed_reconciliation.py) using this same check-then-insert
+    # shape; ON CONFLICT DO NOTHING is atomic at the database level, so
+    # the race can't happen regardless of how many sessions call seed() at
+    # once.
     existing_numbers = {
         r["pirs_number"]
         for r in run_query(
@@ -117,8 +122,8 @@ def seed(project_id: int | None = None) -> None:
     for (pirs_number, statement, indicator_id, definition, disaggregation,
          unit_of_measure, data_type, data_collection_method, data_source,
          frequency) in PIRS_ENTRIES:
-        if pirs_number in existing_numbers:
-            continue
+        if pirs_number not in existing_numbers:
+            n += 1
         run_write(
             """INSERT INTO mel_indicator_pirs
                (project_id, pirs_number, statement, indicator_id, definition,
@@ -126,7 +131,8 @@ def seed(project_id: int | None = None) -> None:
                 data_collection_method, data_source, frequency)
                VALUES (:project_id, :pirs_number, :statement, :indicator_id, :definition,
                        :disaggregation, :unit_of_measure, :data_type,
-                       :data_collection_method, :data_source, :frequency)""",
+                       :data_collection_method, :data_source, :frequency)
+               ON CONFLICT (project_id, pirs_number) DO NOTHING""",
             {
                 "project_id": project_id, "pirs_number": pirs_number,
                 "statement": statement, "indicator_id": indicator_id,
@@ -136,6 +142,5 @@ def seed(project_id: int | None = None) -> None:
                 "data_source": data_source, "frequency": frequency,
             },
         )
-        n += 1
 
     print(f"mel_indicator_pirs: {n} inserted ({len(PIRS_ENTRIES) - n} already present).")

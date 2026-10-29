@@ -101,13 +101,17 @@ def seed(project_id: int | None = None) -> None:
             return
         project_id = existing_project[0]["project_id"]
 
-    # One round trip for every already-seeded row, not one per
-    # PROFRAME_RESULTS item: on a fully-seeded database (the common case
-    # on every boot after the first), the old per-row "does this exist"
-    # SELECT inside the loop below made this call 63 round trips to
-    # confirm "yes, skip" every single time -- a real, measured
-    # contributor to cold-boot times exceeding a minute in production.
-    # Keys only, no DB round trip per item below.
+    # Bulk existing-keys fetch is only used to count how many rows this
+    # call actually adds (for the boot-log message) -- it does NOT gate the
+    # INSERT below, which always runs with ON CONFLICT DO NOTHING instead
+    # of a check-then-insert. Two Streamlit sessions booting around the
+    # same moment could otherwise both read an empty existing_keys set
+    # before either had committed, and the second INSERT would hit
+    # idx_pfr_key's UNIQUE constraint -- confirmed to actually happen in
+    # production for a different seed module (seed_reconciliation.py)
+    # using this same check-then-insert shape; ON CONFLICT DO NOTHING is
+    # atomic at the database level, so the race can't happen regardless of
+    # how many sessions call seed() at once.
     existing_keys = {
         (r["area_label"], r["proframe_number"], r["indicator_statement"])
         for r in run_query(
@@ -124,8 +128,8 @@ def seed(project_id: int | None = None) -> None:
         # #30/#31/#32 repeat twice each within one area for two different
         # indicators, so (area, #) alone isn't a safe key — must include
         # indicator_statement (matches idx_pfr_key).
-        if (area_label, proframe_number, indicator_statement) in existing_keys:
-            continue
+        if (area_label, proframe_number, indicator_statement) not in existing_keys:
+            n += 1
         run_write(
             """INSERT INTO mel_proframe_results
                (project_id, area_label, level, key_result_statement, assumptions,
@@ -135,7 +139,9 @@ def seed(project_id: int | None = None) -> None:
                VALUES (:project_id, :area_label, :level, :key_result_statement, :assumptions,
                        :risks, :proframe_number, :indicator_statement, :indicator_id,
                        :key_measure, :disaggregation, :markers, :means_of_verification,
-                       :cel_scope, :note)""",
+                       :cel_scope, :note)
+               ON CONFLICT (project_id, area_label, proframe_number, indicator_statement)
+               DO NOTHING""",
             {
                 "project_id": project_id, "area_label": area_label, "level": level,
                 "key_result_statement": key_result_statement, "assumptions": assumptions,
@@ -146,7 +152,6 @@ def seed(project_id: int | None = None) -> None:
                 "cel_scope": cel_scope, "note": note,
             },
         )
-        n += 1
 
     # Backfill indicator_id on rows that already existed under the old,
     # pre-Phase-6-step-3 values (fixed in-place above in PROFRAME_RESULTS,

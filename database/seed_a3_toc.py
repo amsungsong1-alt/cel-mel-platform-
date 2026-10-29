@@ -150,14 +150,27 @@ def seed(project_id: int | None = None) -> None:
             return
         project_id = existing_project[0]["project_id"]
 
+    # Every block below uses the same pattern: a bulk existing-keys fetch
+    # used only to count how many rows this call adds (for the boot-log
+    # message), and an unconditional INSERT ... ON CONFLICT DO NOTHING
+    # (never a check-then-insert). Two Streamlit sessions booting around
+    # the same moment could otherwise both read an empty existing-keys set
+    # before either had committed, and the second INSERT would hit the
+    # table's UNIQUE constraint -- this exact bug actually happened in
+    # production for a different seed module (seed_reconciliation.py)
+    # using this same check-then-insert shape. ON CONFLICT DO NOTHING is
+    # atomic at the database level, so the race can't happen regardless of
+    # how many sessions call seed() at once.
+
     n_toc = 0
     if not run_query("SELECT 1 FROM mel_a3_toc WHERE project_id=:pid", {"pid": project_id}):
-        run_write(
-            """INSERT INTO mel_a3_toc (project_id, goal, logic, not_reported_note)
-               VALUES (:pid, :goal, :logic, :note)""",
-            {"pid": project_id, "goal": GOAL, "logic": LOGIC, "note": NOT_REPORTED_NOTE},
-        )
         n_toc = 1
+    run_write(
+        """INSERT INTO mel_a3_toc (project_id, goal, logic, not_reported_note)
+           VALUES (:pid, :goal, :logic, :note)
+           ON CONFLICT (project_id) DO NOTHING""",
+        {"pid": project_id, "goal": GOAL, "logic": LOGIC, "note": NOT_REPORTED_NOTE},
+    )
 
     existing_pathways = {
         r["pathway_label"] for r in run_query(
@@ -166,13 +179,13 @@ def seed(project_id: int | None = None) -> None:
     }
     n_pathways = 0
     for label, description in PATHWAYS:
-        if label in existing_pathways:
-            continue
+        if label not in existing_pathways:
+            n_pathways += 1
         run_write(
-            "INSERT INTO mel_a3_pathways (project_id, pathway_label, description) VALUES (:pid, :l, :d)",
+            "INSERT INTO mel_a3_pathways (project_id, pathway_label, description) VALUES (:pid, :l, :d) "
+            "ON CONFLICT (project_id, pathway_label) DO NOTHING",
             {"pid": project_id, "l": label, "d": description},
         )
-        n_pathways += 1
 
     existing_letters = {
         r["pathway_letter"] for r in run_query(
@@ -181,17 +194,17 @@ def seed(project_id: int | None = None) -> None:
     }
     n_chain = 0
     for letter, label, models, outputs, outcomes, impact, key_measure in RESULTS_CHAIN:
-        if letter in existing_letters:
-            continue
+        if letter not in existing_letters:
+            n_chain += 1
         run_write(
             """INSERT INTO mel_a3_results_chain
                (project_id, pathway_letter, pathway_label, delivery_models, outputs,
                 outcomes, impact, key_measure)
-               VALUES (:pid, :letter, :label, :models, :outputs, :outcomes, :impact, :km)""",
+               VALUES (:pid, :letter, :label, :models, :outputs, :outcomes, :impact, :km)
+               ON CONFLICT (project_id, pathway_letter) DO NOTHING""",
             {"pid": project_id, "letter": letter, "label": label, "models": models,
              "outputs": outputs, "outcomes": outcomes, "impact": impact, "km": key_measure},
         )
-        n_chain += 1
 
     existing_sequences = {
         r["sequence"] for r in run_query(
@@ -200,13 +213,13 @@ def seed(project_id: int | None = None) -> None:
     }
     n_if_then = 0
     for sequence, statement in IF_THEN:
-        if sequence in existing_sequences:
-            continue
+        if sequence not in existing_sequences:
+            n_if_then += 1
         run_write(
-            "INSERT INTO mel_a3_if_then (project_id, sequence, statement) VALUES (:pid, :seq, :stmt)",
+            "INSERT INTO mel_a3_if_then (project_id, sequence, statement) VALUES (:pid, :seq, :stmt) "
+            "ON CONFLICT (project_id, sequence) DO NOTHING",
             {"pid": project_id, "seq": sequence, "stmt": statement},
         )
-        n_if_then += 1
 
     existing_areas = {
         r["area_label"] for r in run_query(
@@ -215,14 +228,14 @@ def seed(project_id: int | None = None) -> None:
     }
     n_areas = 0
     for area_label, indicator_ids, key_measures in RESULT_AREAS:
-        if area_label in existing_areas:
-            continue
+        if area_label not in existing_areas:
+            n_areas += 1
         run_write(
             """INSERT INTO mel_a3_result_areas (project_id, area_label, indicator_ids, key_measures)
-               VALUES (:pid, :area, :ids, :km)""",
+               VALUES (:pid, :area, :ids, :km)
+               ON CONFLICT (project_id, area_label) DO NOTHING""",
             {"pid": project_id, "area": area_label, "ids": indicator_ids, "km": key_measures},
         )
-        n_areas += 1
 
     print(
         f"A3 Results Framework (ToC): {n_toc} ToC row(s), {n_pathways} pathway(s), "

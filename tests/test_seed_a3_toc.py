@@ -143,3 +143,43 @@ def test_seed_skips_gracefully_when_no_sawa_project_exists_yet(monkeypatch):
 
     st.cache_resource.clear()
     os.remove(path)
+
+
+def test_toc_singleton_insert_tolerates_a_row_already_present(seeded_db):
+    # Regression test for the same production bug fixed in
+    # seed_reconciliation.py: two Streamlit sessions booting around the
+    # same moment could both read an empty "does mel_a3_toc have a row
+    # yet" check before either had committed, and the second INSERT would
+    # hit idx_a3_toc_project's UNIQUE constraint (a single-column index,
+    # project_id alone -- this table is a one-row-per-project singleton).
+    # A Python-level pre-check can't reproduce this -- what actually
+    # prevents the error is the SQL's own ON CONFLICT clause, exercised
+    # here by running the exact INSERT twice in a row with no precheck gate
+    # in between.
+    db_, _ = seeded_db
+    insert_sql = """INSERT INTO mel_a3_toc (project_id, goal, logic, not_reported_note)
+        VALUES (:pid, 'x', 'x', NULL)
+        ON CONFLICT (project_id) DO NOTHING"""
+    params = {"pid": 1}
+    db_.run_write(insert_sql, params)  # row already exists from the fixture seed
+    db_.run_write(insert_sql, params)  # must not raise
+
+    rows = db_.run_query("SELECT COUNT(*) AS c FROM mel_a3_toc WHERE project_id=1", {})
+    assert rows[0]["c"] == 1
+
+
+def test_pathways_insert_tolerates_a_row_already_present(seeded_db):
+    # Same regression, for one of the 4 non-singleton blocks in seed()
+    # (mel_a3_pathways, idx_a3p_key on (project_id, pathway_label)).
+    db_, _ = seeded_db
+    insert_sql = """INSERT INTO mel_a3_pathways (project_id, pathway_label, description)
+        VALUES (:pid, :label, 'x')
+        ON CONFLICT (project_id, pathway_label) DO NOTHING"""
+    params = {"pid": 1, "label": "Capacity building"}
+    db_.run_write(insert_sql, params)
+    db_.run_write(insert_sql, params)  # must not raise
+
+    rows = db_.run_query(
+        "SELECT COUNT(*) AS c FROM mel_a3_pathways WHERE pathway_label='Capacity building'", {}
+    )
+    assert rows[0]["c"] == 1

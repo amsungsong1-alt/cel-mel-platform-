@@ -338,6 +338,20 @@ AGRI_IMPACT_QUESTIONS = [
 
 def _seed_table(table: str, key_col: str, rows: list[tuple], columns: list[str],
                  project_id: int) -> int:
+    """Shared insert-missing-only loop for both tables here. Bulk
+    existing-keys fetch is only used to count how many rows this call adds
+    (for the boot-log message), NOT to gate the INSERT itself. The INSERT
+    always runs with ON CONFLICT (project_id, key_col) DO NOTHING, not a
+    check-then-insert: two Streamlit sessions booting around the same
+    moment could otherwise both read an empty existing_keys set before
+    either had committed, and the second INSERT would hit the table's
+    UNIQUE constraint -- this exact bug actually happened in production
+    for a different seed module (seed_reconciliation.py). ON CONFLICT DO
+    NOTHING is atomic at the database level, so the race can't happen
+    regardless of how many sessions call seed() at once. Requires a
+    unique index on (project_id, key_col) -- see mel_agri_impact_questions'
+    idx_maiq_key, added specifically so this table could use this helper
+    safely (it had no unique index at all before)."""
     existing_keys = {
         r[key_col] for r in run_query(
             f"SELECT {key_col} FROM {table} WHERE project_id=:pid", {"pid": project_id}
@@ -347,13 +361,13 @@ def _seed_table(table: str, key_col: str, rows: list[tuple], columns: list[str],
     n = 0
     for row in rows:
         key_value = row[columns.index(key_col)]
-        if key_value in existing_keys:
-            continue
+        if key_value not in existing_keys:
+            n += 1
         run_write(
-            f"INSERT INTO {table} ({', '.join(cols)}) VALUES ({', '.join(':' + c for c in cols)})",
+            f"INSERT INTO {table} ({', '.join(cols)}) VALUES ({', '.join(':' + c for c in cols)}) "
+            f"ON CONFLICT (project_id, {key_col}) DO NOTHING",
             {"project_id": project_id, **dict(zip(columns, row))},
         )
-        n += 1
     return n
 
 

@@ -754,6 +754,9 @@ CREATE TABLE IF NOT EXISTS mel_agri_impact_questions (
     answered_at   TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_maiq_project ON mel_agri_impact_questions(project_id);
+-- See database/schema.sql's idx_maiq_key comment -- same reasoning, and
+-- the matching dedup runs in db.py's Postgres migration branch too.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_maiq_key ON mel_agri_impact_questions(project_id, question_text);
 
 -- A4/A5 schedules — see database/schema.sql's mel_schedule_activities
 -- comment (Phase 6 step 2) for why this is one unified table and why

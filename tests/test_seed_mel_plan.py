@@ -309,3 +309,134 @@ def test_crosswalk_links_are_one_to_one(seeded_db_with_workbook):
     )
     ids = [r["indicator_id"] for r in linked]
     assert len(ids) == len(set(ids)), "an indicator_id is claimed by more than one MEL Plan row"
+
+
+def test_mel_plan_indicators_insert_tolerates_a_row_already_present(seeded_db):
+    # Regression test for the same production bug fixed in
+    # seed_reconciliation.py: two Streamlit sessions booting around the
+    # same moment could both read an empty existing-keys set before
+    # either had committed, and the second INSERT would hit idx_mpi_key's
+    # UNIQUE constraint. A Python-level pre-check can't reproduce this --
+    # what actually prevents the error is the SQL's own ON CONFLICT
+    # clause, exercised here by running the exact INSERT twice in a row
+    # for the same key with no existing-keys gate in between.
+    db_, _ = seeded_db
+    insert_sql = """INSERT INTO mel_plan_indicators
+        (project_id, row_number, section, indicator_text, baseline, lop_target,
+         data_collection_methods, frequency, data_sources, responsible_collector,
+         cel_scope, planner_notes, indicator_id)
+        VALUES (:pid, :rn, 'Impact', 'x', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)
+        ON CONFLICT (project_id, row_number) DO NOTHING"""
+    params = {"pid": 1, "rn": 12}
+    db_.run_write(insert_sql, params)
+    db_.run_write(insert_sql, params)  # must not raise
+
+    rows = db_.run_query("SELECT COUNT(*) AS c FROM mel_plan_indicators WHERE row_number=12", {})
+    assert rows[0]["c"] == 1
+
+
+def test_agri_impact_questions_insert_tolerates_a_row_already_present(seeded_db):
+    # Same regression, for mel_agri_impact_questions -- this table had NO
+    # unique index at all until this fix (idx_maiq_key, added alongside
+    # this fix specifically so it could be protected the same way as
+    # every other seeded table). Before idx_maiq_key existed, this exact
+    # race wouldn't have raised an error -- it would have silently
+    # inserted a duplicate row, arguably worse (silent data corruption
+    # instead of a visible failure).
+    db_, _ = seeded_db
+    qtext = db_.run_query("SELECT question_text FROM mel_agri_impact_questions LIMIT 1", {})[0]["question_text"]
+    insert_sql = """INSERT INTO mel_agri_impact_questions (project_id, question_text)
+        VALUES (:pid, :qtext)
+        ON CONFLICT (project_id, question_text) DO NOTHING"""
+    params = {"pid": 1, "qtext": qtext}
+    db_.run_write(insert_sql, params)  # must not raise, and must not duplicate
+
+    rows = db_.run_query(
+        "SELECT COUNT(*) AS c FROM mel_agri_impact_questions WHERE question_text=:q", {"q": qtext}
+    )
+    assert rows[0]["c"] == 1
+
+
+def test_agri_impact_questions_dedup_keeps_the_answered_row(monkeypatch):
+    # Most safety-critical test in this batch: simulates the race having
+    # ALREADY happened against production before idx_maiq_key existed (a
+    # real duplicate (project_id, question_text) pair, one Answered with a
+    # real answer, inserted by temporarily dropping the unique index to
+    # bypass it -- the same bypass a pre-fix, pre-idx_maiq_key database
+    # would have had by construction). Re-running db.init_db() (as every
+    # app boot does) must dedup down to exactly one row AND it must be the
+    # Answered one, never the one an answer would be discarded from.
+    fd, path = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
+    os.remove(path)
+    monkeypatch.setattr(db, "DB_PATH", path)
+    monkeypatch.setattr(db, "DATABASE_URL", f"sqlite:///{path}")
+    st.cache_resource.clear()
+    db.init_db()
+    db.run_write("INSERT INTO projects (project_id, name) VALUES (1, 'SAWA')", {})
+
+    from database import seed_mel_plan
+    seed_mel_plan.seed()
+
+    qtext = db.run_query("SELECT question_text FROM mel_agri_impact_questions LIMIT 1", {})[0]["question_text"]
+    db.run_write("DROP INDEX IF EXISTS idx_maiq_key", {})
+    db.run_write(
+        "INSERT INTO mel_agri_impact_questions (project_id, question_text, status, answer_text) "
+        "VALUES (1, :q, 'Answered', 'Confirmed with AIL.')",
+        {"q": qtext},
+    )
+    assert db.run_query(
+        "SELECT COUNT(*) AS c FROM mel_agri_impact_questions WHERE question_text=:q", {"q": qtext}
+    )[0]["c"] == 2
+
+    st.cache_resource.clear()
+    db.init_db()  # re-runs _run_migrations: dedup, then re-creates idx_maiq_key
+
+    rows = db.run_query(
+        "SELECT status, answer_text FROM mel_agri_impact_questions WHERE question_text=:q", {"q": qtext}
+    )
+    assert len(rows) == 1
+    assert rows[0]["status"] == "Answered"
+    assert rows[0]["answer_text"] == "Confirmed with AIL."
+
+    st.cache_resource.clear()
+    os.remove(path)
+
+
+def test_agri_impact_questions_dedup_keeps_lowest_id_when_both_open(monkeypatch):
+    # Same scenario, but neither duplicate has been answered -- nothing to
+    # protect by preferring one over the other, so the dedup falls back to
+    # keeping the oldest (lowest id) row rather than an arbitrary one.
+    fd, path = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
+    os.remove(path)
+    monkeypatch.setattr(db, "DB_PATH", path)
+    monkeypatch.setattr(db, "DATABASE_URL", f"sqlite:///{path}")
+    st.cache_resource.clear()
+    db.init_db()
+    db.run_write("INSERT INTO projects (project_id, name) VALUES (1, 'SAWA')", {})
+
+    from database import seed_mel_plan
+    seed_mel_plan.seed()
+
+    qtext = db.run_query("SELECT question_text FROM mel_agri_impact_questions LIMIT 1", {})[0]["question_text"]
+    lowest_id = db.run_query(
+        "SELECT id FROM mel_agri_impact_questions WHERE question_text=:q", {"q": qtext}
+    )[0]["id"]
+    db.run_write("DROP INDEX IF EXISTS idx_maiq_key", {})
+    db.run_write(
+        "INSERT INTO mel_agri_impact_questions (project_id, question_text, status) VALUES (1, :q, 'Open')",
+        {"q": qtext},
+    )
+
+    st.cache_resource.clear()
+    db.init_db()
+
+    rows = db.run_query(
+        "SELECT id FROM mel_agri_impact_questions WHERE question_text=:q", {"q": qtext}
+    )
+    assert len(rows) == 1
+    assert rows[0]["id"] == lowest_id
+
+    st.cache_resource.clear()
+    os.remove(path)

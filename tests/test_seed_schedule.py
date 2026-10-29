@@ -151,3 +151,28 @@ def test_seed_skips_gracefully_when_no_sawa_project_exists_yet(monkeypatch):
 
     st.cache_resource.clear()
     os.remove(path)
+
+
+def test_insert_tolerates_a_row_already_present_regardless_of_any_precheck(seeded_db):
+    # Regression test for the same production bug fixed in
+    # seed_reconciliation.py: two Streamlit sessions booting around the
+    # same moment could both read an empty existing-numbers set before
+    # either had committed, and the second INSERT would hit idx_msa_key's
+    # UNIQUE constraint. A Python-level pre-check can't reproduce this --
+    # what actually prevents the error is the SQL's own ON CONFLICT
+    # clause, exercised here by running the exact INSERT twice in a row
+    # for the same key with no existing-numbers gate in between.
+    db_, _ = seeded_db
+    insert_sql = """INSERT INTO mel_schedule_activities
+        (project_id, sheet, activity_number, group_label, activity, note, indicator_id,
+         lead_role, support_role, location, start_date, end_date)
+        VALUES (:pid, :sheet, :num, 'A. Preparation', 'x', NULL, NULL, 'x', 'x', 'x', NULL, NULL)
+        ON CONFLICT (project_id, sheet, activity_number) DO NOTHING"""
+    params = {"pid": 1, "sheet": "A4 Onboarding Q2", "num": 1}
+    db_.run_write(insert_sql, params)
+    db_.run_write(insert_sql, params)  # must not raise
+
+    rows = db_.run_query(
+        "SELECT COUNT(*) AS c FROM mel_schedule_activities WHERE sheet='A4 Onboarding Q2' AND activity_number=1", {}
+    )
+    assert rows[0]["c"] == 1

@@ -287,7 +287,43 @@ def _run_migrations(schema_fingerprint: str) -> bool:
             # rolling redeploy) — pg_advisory_xact_lock serializes any other
             # session trying to migrate at the same time and auto-releases
             # at transaction end, so it can't leak on an exception.
-            _execute_script(conn, "SELECT pg_advisory_xact_lock(823771);\n" + schema)
+            # One-time dedup of mel_agri_impact_questions, run (still in
+            # the same single round trip, via the DO block's own exception
+            # handler rather than a second conn.execute() call) BEFORE the
+            # schema script's CREATE UNIQUE INDEX idx_maiq_key on
+            # (project_id, question_text) -- that table had no unique
+            # constraint at all before this fix, so a boot-time race (two
+            # Streamlit sessions both seeding it around the same moment,
+            # the same bug class fixed in seed_reconciliation.py) could
+            # have already silently inserted a real duplicate row into
+            # production, which would make CREATE UNIQUE INDEX fail
+            # outright once it tries to run. Keeps exactly one row per
+            # (project_id, question_text): the Answered one if either copy
+            # has been answered (an answer is real information, never
+            # discard it), tie-broken by lowest id (oldest) otherwise.
+            # "WHEN undefined_table" catches the common case of a fresh
+            # database where the schema script hasn't created the table
+            # yet -- not an error, nothing to dedup.
+            dedup_maiq = """
+                DO $$
+                BEGIN
+                    DELETE FROM mel_agri_impact_questions
+                    WHERE id IN (
+                        SELECT id FROM (
+                            SELECT id,
+                                   ROW_NUMBER() OVER (
+                                       PARTITION BY project_id, question_text
+                                       ORDER BY CASE WHEN status = 'Answered' THEN 0 ELSE 1 END, id
+                                   ) AS rn
+                            FROM mel_agri_impact_questions
+                        ) AS ranked
+                        WHERE rn > 1
+                    );
+                EXCEPTION WHEN undefined_table THEN
+                    NULL;
+                END $$;
+            """
+            _execute_script(conn, "SELECT pg_advisory_xact_lock(823771);\n" + dedup_maiq + schema)
             # Migrate existing tables that predate these columns.
             _execute_script(conn, """
                 ALTER TABLE raw_data_analysis ADD COLUMN IF NOT EXISTS reporting_year INTEGER;
@@ -1224,6 +1260,28 @@ def _run_migrations(schema_fingerprint: str) -> bool:
 
     schema = SCHEMA_PATH.read_text()
     conn = get_connection()
+    # Same one-time mel_agri_impact_questions dedup as the Postgres branch
+    # above (see its comment for why) -- must run before executescript()
+    # below creates idx_maiq_key. try/except (not an existence check)
+    # because a fresh database has no mel_agri_impact_questions table yet,
+    # which is the common case, not an error.
+    try:
+        conn.execute("""
+            DELETE FROM mel_agri_impact_questions
+            WHERE id IN (
+                SELECT id FROM (
+                    SELECT id,
+                           ROW_NUMBER() OVER (
+                               PARTITION BY project_id, question_text
+                               ORDER BY CASE WHEN status = 'Answered' THEN 0 ELSE 1 END, id
+                           ) AS rn
+                    FROM mel_agri_impact_questions
+                ) AS ranked
+                WHERE rn > 1
+            )
+        """)
+    except Exception:
+        pass
     conn.executescript(schema)
     # Migrate existing databases that predate these columns.
     for stmt in (

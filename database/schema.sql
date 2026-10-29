@@ -999,6 +999,13 @@ CREATE TABLE IF NOT EXISTS mel_agri_impact_questions (
     answered_at   TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_maiq_project ON mel_agri_impact_questions(project_id);
+-- Added so seed_mel_plan.py's insert-missing loop can use an atomic
+-- INSERT ... ON CONFLICT DO NOTHING instead of a check-then-insert (which
+-- had no unique constraint to protect it at all until this index existed
+-- -- see _run_migrations()'s mel_agri_impact_questions dedup comment in
+-- db.py for the one-time cleanup this required on an already-deployed
+-- database, run immediately before this index is created on every boot).
+CREATE UNIQUE INDEX IF NOT EXISTS idx_maiq_key ON mel_agri_impact_questions(project_id, question_text);
 
 -- A4 Onboarding Q2 + A5 Training Q2 — docs/mel_tool/10_A4_Onboarding_Q2.md
 -- and 11_A5_Training_Q2.md (Phase 6 step 2). One unified table for both

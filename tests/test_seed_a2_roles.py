@@ -137,3 +137,26 @@ def test_seed_skips_gracefully_when_no_sawa_project_exists_yet(monkeypatch):
 
     st.cache_resource.clear()
     os.remove(path)
+
+
+def test_insert_tolerates_a_row_already_present_regardless_of_any_precheck(seeded_db):
+    # Regression test for the same production bug fixed in
+    # seed_reconciliation.py: two Streamlit sessions booting around the
+    # same moment could both read an empty existing-keys set before
+    # either had committed, and the second INSERT would hit idx_roles_key's
+    # UNIQUE constraint. A Python-level pre-check can't reproduce this --
+    # what actually prevents the error is the SQL's own ON CONFLICT
+    # clause, exercised here (for mel_roles, one of the 4 tables
+    # _seed_table() shares) by running the exact INSERT twice in a row for
+    # the same key with no existing-keys gate in between.
+    db_, _ = seeded_db
+    insert_sql = """INSERT INTO mel_roles
+        (project_id, role_name, person_name, responsibilities, sends_to, receives_from, backup)
+        VALUES (:pid, :role_name, NULL, 'x', 'x', 'x', NULL)
+        ON CONFLICT (project_id, role_name) DO NOTHING"""
+    params = {"pid": 1, "role_name": "MEAL Lead"}
+    db_.run_write(insert_sql, params)
+    db_.run_write(insert_sql, params)  # must not raise
+
+    rows = db_.run_query("SELECT COUNT(*) AS c FROM mel_roles WHERE role_name='MEAL Lead'", {})
+    assert rows[0]["c"] == 1

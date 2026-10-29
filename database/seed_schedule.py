@@ -98,6 +98,17 @@ _COLUMNS = ["activity_number", "group_label", "activity", "note", "indicator_id"
 
 
 def _seed_sheet(sheet: str, rows: list[tuple], project_id: int) -> int:
+    # Bulk existing-numbers fetch is only used to count how many rows this
+    # call adds (for the boot-log message) -- it does NOT gate the INSERT
+    # below, which always runs with ON CONFLICT DO NOTHING instead of a
+    # check-then-insert. Two Streamlit sessions booting around the same
+    # moment could otherwise both read an empty existing_numbers set
+    # before either had committed, and the second INSERT would hit
+    # idx_msa_key's UNIQUE constraint -- this exact bug actually happened
+    # in production for a different seed module (seed_reconciliation.py)
+    # using this same check-then-insert shape. ON CONFLICT DO NOTHING is
+    # atomic at the database level, so the race can't happen regardless of
+    # how many sessions call seed() at once.
     existing_numbers = {
         r["activity_number"] for r in run_query(
             "SELECT activity_number FROM mel_schedule_activities WHERE project_id=:pid AND sheet=:sheet",
@@ -107,15 +118,15 @@ def _seed_sheet(sheet: str, rows: list[tuple], project_id: int) -> int:
     n = 0
     for row in rows:
         activity_number = row[0]
-        if activity_number in existing_numbers:
-            continue
+        if activity_number not in existing_numbers:
+            n += 1
         run_write(
             f"""INSERT INTO mel_schedule_activities
                 (project_id, sheet, {', '.join(_COLUMNS)})
-                VALUES (:project_id, :sheet, {', '.join(':' + c for c in _COLUMNS)})""",
+                VALUES (:project_id, :sheet, {', '.join(':' + c for c in _COLUMNS)})
+                ON CONFLICT (project_id, sheet, activity_number) DO NOTHING""",
             {"project_id": project_id, "sheet": sheet, **dict(zip(_COLUMNS, row))},
         )
-        n += 1
     return n
 
 

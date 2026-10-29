@@ -60,7 +60,19 @@ def _seed_table(table: str, key_col: str, rows: list[tuple], columns: list[str],
     """Shared insert-missing-only loop for all four tables here: one bulk
     SELECT of existing keys up front (not one round trip per row -- see
     seed_pirs.py/seed_proframe.py/seed_shared_measures.py's docstrings for
-    why that mattered in production), then INSERT only what's missing."""
+    why that mattered in production), used only to count how many rows
+    this call adds (for the boot-log message), NOT to gate the INSERT
+    itself. The INSERT always runs with ON CONFLICT (project_id, key_col)
+    DO NOTHING (every table here is keyed that way -- idx_dfs_key,
+    idx_roles_key, idx_sr_key, idx_du_key all match (project_id,
+    <their key column>)), not a check-then-insert: two Streamlit sessions
+    booting around the same moment could otherwise both read an empty
+    existing_keys set before either had committed, and the second INSERT
+    would hit the table's UNIQUE constraint -- confirmed to actually
+    happen in production for a different seed module
+    (seed_reconciliation.py) using this same check-then-insert shape.
+    ON CONFLICT DO NOTHING is atomic at the database level, so the race
+    can't happen regardless of how many sessions call seed() at once."""
     existing_keys = {
         r[key_col] for r in run_query(
             f"SELECT {key_col} FROM {table} WHERE project_id=:pid", {"pid": project_id}
@@ -70,13 +82,13 @@ def _seed_table(table: str, key_col: str, rows: list[tuple], columns: list[str],
     n = 0
     for row in rows:
         key_value = row[columns.index(key_col)]
-        if key_value in existing_keys:
-            continue
+        if key_value not in existing_keys:
+            n += 1
         run_write(
-            f"INSERT INTO {table} ({', '.join(cols)}) VALUES ({', '.join(':' + c for c in cols)})",
+            f"INSERT INTO {table} ({', '.join(cols)}) VALUES ({', '.join(':' + c for c in cols)}) "
+            f"ON CONFLICT (project_id, {key_col}) DO NOTHING",
             {"project_id": project_id, **dict(zip(columns, row))},
         )
-        n += 1
     return n
 
 

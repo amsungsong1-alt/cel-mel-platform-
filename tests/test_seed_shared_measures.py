@@ -134,3 +134,41 @@ def test_seed_skips_gracefully_when_no_sawa_project_exists_yet(monkeypatch):
 
     st.cache_resource.clear()
     os.remove(path)
+
+
+def test_insert_tolerates_a_row_already_present_regardless_of_any_precheck(monkeypatch):
+    # Regression test for the same production bug fixed in
+    # seed_reconciliation.py: two Streamlit sessions booting around the
+    # same moment could both read an empty existing-numbers set before
+    # either had committed, and the second INSERT would hit idx_sm_key's
+    # UNIQUE constraint. A Python-level pre-check can't reproduce this --
+    # what actually prevents the error is the SQL's own ON CONFLICT
+    # clause, exercised here by running the exact INSERT twice in a row
+    # for the same key with no existing-numbers gate in between.
+    fd, path = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
+    os.remove(path)
+    monkeypatch.setattr(db, "DB_PATH", path)
+    monkeypatch.setattr(db, "DATABASE_URL", f"sqlite:///{path}")
+    st.cache_resource.clear()
+    db.init_db()
+    db.run_write("INSERT INTO projects (project_id, name) VALUES (1, 'SAWA')", {})
+    from database import seed_shared_measures
+    seed_shared_measures.seed()
+
+    insert_sql = """INSERT INTO mel_shared_measures
+        (project_id, row_number, sm_group, sm_group_description, sm_subcode,
+         sm_subcode_description, statement, indicator_id)
+        VALUES (:project_id, :row_number, :sm_group, :sm_group_description, :sm_subcode,
+                :sm_subcode_description, :statement, :indicator_id)
+        ON CONFLICT (project_id, row_number) DO NOTHING"""
+    params = dict(project_id=1, row_number=1, sm_group="x", sm_group_description="x",
+                  sm_subcode="x", sm_subcode_description="x", statement="x", indicator_id=None)
+    db.run_write(insert_sql, params)
+    db.run_write(insert_sql, params)  # must not raise
+
+    rows = db.run_query("SELECT COUNT(*) AS c FROM mel_shared_measures WHERE row_number=1", {})
+    assert rows[0]["c"] == 1
+
+    st.cache_resource.clear()
+    os.remove(path)

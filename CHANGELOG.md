@@ -25,11 +25,40 @@ All notable changes to the CEL MEL Platform. Format loosely follows
   against SQLite and real Postgres 15, reproducing the exact reported
   INSERT shape. 1 new regression test in `tests/test_seed_reconciliation.py`
   (confirmed it fails against the pre-fix INSERT, to prove it actually
-  exercises the bug). **This same check-then-insert shape is used by
-  every other `seed_*.py` module in this project** (`seed_pirs`,
-  `seed_proframe`, `seed_shared_measures`, `seed_a2_roles`,
-  `seed_mel_plan`, `seed_schedule`, `seed_a3_toc`) — all are equally
-  exposed to this race, not fixed here, flagged as a follow-up.
+  exercises the bug).
+- **Same check-then-insert race, fixed in every other `seed_*.py` module**
+  (`seed_pirs`, `seed_proframe`, `seed_shared_measures`, `seed_a2_roles`,
+  `seed_mel_plan`, `seed_schedule`, `seed_a3_toc`) — the follow-up flagged
+  above. Every insert-missing loop now runs an unconditional `INSERT ...
+  ON CONFLICT (...) DO NOTHING` instead of a Python-level
+  check-then-insert; a bulk existing-keys fetch is kept only to produce an
+  accurate "N inserted" boot-log count, never to gate the INSERT itself.
+  `seed_proframe.py`'s and `seed_mel_plan.py`'s separate `indicator_id`
+  backfill loops (UPDATE-based) are untouched — an UPDATE keyed by its own
+  natural key is already race-safe, this bug class only ever affected
+  INSERTs racing each other.
+  `mel_agri_impact_questions` needed an extra step first: unlike every
+  other seeded table, it had **no unique constraint at all**, so this
+  exact race wouldn't have raised a visible error there — it would have
+  silently inserted a duplicate row (arguably worse: silent data
+  corruption instead of a loud failure). Added `idx_maiq_key` (`project_id,
+  question_text`) to both schema files, and — since this table is a real
+  working log that may already hold genuine production content (a
+  question someone has actually answered) — a one-time deduplication
+  step in `_run_migrations()` (both dialects; a `DO $$` block on Postgres,
+  folded into the same already-batched migration script so it costs no
+  extra round trip, per the earlier migration-batching work) that runs
+  immediately before `idx_maiq_key` is created on every boot: for any
+  `(project_id, question_text)` pair with more than one row, keeps the
+  `Answered` one if either copy has been answered (an answer is real
+  information, never discarded), otherwise keeps the lowest id. Verified
+  against SQLite and real Postgres 15: a fresh install, full
+  re-seed idempotency, direct `ON CONFLICT` race reproduction for every
+  table, and both dedup scenarios (an Answered duplicate; two Open
+  duplicates) confirmed to keep the right row and leave `idx_maiq_key`
+  enforcing uniqueness afterward. 11 new regression tests across the 7
+  modules' test files (4 of them covering the `mel_agri_impact_questions`
+  index + dedup specifically).
 
 ### Changed
 - **Retired `qr_actuals`, rebuilt Module L's §7 Technical Reconciliation
