@@ -105,16 +105,25 @@ RESULTS_CHAIN = [
 # 3 fields that ARE live-linked (key_result_statement/assumptions/risks).
 RESULT_AREAS = [
     ("1. Impact level", "IM1, IM2, IM3", "YiW; D&F"),
-    ("2.1 Work, Enterprise development and Income", "OC1, OC4, OC5, OC6, OC7, OC8", "YiW; Enterprise"),
-    ("2.2 Aquaculture Production and Revenue", "OC9, OC10", None),
+    # OC7/OC8 dropped (were "OC1, OC4, OC5, OC6, OC7, OC8"): the Oct 2026
+    # workbook revision reclassified both to "Not in CEL scope" -- they're
+    # TechnoServe-tracked now, not CEL's own. See seed_reconciliation.py's
+    # TS-7/TS-8 cross-reference comment for the same reclassification.
+    ("2.1 Work, Enterprise development and Income", "OC1, OC4, OC5, OC6", "YiW; Enterprise"),
+    # Was "OC9, OC10" -- both reclassified to "Not in CEL scope" by the
+    # same revision, so this area now has no CEL-tracked indicator at all.
+    ("2.2 Aquaculture Production and Revenue", "Not reported by CEL", None),
     ("2.3 Agency, Networks and Resilence", "OC11, OC12, OC13", "WAN; Advocacy & WAN"),
     ("2.4 Inclusion, Safeguarding and Accessibility", "OC14, OC15", "Inclusion & Reach"),
     ("2.5 Regulatory Compliance and Market Assurance", "Not reported by CEL",
      "Regulatory & Compliance; Access to quality inputs"),
-    ("3.1 Youth accessing starter-pack and Micro-grant", "OP4, OP5", "WEO; Enterprise"),
+    # Was "OP4, OP5" -- both reclassified to "Not in CEL scope".
+    ("3.1 Youth accessing starter-pack and Micro-grant", "Not reported by CEL", "WEO; Enterprise"),
     ("3.2 Training and Skills", "OP10, OP11, OP36, OP29", "WEO; Enterprise"),
     ("3.3 Network (WAN) and Leadership", "OP15, OP16, OP17, OP18, OP33", "WAN; Advocacy & WAN"),
-    ("3.4 Inclusion and Safeguarding", "OP22, OP24, OP31, OP34, OP35, OP28", "Inclusion & Reach; WEO"),
+    # OP24/OP35 dropped (were "OP22, OP24, OP31, OP34, OP35, OP28"): both
+    # reclassified to "Not in CEL scope" by the same revision.
+    ("3.4 Inclusion and Safeguarding", "OP22, OP31, OP34, OP28", "Inclusion & Reach; WEO"),
     ("3.5 Regulations, Compliance and Market Assurance", "Not reported by CEL",
      "Regulation & Compliance; Quality Inputs; Food Safety"),
     ("3.6 Coverage and Impact Areas", "OP25, OP26", "Coverage; Coverage (not WEO)"),
@@ -222,8 +231,9 @@ def seed(project_id: int | None = None) -> None:
         )
 
     existing_areas = {
-        r["area_label"] for r in run_query(
-            "SELECT area_label FROM mel_a3_result_areas WHERE project_id=:pid", {"pid": project_id}
+        r["area_label"]: (r["indicator_ids"], r["key_measures"]) for r in run_query(
+            "SELECT area_label, indicator_ids, key_measures FROM mel_a3_result_areas WHERE project_id=:pid",
+            {"pid": project_id},
         )
     }
     n_areas = 0
@@ -237,8 +247,28 @@ def seed(project_id: int | None = None) -> None:
             {"pid": project_id, "area": area_label, "ids": indicator_ids, "km": key_measures},
         )
 
+    # Backfill indicator_ids/key_measures on areas that already existed
+    # under old values -- ON CONFLICT DO NOTHING above only inserts
+    # missing areas, so a source-code correction (like the Oct 2026
+    # workbook revision dropping OC7/OC8/OC9/OC10/OP4/OP5/OP24/OP35 from
+    # the areas that listed them, once those indicators left CEL scope)
+    # would never reach an already-seeded production row without this.
+    # Safe to run unconditionally: this table is read-only reference data,
+    # never edited through the app.
+    n_backfilled = 0
+    for area_label, indicator_ids, key_measures in RESULT_AREAS:
+        current = existing_areas.get(area_label)
+        if current == (indicator_ids, key_measures):
+            continue
+        run_write(
+            """UPDATE mel_a3_result_areas SET indicator_ids=:ids, key_measures=:km
+               WHERE project_id=:pid AND area_label=:area""",
+            {"pid": project_id, "area": area_label, "ids": indicator_ids, "km": key_measures},
+        )
+        n_backfilled += 1
+
     print(
         f"A3 Results Framework (ToC): {n_toc} ToC row(s), {n_pathways} pathway(s), "
         f"{n_chain} results-chain row(s), {n_if_then} if-then statement(s), "
-        f"{n_areas} result-area row(s) inserted."
+        f"{n_areas} result-area row(s) inserted, {n_backfilled} backfilled."
     )

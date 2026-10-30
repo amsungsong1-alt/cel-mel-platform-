@@ -168,6 +168,39 @@ def test_toc_singleton_insert_tolerates_a_row_already_present(seeded_db):
     assert rows[0]["c"] == 1
 
 
+def test_result_areas_drop_indicators_that_left_cel_scope(seeded_db):
+    # The Oct 2026 workbook revision reclassified OC7/OC8 (area 2.1),
+    # OC9/OC10 (area 2.2), OP4/OP5 (area 3.1), and OP24/OP35 (area 3.4) to
+    # "Not in CEL scope" -- these areas' hand-curated indicator_ids lists
+    # must no longer include them (never silently keep listing an
+    # indicator CEL itself doesn't track as CEL-scoped).
+    db_, _ = seeded_db
+    rows = {
+        r["area_label"]: r["indicator_ids"] for r in db_.run_query(
+            "SELECT area_label, indicator_ids FROM mel_a3_result_areas", {}
+        )
+    }
+    assert rows["2.1 Work, Enterprise development and Income"] == "OC1, OC4, OC5, OC6"
+    assert rows["2.2 Aquaculture Production and Revenue"] == "Not reported by CEL"
+    assert rows["3.1 Youth accessing starter-pack and Micro-grant"] == "Not reported by CEL"
+    assert rows["3.4 Inclusion and Safeguarding"] == "OP22, OP31, OP34, OP28"
+
+
+def test_backfills_a_result_area_seeded_under_an_old_indicator_list(seeded_db):
+    db_, seed_mod = seeded_db
+    db_.run_write(
+        """UPDATE mel_a3_result_areas SET indicator_ids='OC1, OC4, OC5, OC6, OC7, OC8'
+           WHERE area_label='2.1 Work, Enterprise development and Income'""",
+        {},
+    )
+    seed_mod.seed()
+    row = db_.run_query(
+        "SELECT indicator_ids FROM mel_a3_result_areas WHERE area_label='2.1 Work, Enterprise development and Income'",
+        {},
+    )[0]
+    assert row["indicator_ids"] == "OC1, OC4, OC5, OC6"
+
+
 def test_pathways_insert_tolerates_a_row_already_present(seeded_db):
     # Same regression, for one of the 4 non-singleton blocks in seed()
     # (mel_a3_pathways, idx_a3p_key on (project_id, pathway_label)).

@@ -70,12 +70,22 @@ def test_indicator_counts_by_level_match_im4_oc15_op36():
 
 @requires_real_workbook
 def test_not_in_cel_scope_list_matches_readme_exactly():
-    # 00_README.md documents these 13 as the plain/black-font (not in CEL
-    # scope) indicators -- this is the ground truth the font-colour-based
-    # cel_scope extraction must reproduce exactly.
+    # 00_README.md originally documented 13 plain/black-font (not in CEL
+    # scope) indicators from the Oct 18 2026 workbook. The Oct 26 2026
+    # revision reclassified 8 more to "Not in CEL scope" (OC7-OC10, OP4,
+    # OP5, OP24, OP35 -- e.g. OC7/OC8, the TechnoServe Catalytic/Micro
+    # Investment Fund indicators, are now TechnoServe-only, not CEL's own)
+    # -- found via a live-production audit after that revision was applied
+    # (00_README.md itself is stale now and wasn't re-transcribed; this
+    # test's ground truth is the real workbook's extracted cel_scope, not
+    # the doc). Note this is NOT the same set as "has no model_sheet" --
+    # see test_one_indicator_one_sheet_rule_holds below, unaffected by
+    # this revision: all 8 newly-reclassified indicators are still typed
+    # into a model sheet, just flagged out of CEL's own scope now.
     expected = {
-        "IM4", "OP1", "OP2", "OP3", "OP6", "OP7", "OP8",
-        "OP12", "OP13", "OP14", "OP19", "OP20", "OP21",
+        "IM4", "OC7", "OC8", "OC9", "OC10", "OP1", "OP2", "OP3", "OP4", "OP5",
+        "OP6", "OP7", "OP8", "OP12", "OP13", "OP14", "OP19", "OP20", "OP21",
+        "OP24", "OP35",
     }
     result = sfw.extract_workbook(_REAL_WORKBOOK)
     not_in_scope = {i["indicator_id"] for i in result["indicators"] if i["cel_scope"] == "Not in CEL scope"}

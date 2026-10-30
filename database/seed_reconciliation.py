@@ -24,6 +24,14 @@ exactly the 3 lines with a clear, documented correspondence to the real
   - TS-8  (III.4, Micro Investment Fund enterprises, 150) -> OC8
     Both per docs/mel_tool/04_MEL_Plan.md / 06_Project_IPTT.md, which derive
     OC7/OC8's own Y1 targets directly from "TechnoServe planner III.3/III.4".
+    NOTE (Oct 2026 workbook revision, found during the subsequent app audit):
+    OC7/OC8 themselves were reclassified to cel_scope "Not in CEL scope"
+    (CEL no longer tracks them as its own indicators -- they're
+    TechnoServe-only now). The TS-7/TS-8 cross-reference is left in place
+    anyway: it still correctly shows which indicator these TechnoServe
+    figures used to roll up to / are comparable against, and this field
+    was never used to drive any calculation (see the schema comment) --
+    but don't read it as "CEL currently tracks this indicator too."
 Every other line is genuinely external TechnoServe reference data (youth
 mobilised totals, catfish MT, trading revenue, ...) with no CEL indicator
 counterpart in the new scheme -- left NULL rather than forcing a mapping

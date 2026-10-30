@@ -101,25 +101,25 @@ MEL_PLAN_INDICATORS = [
     (23, 'Outcome',
      'Number of CEL-referred enterprises supported with Catalytic Fund support',
      None, '40', 'TechnoServe award/disbursement records, Partner reports, Enterprise verification', 'Quarterly',
-     'TechnoServe, IPs, APSPs', 'BDS Coach', "New output indicator (in CEL's consolidated plan)",
+     'TechnoServe, IPs, APSPs', 'BDS Coach', 'Not in CEL scope',
      'TechnoServe planner III.3 Y1 10 x4 = 40 (Q3 3, Q4 7). Programme-wide figure: confirm the CEL-referred share.',
      'OC7'),
     (24, 'Outcome',
      'Number of CEL-referred enterprises supported with Micro Investment Fund support',
      None, '600', 'TechnoServe award/disbursement records, Partner reports, Enterprise verification', 'Quarterly',
-     'TechnoServe, IPs, APSPs', 'BDS Coach', "New output indicator (in CEL's consolidated plan)",
+     'TechnoServe, IPs, APSPs', 'BDS Coach', 'Not in CEL scope',
      'TechnoServe planner III.4 Y1 150 x4 = 600 (Q3 52, Q4 98). Programme-wide figure: confirm the CEL-referred share.',
      'OC8'),
     (25, 'Outcome',
      'Quantity (MT) of fish produced annually',
      None, '50000', 'YiW records, Partner reports, Program and Participant surveys', 'Quarterly', 'IPs, APSPs',
-     'BDS Coach', 'Applicable to CEL',
+     'BDS Coach', 'Not in CEL scope',
      'CEL planner III.R2 Y1 115.7 MT x4. PWD MT (II.R6) treated as a subset. [Previous value: 50000]',
      'OC9'),
     (26, 'Outcome',
      'Amount of revenue (USD) from fish produced annually',
      None, '90000000', 'YiW records, Partner reports, Program and Participant surveys', 'Quarterly', 'IPs, APSPs',
-     'Finance Lead; BDS Coach', 'Applicable to CEL',
+     'Finance Lead; BDS Coach', 'Not in CEL scope',
      'CEL planner III.R3 Y1 $208,333 x4. PWD revenue (II.R7) treated as a subset. [Previous value: 90000000]',
      'OC10'),
     (27, 'Outcome',
@@ -228,7 +228,7 @@ MEL_PLAN_INDICATORS = [
      'OP16'),
     (51, 'Output', 'Number of young women-owned enterprises mentored and coached by WAN',
      None, None, 'WAN mentoring/coaching records, Enterprise interviews, Programme reports', 'Quarterly',
-     'WAN groups, enterprises', 'GYSI Lead (WAN)', "To be confirmed (not directly in CEL's consolidated plan)",
+     'WAN groups, enterprises', 'GYSI Lead (WAN)', 'Applicable to CEL',
      'No target in CEL Y1 planner.',
      'OP17'),
     (52, 'Output', 'SM 8.2Number of advocacy campaigns undertaken by WAN',
@@ -274,12 +274,12 @@ MEL_PLAN_INDICATORS = [
      None),
     (62, 'Output', 'Number of youth mobilised into the program (community entry, sensitization, selection)',
      None, '2000', 'Participant onboarding records, Mobilisation reports, Attendance records', 'Quarterly', 'IPs, APSPs',
-     'BDS Officer', "Not treated as WEO (CEL's consolidated plan)",
+     'BDS Officer', 'Applicable to CEL',
      'CEL planner I.1: Y1 500 x4. Onboarding, not a WEO count. LoP = Y1 x4. Added from planner (no original row).',
      'OP27'),
     (63, 'Output', 'Number of gender focal persons trained on GALS and EMAP',
      None, '100', 'Training reports, Participant lists, WEO records', 'Quarterly', 'IPs, APSPs',
-     'GYSI Lead', "New output indicator (in CEL's consolidated plan)",
+     'GYSI Lead', 'Applicable to CEL',
      'CEL planner I.9: Y1 25 x4. LoP = Y1 x4. Added from planner (no original row).',
      'OP28'),
     (64, 'Output', 'Number of young women in women-led cooperatives/clusters trained in gender, financial literacy and business mentoring',
@@ -289,12 +289,12 @@ MEL_PLAN_INDICATORS = [
      'OP29'),
     (65, 'Output', 'Number of young women trained in gender transformative trainings',
      None, '2000', 'Training reports, Participant lists, WEO records', 'Quarterly', 'IPs, APSPs',
-     'GYSI Lead', "New output indicator (in CEL's consolidated plan)",
+     'GYSI Lead', 'Applicable to CEL',
      'CEL planner I.19: Y1 500 x4. LoP = Y1 x4. Added from planner (no original row).',
      'OP30'),
     (66, 'Output', 'Number of young women trained to identify and respond to safeguarding issues',
      None, '2000', 'Training reports, Participant lists, WEO records', 'Quarterly', 'IPs, APSPs',
-     'GYSI Lead', "New output indicator (in CEL's consolidated plan)",
+     'GYSI Lead', 'Applicable to CEL',
      'CEL planner I.20: Y1 500 x4. LoP = Y1 x4. Added from planner (no original row).',
      'OP31'),
     (67, 'Output', 'Number of young women trained in mentorship and digital literacy',
@@ -304,22 +304,22 @@ MEL_PLAN_INDICATORS = [
      'OP32'),
     (68, 'Output', 'Number of WAN leadership bootcamps and exchange visits held',
      None, '4', 'WAN records, Event reports, Programme reports', 'Quarterly', 'IPs, APSPs',
-     'GYSI Lead (WAN)', "New output indicator (in CEL's consolidated plan)",
+     'GYSI Lead (WAN)', 'Applicable to CEL',
      'CEL planner I.12: Y1 2 x4. LoP = Y1 x4. Added from planner (no original row).',
      'OP33'),
     (69, 'Output', 'Number of women-led cooperatives/clusters with developed gender-responsive governance frameworks',
      None, '100', 'Cooperative/cluster records, Governance framework documents, Programme reports', 'Quarterly', 'IPs, APSPs',
-     'GYSI Lead (WAN)', "New output indicator (in CEL's consolidated plan)",
+     'GYSI Lead (WAN)', 'Applicable to CEL',
      'CEL planner I.18: Y1 25 x4. Likely the same 25 cooperatives/clusters as III.6: avoid double counting. LoP = Y1 x4.',
      'OP34'),
     (70, 'Output', 'Number of sites/partners with institutionalized safeguarding and occupational health standards',
      None, '8', 'Partner/site assessment records, Policy documents, Programme reports', 'Quarterly', 'IPs, APSPs',
-     'GYSI Lead', "New output indicator (in CEL's consolidated plan)",
+     'GYSI Lead', 'Not in CEL scope',
      'CEL planner I.23: planner shows 2 and 2 (no total printed), read as Y1 4, x4 = 16. Confirm. LoP = Y1 x4.',
      'OP35'),
     (71, 'Output', 'Number of enterprises prepared and referred to TechnoServe for Catalytic Fund or Micro Investment Fund support',
      None, None, 'Referral checklist, Referral register, Enterprise growth plans, TechnoServe feedback', 'Quarterly',
-     'TechnoServe, IPs, APSPs', 'BDS Coach; Finance Lead', "To be confirmed (not directly in CEL's consolidated plan)",
+     'TechnoServe, IPs, APSPs', 'BDS Coach; Finance Lead', 'Applicable to CEL',
      'No Y1 target in the CEL planner. Agree with TechnoServe/AIL; must be at least the Catalytic Fund and Micro Investment Fund numbers below.',
      'OP36'),
 ]
@@ -400,32 +400,36 @@ def seed(project_id: int | None = None) -> None:
         project_id,
     )
 
-    # Backfill indicator_id on rows that already existed before this
-    # crosswalk column was added (every mel_plan_indicators row seeded by
-    # an earlier deploy) -- _seed_table above only inserts missing rows by
+    # Backfill indicator_id and cel_scope on rows that already existed
+    # under old values -- _seed_table above only inserts missing rows by
     # row_number, so without this an already-seeded production row would
-    # keep indicator_id NULL forever even after the ALTER adds the column.
-    # Safe to run unconditionally: indicator_id is reference metadata this
-    # module alone maintains (unlike mel_agri_impact_questions.status,
-    # which real app usage can change), so always re-setting it from
-    # MEL_PLAN_INDICATORS is correct, not just on first insert.
-    _current_links = {
-        r["row_number"]: r["indicator_id"]
+    # never pick up a source-code correction. Safe to run unconditionally:
+    # both are reference metadata this module alone maintains (unlike
+    # mel_agri_impact_questions.status, which real app usage can change),
+    # so always re-setting them from MEL_PLAN_INDICATORS is correct, not
+    # just on first insert. cel_scope specifically needed this after the
+    # Oct 2026 workbook revision reclassified 13 of the 27 linked rows
+    # (e.g. OC7/OC8/OC9/OC10 moved OUT of CEL scope) -- confirmed by a
+    # category-level comparison against live mel_indicators.cel_scope.
+    _current_rows = {
+        r["row_number"]: (r["indicator_id"], r["cel_scope"])
         for r in run_query(
-            "SELECT row_number, indicator_id FROM mel_plan_indicators WHERE project_id=:pid",
+            "SELECT row_number, indicator_id, cel_scope FROM mel_plan_indicators WHERE project_id=:pid",
             {"pid": project_id},
         )
     }
     n3 = 0
     for row in MEL_PLAN_INDICATORS:
-        row_number, indicator_id = row[0], row[-1]
-        if indicator_id is None or _current_links.get(row_number) == indicator_id:
+        row_number, cel_scope, indicator_id = row[0], row[9], row[-1]
+        current_id, current_scope = _current_rows.get(row_number, (None, None))
+        if current_id == indicator_id and current_scope == cel_scope:
             continue
         run_write(
-            "UPDATE mel_plan_indicators SET indicator_id=:iid WHERE project_id=:pid AND row_number=:rn",
-            {"iid": indicator_id, "pid": project_id, "rn": row_number},
+            """UPDATE mel_plan_indicators SET indicator_id=:iid, cel_scope=:scope
+               WHERE project_id=:pid AND row_number=:rn""",
+            {"iid": indicator_id, "scope": cel_scope, "pid": project_id, "rn": row_number},
         )
         n3 += 1
 
     print(f"MEL Plan: {n1} indicator row(s), {n2} Agri-Impact question(s) inserted, "
-          f"{n3} crosswalk link(s) backfilled.")
+          f"{n3} row(s) backfilled (indicator_id/cel_scope).")

@@ -6,6 +6,51 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 ## Unreleased
 
 ### Fixed
+- `database/seed_proframe.py`, `database/seed_mel_plan.py`,
+  `database/seed_a3_toc.py` — re-synced hand-curated `cel_scope`/indicator-
+  list data against the Oct 26 2026 workbook revision applied to
+  production earlier (`mel_indicators.cel_scope` changed for 31
+  indicators — e.g. OC7-OC10 moved OUT of CEL scope, several others
+  moved in). An app-wide audit (triggered by the user after that
+  revision) found three home-page reference views were now showing wrong
+  CEL-scope data because nothing propagates `mel_indicators` changes into
+  their own hand-transcribed Python data:
+  - ProFrame: 30 of 53 linked rows' `cel_scope` disagreed with live data
+    (confirmed by category-level comparison, ignoring ProFrame's own
+    legend-style wording like "To be confirmed (not directly in CEL's
+    consolidated plan)" vs the terser live value — those were never
+    real mismatches).
+  - MEL Plan: 13 of 27 linked rows, same pattern.
+  - A3's `RESULT_AREAS`: 4 of 12 result areas listed an indicator that
+    had just left CEL scope (e.g. "2.1" still listed OC7/OC8; "2.2"'s
+    entire indicator list, OC9/OC10, left scope so it's now "Not
+    reported by CEL" like 2.5/3.5 already were).
+  All three corrected (30 + 13 + 4 rows respectively), and each seed
+  module's existing backfill step (added for indicator_id in earlier
+  work) extended to also reconcile `cel_scope`/`indicator_ids` on
+  already-seeded rows — without this, the Python source fix alone would
+  never reach an already-deployed production row (same gap class as the
+  earlier `mel_plan_indicators.indicator_id` and ProFrame
+  `indicator_id` backfill fixes). Runs automatically in `app.py`'s boot
+  sequence, so no separate production script run is needed — the next
+  app boot after this deploys self-corrects the stale rows.
+  `database/seed_reconciliation.py`'s TS-7/TS-8 cross-reference (OC7,
+  OC8) is now annotated, in both the module docstring and Module L's
+  "Cross-ref" column help text, that the linked indicator isn't
+  necessarily still CEL-scoped itself (informational-only field, never a
+  join key, so no functional change needed there). Also fixed
+  `tests/test_seed_from_workbook.py`'s `test_not_in_cel_scope_list_
+  matches_readme_exactly`, whose hardcoded expected set was from the pre-
+  revision workbook (00_README.md itself is stale post-revision and
+  wasn't re-transcribed; this test's ground truth is now the live
+  extracted workbook, not the doc). While writing the Postgres
+  regression tests for this, caught and fixed a real cross-dialect bug
+  in two of them: `cel_scope="..."` (double-quoted) is a valid SQLite
+  string-literal fallback but Postgres parses double quotes as an
+  identifier, raising `UndefinedColumn` — both now use proper bound
+  parameters. Verified against SQLite (206 tests) and real Postgres 15,
+  including the exact already-seeded-then-backfilled scenario for all
+  three modules together.
 - `database/seed_reconciliation.py` — **urgent, production**: fixed a
   `psycopg.errors.UniqueViolation` on `idx_mrl_key` happening on every
   boot. Root cause: app.py's boot-time seed calls run once per new

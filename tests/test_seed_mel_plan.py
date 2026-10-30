@@ -123,6 +123,21 @@ def test_backfills_indicator_id_on_rows_that_predate_the_crosswalk_column(seeded
     assert row["indicator_id"] == "OP9"
 
 
+def test_backfills_cel_scope_on_a_row_seeded_under_the_old_value(seeded_db):
+    # Same backfill gap, for cel_scope instead of indicator_id: the Oct
+    # 2026 workbook revision reclassified row 23 (OC7) from "New output
+    # indicator" to "Not in CEL scope". A row already seeded under the old
+    # value must be corrected on the next seed() call.
+    db_, seed_mod = seeded_db
+    db_.run_write(
+        "UPDATE mel_plan_indicators SET cel_scope=:scope WHERE row_number=23",
+        {"scope": "New output indicator (in CEL's consolidated plan)"},
+    )
+    seed_mod.seed()
+    row = db_.run_query("SELECT cel_scope FROM mel_plan_indicators WHERE row_number=23", {})[0]
+    assert row["cel_scope"] == "Not in CEL scope"
+
+
 def test_seed_is_idempotent(seeded_db):
     db_, seed_mod = seeded_db
     seed_mod.seed()
@@ -256,11 +271,17 @@ def test_y1x4_crosscheck_against_lop_target_matches_known_results(seeded_db_with
     # Mirrors app.py's "Y1×4 vs LoP Target cross-check" view exactly (same
     # query, same year1_value/parse_lop_target/lop_target_mismatch calls)
     # against the real seeded workbook data, and asserts the specific
-    # counts/flags found once the crosswalk was built: 16 of the 27 linked
+    # counts/flags found once the crosswalk was built: 15 of the 27 linked
     # rows match, 3 genuinely mismatch (IM1, OC9, OC10 -- all three trace
     # to a stale LoP Target the source doc's own notes already flag with
-    # "[Previous value: ...]"), 8 aren't numerically comparable
-    # (percentage-formula or blank LoP targets).
+    # "[Previous value: ...]"), 9 aren't numerically comparable
+    # (percentage-formula or blank LoP targets). Was 16/3/8 before the
+    # Oct 2026 workbook revision wiped OP15's entire Q1-Q4 target set
+    # (year1_value() -> None, so lop_target_mismatch(None, 100) -> None):
+    # OP15 moved from "match" to "not comparable" -- the cross-check is
+    # self-correcting (recomputed live, not seeded), so this is the only
+    # row this specific revision moved, confirmed against a fresh
+    # live-production audit before updating this baseline.
     from utils.iptt_rules import lop_target_mismatch, parse_lop_target, year1_value
     db_, pid = seeded_db_with_workbook
 
@@ -294,8 +315,8 @@ def test_y1x4_crosscheck_against_lop_target_matches_known_results(seeded_db_with
     not_comparable = {iid for iid, m in results.items() if m is None}
 
     assert mismatched == {"IM1", "OC9", "OC10"}
-    assert len(matched) == 16
-    assert len(not_comparable) == 8
+    assert len(matched) == 15
+    assert len(not_comparable) == 9
     assert len(mismatched) + len(matched) + len(not_comparable) == 27
 
 

@@ -1064,7 +1064,9 @@ with tab_recon:
             "Notes":     st.column_config.TextColumn(width="medium"),
             "Cross-ref": st.column_config.TextColumn(
                 width="small", help="Informational cross-reference to Module M's 55-indicator "
-                                     "scheme only — never a join key, never read by Module M."),
+                                     "scheme only — never a join key, never read by Module M. "
+                                     "Shows what this line used to roll up to; the linked "
+                                     "indicator isn't necessarily still CEL-scoped itself."),
         },
     )
 

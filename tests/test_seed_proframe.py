@@ -212,6 +212,27 @@ def test_backfills_indicator_id_on_a_row_seeded_under_the_old_stale_value(seeded
     assert row["indicator_id"] == "OC7"
 
 
+def test_backfills_cel_scope_on_a_row_seeded_under_the_old_value(seeded_db):
+    # Same backfill gap, for cel_scope instead of indicator_id: the Oct
+    # 2026 workbook revision reclassified OC7 from "New output indicator"
+    # to "Not in CEL scope" (it's now TechnoServe-only, not CEL-tracked).
+    # A row already seeded under the old value must be corrected on the
+    # next seed() call, not left stale forever.
+    db_, seed_mod = seeded_db
+    db_.run_write(
+        """UPDATE mel_proframe_results SET cel_scope=:scope
+           WHERE area_label='2.1 Work, Enterprise development and Income' AND proframe_number=9""",
+        {"scope": "New output indicator (in CEL's consolidated plan)"},
+    )
+    seed_mod.seed()
+    row = db_.run_query(
+        """SELECT cel_scope FROM mel_proframe_results
+           WHERE area_label='2.1 Work, Enterprise development and Income' AND proframe_number=9""",
+        {},
+    )[0]
+    assert row["cel_scope"] == "Not in CEL scope"
+
+
 def test_seed_is_idempotent(seeded_db):
     db_, seed_mod = seeded_db
     seed_mod.seed()
