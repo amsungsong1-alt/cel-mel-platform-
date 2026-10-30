@@ -5,7 +5,69 @@ All notable changes to the CEL MEL Platform. Format loosely follows
 
 ## Unreleased
 
+### Added
+- `scripts/check_reference_data_drift.py` — reusable consistency checker
+  packaging the Oct 2026 manual audit (which took a multi-agent
+  investigation to do by hand) into a script that re-runs in under a
+  minute after any future workbook change. Checks every hand-curated
+  reference table with an `indicator_id` column (ProFrame, MEL Plan,
+  PIRS, Shared Measures) against live `mel_indicators` for: phantom
+  indicator_id references, duplicate indicator_id claims within a table,
+  and (for ProFrame/MEL Plan) `cel_scope` category drift — the same
+  category-normalising comparison used in the manual audit, so ProFrame's
+  own legend-style wording ("To be confirmed (not directly in CEL's
+  consolidated plan)") is never flagged as a false mismatch against
+  `mel_indicators`' terser value. Read-only, exits 1 if drift is found
+  (safe to use as a pre-deploy check, not just a manual tool). Run
+  against production as a final check after this round of fixes: found
+  only the known-already-fixed-but-not-yet-deployed PIRS issue, nothing
+  else — confirms the checker itself works and that this cleanup pass
+  was thorough. Deliberately does not cover `mel_a3_result_areas`
+  (free-text comma-separated indicator lists, not a column — see the
+  script's own docstring for why that needs human judgement, not an
+  automated check) or the reconciliation/schedule modules' small,
+  already-curated cross-references. 6 new tests in
+  `tests/test_check_reference_data_drift.py`.
+
+### Removed
+- `database/seed_mel_indicators.py` + `tests/test_seed_mel_indicators.py`
+  — dead code: the Phase 2 (pre-cutover, v1-scheme) indicator seeder,
+  fully superseded by `scripts/seed_from_workbook.py` since Phase 3 and
+  no longer called from `app.py`'s boot sequence. Its one remaining live
+  dependency, `_extract_sm_code()`, moved into
+  `scripts/seed_from_workbook.py` directly (its only real caller).
+  `tests/test_seed_pirs.py` and `tests/test_seed_shared_measures.py`,
+  which still cross-checked against this deprecated module (itself a
+  source of the same stale pre-cutover IDs, e.g. `OP38`/`OP39`, that it
+  was supposed to be guarding against), now cross-check against the real
+  workbook instead, matching `tests/test_seed_proframe.py`'s already-
+  established pattern. Stray docstring references to the deleted
+  module's own docstring (now dangling) replaced with a self-contained
+  explanation in `seed_proframe.py`/`seed_mel_plan.py`/`seed_a2_roles.py`/
+  `seed_pirs.py`.
+
 ### Fixed
+- `database/seed_pirs.py` — while migrating its stale-reference test off
+  the deprecated module above, found a *separate*, pre-existing bug the
+  OP38/OP39 fix would have papered over rather than caught: PIRS entries
+  #15/#16 (fish MT/revenue, "Quantity (MT) of fish produced annually" /
+  "Amount of revenue (USD) from fish produced annually") were pointing at
+  `OC7`/`OC8` (the TechnoServe Catalytic/Micro Investment Fund
+  indicators) instead of the correct `OC9`/`OC10` — and #21/#22 (the
+  actual Catalytic/Micro Investment Fund entries) were pointing at
+  phantom pre-cutover codes `OP38`/`OP39` instead of `OC7`/`OC8`. Fixing
+  only #21/#22 without also fixing #15/#16 would have created two PIRS
+  entries both claiming `OC7` and two both claiming `OC8` — caught by
+  cross-checking every linked entry's statement against its claimed
+  indicator's real statement, not just the two entries already under
+  suspicion. All four corrected, a `test_no_indicator_id_is_claimed_by_
+  more_than_one_pirs_entry` regression test added, and `seed_pirs.seed()`
+  given the same indicator_id backfill pattern as `seed_proframe.py`/
+  `seed_mel_plan.py` so an already-seeded production row gets corrected
+  too (confirmed still present in production as of this fix — see the
+  drift-checker's production run above — will self-correct on the next
+  app boot after this deploys). Verified against SQLite and real
+  Postgres 15.
 - `database/seed_proframe.py`, `database/seed_mel_plan.py`,
   `database/seed_a3_toc.py` — re-synced hand-curated `cel_scope`/indicator-
   list data against the Oct 26 2026 workbook revision applied to

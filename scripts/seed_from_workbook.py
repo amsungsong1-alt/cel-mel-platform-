@@ -7,7 +7,7 @@ Default mode is **diff-only** (read-only, safe): it prints exactly what
 would change and makes no writes at all. Nothing is written to the
 database unless you pass --apply explicitly.
 
-    python scripts/seed_from_workbook.py --file SAWA_IP_MEL_System_Tool_CEL_v3_10_18_2026.xlsx
+    python scripts/seed_from_workbook.py --file SAWA_IP_MEL_System_Tool_CEL_v3_<date>.xlsx
 
 Before using --apply, point DATABASE_URL (or the default local SQLite
 file) at a COPY of the database, never at production directly on a first
@@ -18,15 +18,18 @@ the apply.
     python scripts/seed_from_workbook.py --file <xlsx> --apply
     python scripts/seed_from_workbook.py --restore scripts/backups/mel_indicators_<timestamp>.json
 
-Why this exists and what it replaces
+Why this exists and what it replaced
 -------------------------------------
 database/seed_mel_indicators.py's MEL_INDICATORS/MEL_INDICATOR_TARGETS data
 was hand-parsed from a Markdown export of the v1 workbook. The v3 workbook
 renumbers indicators (55 total: IM1-4, OC1-15, OP1-36 -- not the v1
-scheme's 56/OC1-13/OP1-39), so that seed data is now stale. This script is
-the replacement data source going forward: it reads the authoritative
-*.xlsx* directly, every time, rather than a hand-maintained Python list
-that can drift out of sync with the workbook.
+scheme's 56/OC1-13/OP1-39), so that seed data went stale and the module
+was deleted outright (not just stopped-calling) once this script fully
+replaced it -- a hand-maintained Python list drifts out of sync with the
+real workbook (confirmed twice over: once at the Phase 3 cutover itself,
+and again when the Oct 2026 workbook revision needed every indicator-
+dependent reference table re-synced by hand). This script reads the
+authoritative *.xlsx* directly, every time, instead.
 
 Source-of-truth rules this importer encodes (see docs/mel_tool/00_README.md
 and 14_CEL_IPTT_Guide.md for the full rationale):
@@ -64,7 +67,18 @@ _HERE = Path(__file__).parent
 sys.path.insert(0, str(_HERE.parent))
 
 from database.db import init_db, run_query, run_write  # noqa: E402
-from database.seed_mel_indicators import _extract_sm_code  # noqa: E402
+
+_SM_CODE_RE = re.compile(r"^(SM \d+(?:\.\d+)?)\b")
+
+
+def _extract_sm_code(statement: str) -> str | None:
+    """Pull the leading AIL Shared Measures 2.0 code (e.g. 'SM 5.1') off a
+    workbook indicator statement, or None if it doesn't start with one.
+    Moved here from the now-deleted database/seed_mel_indicators.py
+    (Phase 2, superseded by this script since Phase 3) -- this was its
+    only remaining live caller."""
+    m = _SM_CODE_RE.match(statement.strip())
+    return m.group(1) if m else None
 
 MODEL_SHEETS = ["BDS IPTT", "WAN IPTT", "Cross-cutting IPTT"]
 PROJECT_SHEET = "Project IPTT"

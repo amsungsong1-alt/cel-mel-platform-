@@ -5,12 +5,25 @@ Runs against a throwaway SQLite file, never the real dev database.
 from __future__ import annotations
 
 import os
+import sys
 import tempfile
+from pathlib import Path
 
 import pytest
 import streamlit as st
 
 import database.db as db
+
+sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
+import seed_from_workbook as sfw  # noqa: E402
+
+_REAL_WORKBOOK = next(
+    Path(__file__).parent.parent.glob("SAWA_IP_MEL_System_Tool_CEL_v*.xlsx"), None
+)
+requires_real_workbook = pytest.mark.skipif(
+    _REAL_WORKBOOK is None,
+    reason="real workbook .xlsx not present locally (gitignored by design)",
+)
 
 
 @pytest.fixture
@@ -36,6 +49,39 @@ def seeded_db(monkeypatch):
         os.remove(path)
 
 
+@pytest.fixture
+def seeded_db_with_workbook(monkeypatch):
+    """Like seeded_db, but also seeds the real workbook's indicators via
+    seed_from_workbook, so Shared Measures' indicator_id links can be
+    checked against real mel_indicators rows, not just asserted in
+    isolation."""
+    fd, path = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
+    os.remove(path)
+
+    monkeypatch.setattr(db, "DB_PATH", path)
+    monkeypatch.setattr(db, "DATABASE_URL", f"sqlite:///{path}")
+    st.cache_resource.clear()
+    db.init_db()
+
+    from database.seed_sawa import seed as seed_sawa
+    seed_sawa()
+    pid = db.run_query("SELECT project_id FROM projects WHERE name='SAWA'", {})[0]["project_id"]
+
+    extracted = sfw.extract_workbook(_REAL_WORKBOOK)
+    diff = sfw.compute_diff(extracted, sfw.fetch_current_state(pid))
+    sfw.apply_diff(diff, extracted, pid)
+
+    from database import seed_shared_measures
+    seed_shared_measures.seed(pid)
+
+    yield db, pid
+
+    st.cache_resource.clear()
+    if os.path.exists(path):
+        os.remove(path)
+
+
 def test_seeds_exactly_46_rows(seeded_db):
     db_, _ = seeded_db
     rows = db_.run_query("SELECT COUNT(*) AS c FROM mel_shared_measures", {})
@@ -50,19 +96,34 @@ def test_20_rows_matched_to_an_indicator_id(seeded_db):
     assert rows[0]["c"] == 20
 
 
-def test_every_matched_indicator_id_exists_in_mel_indicators(seeded_db):
-    db_, _ = seeded_db
-    from database.seed_mel_indicators import seed as seed_mel
-    seed_mel(project_id=1)
-
+@requires_real_workbook
+def test_every_matched_indicator_id_exists_in_the_real_workbook(seeded_db_with_workbook):
+    # Cross-checks against the REAL workbook (via
+    # scripts/seed_from_workbook.py), not the deprecated
+    # database/seed_mel_indicators.py (deleted -- itself a source of
+    # stale pre-cutover IDs, same class of bug this guarded against in
+    # test_seed_pirs.py and test_seed_proframe.py).
+    db_, pid = seeded_db_with_workbook
     sm_ids = {
         r["indicator_id"]
         for r in db_.run_query(
             "SELECT DISTINCT indicator_id FROM mel_shared_measures WHERE indicator_id IS NOT NULL", {}
         )
     }
-    mel_ids = {r["indicator_id"] for r in db_.run_query("SELECT indicator_id FROM mel_indicators", {})}
-    assert sm_ids <= mel_ids, f"Shared Measures references unknown indicator_id(s): {sm_ids - mel_ids}"
+    real_ids = {
+        r["indicator_id"]
+        for r in db_.run_query("SELECT indicator_id FROM mel_indicators WHERE project_id=:p", {"p": pid})
+    }
+    assert sm_ids <= real_ids, f"Shared Measures references unknown indicator_id(s): {sm_ids - real_ids}"
+
+
+def test_no_indicator_id_is_claimed_by_more_than_one_shared_measures_row(seeded_db):
+    db_, _ = seeded_db
+    rows = db_.run_query(
+        "SELECT indicator_id FROM mel_shared_measures WHERE indicator_id IS NOT NULL", {}
+    )
+    ids = [r["indicator_id"] for r in rows]
+    assert len(ids) == len(set(ids)), "an indicator_id is claimed by more than one Shared Measures row"
 
 
 def test_last_13_rows_are_sawa_specific_with_no_sm_subcode(seeded_db):

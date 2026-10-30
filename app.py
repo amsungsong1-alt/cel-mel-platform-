@@ -75,9 +75,10 @@ if _needs_seed:
         st.warning(f"Auto-seed skipped: {_e}")
 
 # mel_indicators/mel_indicator_targets: NOT auto-seeded here (removed, was
-# a real production bug). database/seed_mel_indicators.py's MEL_INDICATORS
-# data is the OLD v1-scheme workbook (56 indicators, OC1-13/OP1-39) --
-# superseded in Phase 3 by scripts/seed_from_workbook.py, which cut the
+# a real production bug). database/seed_mel_indicators.py (since deleted
+# entirely as noise -- it had no live callers left) held the OLD
+# v1-scheme workbook's MEL_INDICATORS data (56 indicators, OC1-13/OP1-39)
+# -- superseded in Phase 3 by scripts/seed_from_workbook.py, which cut the
 # live database over to the real v3 scheme (55 indicators, OC1-15/OP1-36)
 # run directly against production. Because that old seed()'s idempotency
 # check only looks at "does this indicator_id exist", it had no way to

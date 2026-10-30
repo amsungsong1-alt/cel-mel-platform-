@@ -97,8 +97,9 @@ def seed(project_id: int | None = None) -> None:
     call on every app boot: existing rows are left untouched.
 
     project_id=None (the default) looks up the SAWA project by name, same
-    as seed_mel_indicators.seed() -- see that function's docstring for why
-    a hardcoded default project_id is unsafe."""
+    (the project_id a dev SQLite database gets isn't necessarily
+    production's -- confirmed different in practice, 1 locally vs 2 in
+    production)."""
     if project_id is None:
         existing_project = run_query(
             "SELECT project_id FROM projects WHERE name = 'SAWA'", {}
