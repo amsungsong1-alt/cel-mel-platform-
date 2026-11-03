@@ -1,6 +1,6 @@
 # A2 Data Flow & Roles
 
-Assignment 2: data flow from participants to Agri-Impact (7 stages), key persons and roles (names and backups to fill), who collects/verifies/reviews per IPTT sheet, how data is used and data standards.
+Assignment 2: data flow from participants to Agri-Impact (7 stages), key persons and roles (names and backups are now filled in, pending confirmation), who collects/verifies/reviews per IPTT sheet, how data is used and data standards.
 
 **Sheet title:** Assignment 2: Data flow and roles
 
@@ -13,11 +13,11 @@ Assignment 2: data flow from participants to Agri-Impact (7 stages), key persons
 | Stage | Who | What happens | Output / evidence | Control check | Timing |
 |---|---|---|---|---|---|
 | 1. Participants and partners (source) | Participants; Partner's; group champions | Participants give consent and details at onboarding. Partners keep registers (training, coaching, WAN, referral) and report what they provide per participant. | Consent forms; registers; attendance lists. | Valid unique ID (Ghana Card or Voter ID, otherwise another personal document); popular name; phone or group champion contact; location with a landmark. | Continuous |
-| 2. Collect | BDS Officer; BDS Coach; GYSI Lead (WAN and inclusion); Communication Lead; Finance Lead; Project Team | Compile source records for the quarter, by model: BDS, WAN and Cross-cutting. | Complete, legible source records and registers. | Dates fall in the quarter; consent captured; required fields complete. | Records kept continuously; sent to MEAL by the end of the quarter |
-| 3. Validate and verify | MEAL Officer (MEAL Lead oversees) | Validate records; check unique IDs and duplicates across training lines; completeness check; phone-call verification comparing what participants say with what partners report. | Clean registers; verification note per indicator. | 80% agreement or more is accepted. Below 80%: the partner reworks and resubmits. | After quarter-end submission, with spot checks during the quarter |
+| 2. Collect | BDS Officer; BDS Coach; GYSI Lead (WAN and inclusion); Communication Lead; Finance Lead; Project Team | Compile source records for the quarter, by model: BDS, WAN and Cross-cutting. | Complete, legible source records and registers, including the nine WAN records (member, group, representative, mentor, attendance, issue and action, market log, service pilot, feedback). | Dates fall in the quarter; consent captured; required fields complete. | Records kept continuously; sent to MEAL by the end of the quarter |
+| 3. Validate and verify | Program Lead; MEAL Officer (MEAL Lead oversees) | Validate records; check unique IDs and duplicates across training lines; completeness check; phone-call verification comparing what participants say with what partners report. | Clean registers; verification note per indicator. | Sample 10% of each partner's records per indicator line (minimum 10, maximum 30), random draw. 80% agreement or more is accepted. Below 80%: the partner reworks and resubmits and a fresh sample of the same size is drawn; a second failure counts only individually verified records and goes to the Program Lead. | After quarter-end submission, with spot checks during the quarter |
 | 4. Enter and aggregate | MEAL Officer | Enter verified targets and achievements in BDS IPTT, WAN IPTT and Cross-cutting IPTT. Project IPTT consolidates by formula. | Updated model sheets and Project IPTT. | No CHECK or NOT ASSIGNED flags; blank is not zero; each indicator reported in one sheet only. | Quarter close |
 | 5. Review | MEAL Lead; model leads (BDS Coach, GYSI Lead); Program Lead | Compare results with targets; explain variances (below 70% or above 100%); agree actions. | Reviewed IPTT with management comments. | Targets stay unchanged unless formally approved. | Quarter close review |
-| 6. Approve and submit | Program Lead (approves); CEL Admin (files, version control, submission) | Approve the Project IPTT, assemble the evidence pack and submit to Agri-Impact. | Approved Project IPTT and evidence pack. | Correct file name and version, for example SAWA_IPTT_PMF_CEL_Y1_Q2_2026-12-31.xlsx. | Quarter end plus the AIL deadline (to be confirmed) |
+| 6. Approve and submit | Program Lead (approves); CEL Admin (files, version control, submission) | Approve the Project IPTT, assemble the evidence pack and submit to Agri-Impact. | Approved Project IPTT and evidence pack. | Correct file name and version, for example SAWA_IPTT_PMF_CEL_Y1_Q2_2026-12-31.xlsx. | Quarter end (D) plus the AIL deadline (to be confirmed). Internal clock unless AIL's date is earlier: records to MEAL D+7; verification D+14; review D+18; approval and submission D+21. |
 | 7. Agri-Impact (AIL) review | AIL programme MEL team | Review completeness and consistency; raise queries; consolidate across partners so each participant is counted once; report onward to Mastercard Foundation. | Accepted report or query log. | Corrections are resubmitted as a new version. | After submission (AIL timeline to be confirmed) |
 | **Feedback loop: AIL queries go to the MEAL Officer, who traces each one to the source record and the responsible role, corrects it and resubmits.** |  |  |  |  |  |
 
@@ -27,17 +27,17 @@ Assignment 2: data flow from participants to Agri-Impact (7 stages), key persons
 
 | Role | Name | Data responsibilities | Sends data to | Receives data from | Backup |
 |---|---|---|---|---|---|
-| MEAL Lead |  | Owns indicator definitions, targets, counting rules and the verification protocol; reviews outcome-level results. | Program Lead | MEAL Officer |  |
-| MEAL Officer | Muhammadu Sungsong Aboubakr | Validates records, runs verification, enters achievements in the IPTT sheets, keeps Project IPTT free of flags. | MEAL Lead | BDS Officer; BDS Coach; GYSI Lead; Finance Lead; Project Team |  |
-| BDS Coach |  | Coaching records, enterprise diagnoses and growth plans; enterprise results; finance referrals; YiW follow-up. | MEAL Officer | Partner's; enterprises |  |
-| BDS Officer |  | Training and workshop registers, attendance and completion; mobilisation records. | MEAL Officer | Partner's; participants |  |
-| GYSI Lead |  | Leads WAN and inclusion: member and group registers, forums, bootcamps, PWD, gender and safeguarding indicators, focal-person records. | MEAL Officer | Communication Lead; WAN groups; partners |  |
-| Communication Lead |  | Advocacy and sensitisation campaign records; stories and photographs only with separate consent. | GYSI Lead; MEAL Officer | Field teams |  |
-| Finance Lead |  | Revenue and finance evidence (sales records, referral documents). | MEAL Officer | BDS Coach; enterprises |  |
-| Project Team |  | Delivery support and records across the models, under the model leads. | MEAL Officer | Field teams |  |
-| Program Lead |  | Reviews variances and explanations; approves the submission. | AIL (through CEL Admin) | MEAL Lead; model leads |  |
-| CEL Admin |  | Document storage, file naming, version control and submission logistics. | AIL | Program Lead |  |
-| Partner's |  | Source records and registers for their models, calendars and referral feedback (for example TechnoServe). Results are reported by partner, not as programme-wide totals. | BDS Officer; GYSI Lead; AIL (own reports) | Participants |  |
+| MEAL Lead | Agri-Impact MEL Team | Owns indicator definitions, targets, counting rules and the verification protocol; reviews outcome-level results. | Program Lead | MEAL Officer | CEL MEL Team |
+| MEAL Officer | Muhammadu Sungsong Aboubakr | Validates records, runs verification, enters achievements in the IPTT sheets, keeps Project IPTT free of flags. | MEAL Lead | BDS Officer; BDS Coach; GYSI Lead; Finance Lead; Project Team | Lovia Akpene Baku |
+| BDS Coach | Mammie Hutchful Nortey | Coaching records, enterprise diagnoses and growth plans; enterprise results; finance referrals; YiW follow-up. | MEAL Officer | Partner's; enterprises | Raphael Malm Bryan |
+| BDS Officer | Joana Opheibea Ohene | Training and workshop registers, attendance and completion; mobilisation records. | MEAL Officer | Partner's; participants | Raphael Malm Bryan |
+| GYSI Lead | Gloria Kankam | Leads WAN and inclusion: member and group registers, forums, bootcamps, PWD, gender and safeguarding indicators, focal-person records. | MEAL Officer | Communication Lead; WAN groups; partners | Lovia Akpene Baku |
+| Communication Lead | Maame Serwa Nyame Baah | Advocacy and sensitisation campaign records; stories and photographs only with separate consent. | GYSI Lead; MEAL Officer | Field teams | Lovia Akpene Baku |
+| Finance Lead | Edem Korshie Adzikah | Revenue and finance evidence (sales records, referral documents). | MEAL Officer | BDS Coach; enterprises | Priscilla Naa Addoley Allotey (Finance Officer) |
+| Project Team | Julia Anyanewaa Appiah, Edem Korshie Adzikah, Gloria Kankam, Joana Opheibea Ohene, Muhammadu Sungsong Aboubakr, Lovia Akpene Baku, Mammie Hutchful Nortey, Raphael Malm Bryan, Maame Serwa Nyame Baah | Delivery support and records across the models, under the model leads. | MEAL Officer | Field teams | Margaret Baidoo |
+| Program Lead | Julia Anyanewaa Appiah | Reviews variances and explanations; approves the submission. | AIL (through CEL Admin) | MEAL Lead; model leads | Margaret Baidoo |
+| CEL Admin | Margaret Baidoo | Document storage, file naming, version control and submission logistics. | AIL | Program Lead | Sheila Acheampomaa Ntiri (HR/Personal Assistant) |
+| Partner's | Focal persons (programme, trainer or technical, data, safeguarding): AFRIGEM, Aglow Aqua, AgroKings, Naple Betta, Newage, CSIR, Fisheries Commission, e-SAWA/KNUST, TechnoServe; Agri-Impact. PwC: role to be confirmed with AIL. | Source records and registers for their models, calendars and referral feedback (for example TechnoServe). Results are reported by partner, not as programme-wide totals. | BDS Officer; GYSI Lead; AIL (own reports) | Participants | Other partner focal persons |
 
 
 ## 3. Who collects, verifies and reviews, by IPTT sheet
@@ -50,6 +50,8 @@ Assignment 2: data flow from participants to Agri-Impact (7 stages), key persons
 | Cross-cutting IPTT | 9 to 10: Inclusion and safeguarding; Needs assessment, coordination and MEAL | GYSI Lead; Communication Lead; MEAL Officer (coverage) | MEAL Officer; MEAL Lead (coverage) | Program Lead; MEAL Lead | 12 |
 | Project IPTT | All models (formulas only) | Not typed: pulled from the three sheets by indicator ID | MEAL Officer checks the flags | Program Lead approves | 55 |
 
+Note: the live `COUNTA` formulas behind this column (G39:G42, below) now cache higher numbers (24, 10, 13, 57) than the true indicator counts shown above. Each model sheet gained extra non-indicator rows below its indicator table (a "Quarter 1 Targets are added to Quarter 2 targets" note row, and on Project IPTT two numbered question rows) that fall inside the widened `COUNTA` ranges and get swept into the count. The Indicators column above reports the real indicator-row count (confirmed by listing column A of each sheet); the Formulas section below reports the formulas' literal cached values, which are currently inflated by that stray-row artefact.
+
 
 ## 4. What CEL does with the data
 
@@ -60,13 +62,13 @@ Assignment 2: data flow from participants to Agri-Impact (7 stages), key persons
 | Manage delivery | Program Lead; model leads | Compare results with targets and adjust the onboarding and training schedules and resources. | Quarterly review | Model IPTT sheets; A4; A5 |
 | Learn and adapt | MEAL Lead; MEAL Officer | Hold quarterly insight and learning sessions; field visits to validate results and learning. | Quarterly | Verification notes; field visits |
 | Improve data quality | MEAL Officer | Track verification agreement and rework; correct sources and templates. | Each quarter | Verification notes |
-| Inclusion and safeguarding oversight | GYSI Lead | Monitor PWD participation (aim: 5%), safeguarding training and standards. Case details are never kept in routine records. | Quarterly | Cross-cutting IPTT |
+| Inclusion and safeguarding oversight | GYSI Lead | Record disability status (voluntary) for every registered woman and report the actual PWD share each quarter against the 5% aim. Monitor safeguarding training and standards. Case details are never kept in routine records. | Quarterly | Cross-cutting IPTT |
 | Follow up participants | BDS Coach | Contact participants regularly on how they are earning; keep employment evidence. | Ongoing | Participant register |
 
 
 ## 5. Data standards
 
-•  Consent is captured at onboarding for private, public and media use, including when partners engage other partners.
+•  Consent has two parts: (a) participation and data use; (b) stories, photographs and publicity, which is optional and separate. Both are captured at onboarding, including when partners engage other partners.
 
 •  Each participant has a unique ID (Ghana Card or Voter ID; otherwise another personal document) plus popular name, contact or group champion contact, and a specific location.
 
@@ -80,14 +82,14 @@ Assignment 2: data flow from participants to Agri-Impact (7 stages), key persons
 4 formulas. Formulas are shown exactly as stored in the workbook. `{r}` stands for the formula's own row number. Cached values appear in the content tables above.
 
 ```
-G39: =COUNTA('BDS IPTT'!A9:A80)
-    => 21
+G39: =COUNTA('BDS IPTT'!A9:A81)
+    => 24
 G40: =COUNTA('WAN IPTT'!A9:A80)
-    => 9
+    => 10
 G41: =COUNTA('Cross-cutting IPTT'!A9:A80)
-    => 12
-G42: =COUNTA('Project IPTT'!A10:A80)
-    => 55
+    => 13
+G42: =COUNTA('Project IPTT'!A10:A85)
+    => 57
 ```
 
 

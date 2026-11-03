@@ -6,7 +6,9 @@ Navigation sheet: purpose, workbook map with owners and update frequency, assign
 
 **Subtitle:** Sustainable Aquaculture for Women Advancement (SAWA)  |  Programme management firm: Agri-Impact Ltd. (AIL)  |  Year 1: July 2026 to June 2027
 
-Version v3  |  18 October 2026  |  MEL focal person: Muhammadu Sungsong Aboubakr, MEAL Officer
+**Running header (G1):** SAWA | CEL | v3 | 22 Oct 2026
+
+Version v3  |  18 October 2026  |  MEL focal person: Muhammadu Sungsong Aboubakr, MEAL Officer  |  Updated 22 October 2026
 
 
 ## Purpose

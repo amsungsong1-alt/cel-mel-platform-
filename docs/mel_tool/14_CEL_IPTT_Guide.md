@@ -9,7 +9,9 @@ _Adapted from the SAWA IPTT user guide for CEL's BDS, WAN and Cross-cutting mode
 
 - Project IPTT is formula-driven. It pulls each indicator by its ID (column A) from the model sheet that reports it, so you never retype a number. The only typing allowed in Project IPTT is the notes in column U.
 
-- Every indicator has ONE reporting sheet. Column V of Project IPTT shows which sheet reports it. "CHECK: in more than one sheet" means the ID was copied into two sheets (double-counting risk); "NOT ASSIGNED" means no sheet reports it yet. Programme indicators outside CEL's scope (for example starter packs and micro-grants, delivered by other partners) stay visible in Project IPTT marked "Not in CEL scope".
+- Every indicator has ONE reporting sheet. Column V of Project IPTT shows which sheet reports it. "CHECK: in more than one sheet" means the ID was copied into two sheets (double-counting risk); "NOT ASSIGNED" means no sheet reports it yet. Programme indicators outside CEL's scope (for example starter packs and micro-grants, delivered by other partners) stay visible in Project IPTT marked "Not in CEL scope". **Column V is currently broken**: its formula was changed to reference an external workbook (`SAWA_IP_MEL_System_Tool_CEL_v3_10_22_2026_updated.xlsx`) instead of the BDS/WAN/Cross-cutting IPTT sheets inside this workbook, so every row now caches `#VALUE!` instead of a sheet name, "CHECK", or "NOT ASSIGNED". Treat column V as unreliable until that reference is fixed; verify an indicator's reporting sheet directly in the model sheets instead.
+
+- A new sheet, "CEL Internal IPTT" (added 22 Oct 2026), tracks 10 additional CEL-only indicators (CI-1 to CI-10, plus CI-8a) that are outside the AIL framework and are not consolidated into Project IPTT. Section 3 below cross-references which delivery models they belong to.
 
 - BDS, WAN and work results are not added together as unique programme reach (BDS and WAN concept notes). Women may use several services, so the consolidated rows are indicator results, not a head-count of unique women.
 
@@ -25,21 +27,25 @@ _Adapted from the SAWA IPTT user guide for CEL's BDS, WAN and Cross-cutting mode
 | Cross-cutting IPTT | 9 to 10: Inclusion & safeguarding; Needs assessment, coordination & MEAL | PWDs; inclusion and safeguarding trainings; coverage (not WEO) | 12 | GYSI Lead collects (MEAL Officer for coverage); MEAL Officer verifies; Program Lead reviews |
 | Project IPTT | All models (consolidated, formulas only) | WEO, YiW, Enterprises, PWDs | 55 | MEAL Lead / MEAL Officer prepare and check; Program Lead approves; CEL Admin files |
 
+Note: the live `COUNTA` formulas behind the "Indicators reported" column (D13:D16, below) now cache higher numbers (24, 10, 13, 55) than the counts above. BDS IPTT, WAN IPTT and Cross-cutting IPTT each gained a non-indicator note row below their indicator table ("Quarter 1 Targets are added to Quarter 2 targets") that the widened `COUNTA` ranges now sweep up; Project IPTT's D16 formula is additionally affected by the column V breakage described in section 1 (its `COUNTIF(...,"Not in CEL scope")` term now always evaluates to 0, since V caches `#VALUE!` everywhere, not text). The counts above (21, 9, 12, 55) are the real indicator-row counts, confirmed directly against each sheet's column A.
+
 
 ## 3. Delivery model map
 
 | Delivery model (ProFrame) | Reports in sheet | Main indicators (IDs) | Key Impact Measure | Pathway (YAW ToC) |
 |---|---|---|---|---|
-| 1. BDS: Ideation & Early Business Dev. | BDS IPTT | OP27, OP9, OP29, OP32, OP11 | WEO (mobilisation is onboarding, not WEO) | Capacity building: gain confidence and skills |
-| 2. BDS: Accelerator & Enterprise Transition | BDS IPTT | OP4, OP10, OP5, IM1, IM2, OC1, OC2, OC3, OC4, OC5, OC6, OC9, OC10 | WEO, YiW, Enterprises | Capacity building and market linkage: enterprise growth, dignified work |
-| 3. BDS: Partner Half-day Workshops | BDS IPTT | OP32 | WEO | Capacity building (regulatory, financial literacy, digital, market access) |
+| 1. BDS: Ideation & Early Business Dev. | BDS IPTT | OP27, OP9, OP29, OP32, OP11; CEL internal: CI-5, CI-6 | WEO (mobilisation is onboarding, not WEO) | Capacity building: gain confidence and skills |
+| 2. BDS: Accelerator & Enterprise Transition | BDS IPTT | OP4, OP10, OP5, IM1, IM2, OC1, OC2, OC3, OC4, OC5, OC6, OC9, OC10; CEL internal: CI-1, CI-2, CI-3, CI-6 | WEO, YiW, Enterprises | Capacity building and market linkage: enterprise growth, dignified work |
+| 3. BDS: Partner Half-day Workshops | BDS IPTT | OP32; CEL internal: CI-4, CI-5 | WEO | Capacity building (regulatory, financial literacy, digital, market access) |
 | 4. BDS: Finance Readiness & Referral | BDS IPTT | OC5, OC6, OP36, OC7, OC8 | Enterprises | Market linkage: access to suitable finance |
-| 5. WAN: Membership, Charter & Affiliation | WAN IPTT | OP15, OP16, OP34 | WEO (WAN participation) | Capacity building: voice and agency |
-| 6. WAN: Market Access & Opportunities | WAN IPTT | OP17, OC11 | Enterprises, WEO | Market linkage: increased access to markets |
-| 7. WAN: Advocacy & Policy Influence | WAN IPTT | OP18 | Enabling environment (supports YiW, Enterprises) | Market linkage and enabling environment |
-| 8. WAN: Mentoring, Leadership & Exchange | WAN IPTT | OP33, OC12, OC13 | WEO | Capacity building: confidence, leadership |
+| 5. WAN: Membership, Charter & Affiliation | WAN IPTT | OP15, OP16, OP34; CEL internal: CI-10 | WEO (WAN participation) | Capacity building: voice and agency |
+| 6. WAN: Market Access & Opportunities | WAN IPTT | OP17, OC11; CEL internal: CI-7 | Enterprises, WEO | Market linkage: increased access to markets |
+| 7. WAN: Advocacy & Policy Influence | WAN IPTT | OP18; CEL internal: CI-9 | Enabling environment (supports YiW, Enterprises) | Market linkage and enabling environment |
+| 8. WAN: Mentoring, Leadership & Exchange | WAN IPTT | OP33, OC12, OC13; CEL internal: CI-8, CI-8a | WEO | Capacity building: confidence, leadership |
 | 9. Cross-cutting: Inclusion & Safeguarding | Cross-cutting IPTT | IM3, OP22, OC14, OC15, OP23, OP24, OP28, OP30, OP31, OP35 | PWDs; trainings tagged WEO; focal persons tagged WEO | Cross-cutting: inclusive, safe participation |
 | 10. Cross-cutting: Needs Assessment, Coordination & MEAL | Cross-cutting IPTT | OP25, OP26 | Coverage (not WEO) | Cross-cutting: coverage and traceability |
+
+CEL internal (CI-1 to CI-10, CI-8a) indicators live on the new "CEL Internal IPTT" sheet (added 22 Oct 2026), not on BDS/WAN/Cross-cutting IPTT or Project IPTT; they are tracked by CEL only until AIL accepts them into the shared framework.
 
 
 ## 4. Roles and responsibilities (proposed: confirm and refine)
@@ -66,7 +72,7 @@ _Adapted from the SAWA IPTT user guide for CEL's BDS, WAN and Cross-cutting mode
 | 1 | BDS Officer / BDS Coach, GYSI Lead (WAN and inclusion), Partner's focal persons | Compile source records for the quarter and send to MEAL by the end of the quarter. | Complete, legible source records and registers. | Dates and locations fall in the reporting quarter; consent captured. | Not started |
 | 2 | MEAL Officer | Validate records and update participant, training, group and event registers. | Clean registers with unique IDs. | Ghana Card, Voter ID or other document captured; group champion contact for traceability; required fields complete. | Not started |
 | 3 | MEAL Officer | Aggregate verified results by indicator and enter Achieved in the correct model sheet. | Quarterly achieved values and disaggregations. | Each person counted once; CEL training lines checked for double counting; participants who also receive starter packs, micro-grants or other support from other partners are flagged to AIL. | Not started |
-| 4 | MEAL Officer; MEAL Lead | Data quality assurance: (1) completeness check; (2) phone-call verification comparing support reported by partners with what participants say. | Verification note per indicator. | Agreement of 80% or more: accept. Below 80%: partner reworks and resubmits (13 Oct 2026 MEL meeting). | Not started |
+| 4 | MEAL Officer; MEAL Lead | Data quality assurance: (1) completeness check; (2) phone-call verification comparing support reported by partners with what participants say. | Verification note per indicator. | Sample 10% of each partner's records per indicator line (minimum 10, maximum 30), random draw. Agreement of 80% or more: accept. Below 80%: partner reworks and resubmits; fresh sample of the same size; a second failure counts only individually verified records and goes to the Program Lead (80% rule agreed 13 Oct 2026; sampling details proposed 21 Oct). | Not started |
 | 5 | Program Lead (with model leads) | Review performance, variances and explanations; add comments in column W. | Reviewed model sheet with management comments. | Targets unchanged unless formally approved. | Not started |
 | 6 | Program Lead (approves); CEL Admin (files, version control) | Check Project IPTT (formulas only) and submit to AIL. | Approved Project IPTT and evidence pack. | No "CHECK" or "NOT ASSIGNED" flags in column V; file name and version correct. | Not started |
 | 7 | AIL / Programme MEL team | Review completeness and consistency; return queries. | Accepted report or query log. | Corrections resubmitted as a new version. | Not started |
@@ -80,7 +86,7 @@ _Adapted from the SAWA IPTT user guide for CEL's BDS, WAN and Cross-cutting mode
 | Count unique participants | One person is counted once per indicator and period, using the participant ID. Capture popular names alongside Ghana Card details. |
 | Registration is not participation | Mobilised or registered women count only on indicators that measure mobilisation. Attendance or a finance referral alone is never a job outcome. |
 | One indicator, one sheet | Report each indicator in a single model sheet. Do not copy rows between sheets. |
-| Layers are not totals | WAN leadership and mentorship forum participation and "strengthened" cooperative status are disaggregations of the WAN participation and WAN group indicators, not extra rows. |
+| Layers are not totals | Forum participation and "strengthened" cooperative status are disaggregations, not extra reach. Forum engagements are attendance lines (CI-10); unique women are distinct IDs (OP16). Do not add them. |
 | WEO is the support, YiW is the work | Training delivered by CEL is WEO. Starter packs and micro-grants are WEO support delivered by other partners, so they are not in CEL's scope and CEL does not report them. Mobilisation and sensitisation are onboarding, not WEO. Gender focal persons are not WEO participants. |
 | Protect formulas and structure | Do not overwrite Y1, % or consolidation formulas, or change IDs, rows, headers, validations or sheet names. |
 | Zero and blank | Zero = measured and none achieved. Blank = not due or not yet reported. Never type 0 for "not reported". |
@@ -113,9 +119,9 @@ _Adapted from the SAWA IPTT user guide for CEL's BDS, WAN and Cross-cutting mode
 | Primary and secondary reach | Primary: participants directly supported (CEL training leading to work). Secondary: indirect support, such as a trained partner that leads to jobs or micro-grantees who engage others. | Report the two separately. | Mix primary and secondary in one figure. | Reach records per participant. |
 | Additional work | Adding aquaculture to work a participant already does is "additional" employment. | Existing farmer adds fish production: additional. | Report it as new employment. | Employment or enterprise record. |
 | Work outcomes | Count a job only when the work or income is verified. An employment letter covering 4 months can serve as evidence. Keep checking how participants earn. | Attendance or a finance referral alone is not a job. | Report planned jobs as achieved. | Employment letter, payroll or site verification. |
-| Events and groups vs people | Bootcamps, campaigns and groups count once each. They are not participants. | 25 groups; 500 forum engagements; unique women reported separately. | Add events to people totals. | Event, campaign and group registers. |
-| Same groups, several indicators | WAN groups, strengthened groups and governance frameworks use one register of the same 25 groups. | One group = one record with status flags. | Report 25 + 25 groups. | Group register. |
-| PWD target | Aim for the 5% PWD target; report PWD status as a disaggregation. | 8 young women PWDs in Y1. | Count PWDs separately from the parent count. | Disability status in onboarding record. |
+| Events and groups vs people | Bootcamps, campaigns and groups count once each. They are not participants. Forum engagements (CI-10) are attendance lines; unique women (OP16) are distinct participant IDs. | 25 groups; 500 forum engagements; unique women reported separately. | Add events to people totals. | Event, campaign and group registers. |
+| Same groups, several indicators | WAN groups (OP15), strengthened groups and governance frameworks (OP34) use one group register with three flags: affiliated and active; strengthened; governance framework adopted. Report the 25 strengthened groups once, on OP34; OP15 has its own target after the group map. | One group = one record with status flags. | Report 25 + 25 groups. | Group register. |
+| PWD target | Record disability status (voluntary) for every registered woman and report the actual PWD share each quarter against the 5% aim. | OP22 target is 8 (planner) until AIL confirms 8 vs about 25; the 8 PWD mentors are also tracked on CI-8. | Count PWDs separately from the parent count. | Disability status in onboarding record. |
 | Age and location | A participant who is 35 at onboarding still counts. Use specific landmarks, districts and regions for location. | House address or digital address captured. | Leave location blank. | Onboarding record. |
 | Reporting period | Q1 Jul-Sep 2026; Q2 Oct-Dec 2026; Q3 Jan-Mar 2027; Q4 Apr-Jun 2027. Report in the quarter the condition was met. | Employment verified in Q3 is Q3. | Move results between quarters to meet targets. | Dated verification record. |
 
@@ -143,7 +149,7 @@ _Adapted from the SAWA IPTT user guide for CEL's BDS, WAN and Cross-cutting mode
 
 ## 11. Worked example (illustrative numbers, not real results)
 
-Indicator OP27: Number of youth mobilised into the programme. Target 95 / 135 / 135 / 135 = 500. The achieved figures below are made up for illustration.
+Indicator OP27: Number of youth mobilised into the programme. Target 95 / 135 / 135 / 135 = 500. The achieved figures below are made up for illustration. (OP27's real approved quarterly phasing changed on 22 Oct 2026: Q1's 95 was folded into Q2, so the live target is blank / 230 / 135 / 135 = 500. This worked example keeps its original 95/135/135/135 phasing, since it is illustrating the Target/Achieved/% mechanics, not reporting OP27's current real target.)
 
 | Quarter | Target | Achieved (illustrative) | % achieved |
 |---|---|---|---|
@@ -176,17 +182,33 @@ Interpretation: Y1 achieved so far is 90 + 150 = 240 of 500 (48.0%). Q2 is above
 | Support and escalation | Contact the programme MEL team (AIL) when definitions, aggregation, targets, formulas, duplicate attribution or evidence are unclear. |
 
 
+## 13. Rules added after the 21 Oct 2026 MEL In-house session
+
+New section added to the live sheet in this revision; not present before.
+
+| Rule | Required practice | Detail | Owner |
+|---|---|---|---|
+| Phone-verification sample (80% rule) | Sample 10% of each partner's records per indicator line (minimum 10, maximum 30); random draw saved with its seed; up to 3 call attempts, then replace; at least 2 PWD records per partner where present. | 80% agreement or more: accept. Below 80%: rework and resubmit; fresh sample; second failure: count only verified records and escalate. Jobs (IM1) need an employment letter, payroll or site verification, not a call. | MEAL Officer |
+| Quarter-end clock | D = quarter end: records to MEAL D+7; verification D+14; review D+18; approval and submission D+21, unless AIL's date is earlier. | Q2 (31 Dec 2026): 7 Jan, 14 Jan, 18 Jan, 21 Jan 2027. | MEAL Lead |
+| One pathway, four trainings | Safeguarding, gender transformative, gender/financial literacy/business mentoring, then mentorship and digital literacy run as one pathway per cohort; each woman is counted once per indicator. | About 150 women completing four trainings is 600 completions, not 600 women. | BDS Officer; GYSI Lead |
+| Jobs and dignified work | IM1 counts verified work and income (the 100 value-addition jobs). IM2 is the annual share of those jobs that pass the D&F test. | Target 86% until AIL confirms whether all 100 must pass. | BDS Coach |
+| Referral is not funding | OP36 counts young women prepared and referred. OC7 and OC8 count enterprises TechnoServe confirms as funded, once, in the quarter of the award. | CEL's share of the 10 and 150 programme figures is agreed by 30 Oct. | BDS Coach; Finance Lead |
+| PWD figures are not additions | PWD fish, revenue and mentor figures are disaggregations of the total, never added on top (confirm with AIL). | Record disability status for every woman; report the actual PWD share against the 5% aim. | GYSI Lead |
+| CEL internal indicators | CI-1 to CI-10 are tracked on the CEL Internal IPTT and submitted to AIL once AIL accepts them. | The same counting, verification and evidence rules apply. | MEAL Officer |
+| WAN registers | Nine records: member, group, representative, mentor, attendance, issue and action, market log, service pilot, feedback. One group register with three flags. | Consent for stories and photographs is a separate optional box; safeguarding case details are never held here. | GYSI Lead |
+
+
 ## Formulas (active; complete inventory)
 
 11 formulas. Formulas are shown exactly as stored in the workbook. `{r}` stands for the formula's own row number. Cached values appear in the content tables above.
 
 ```
-D13: =COUNTA('BDS IPTT'!A9:A80)
-    => 21
+D13: =COUNTA('BDS IPTT'!A9:A81)
+    => 24
 D14: =COUNTA('WAN IPTT'!A9:A80)
-    => 9
+    => 10
 D15: =COUNTA('Cross-cutting IPTT'!A9:A80)
-    => 12
+    => 13
 D16: =COUNTA('Project IPTT'!A10:A66)-COUNTIF('Project IPTT'!V10:V66,"Not in CEL scope")
     => 55
 D113: =IFERROR(C113/B113,"-")
@@ -204,4 +226,6 @@ C117: =SUM(C113:C116)
 D117: =IFERROR(C117/B117,"-")
     => 0.48
 ```
+
+D13's range widened from A9:A80 to A9:A81 in this revision (BDS IPTT gained a non-indicator note row at A80, confirmed stray — see section 2's note above). D13/D14/D15's cached values (24/10/13) are inflated by stray rows as explained in section 2; D16's formula is unchanged but its "Not in CEL scope" term is now meaningless because column V is broken (see section 1) — its cached 55 happens to equal the true indicator count by coincidence (55 total minus 0 matches, since V never equals that text any more), not because the underlying logic still works.
 

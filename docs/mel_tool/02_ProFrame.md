@@ -8,25 +8,34 @@ Programme framework for SAWA: partners, delivery models, key impact measures, go
 - **Program Management Firm**: Agri-Impact Ltd.
 - **MEL Focal Person**: Muhammadu Sungsong Aboubakr
 - **Date Created**: 15th October 2026
-- **Date Revised**: 16th October 2026
+- **Date Revised**: 26th October 2026
 - **Revised by**: Muhammadu Sungsong Aboubakr
 
 ### Implementing partners & sub-partners (10 slots)
 
 1. Center for Enterprise Learning (CEL)
+2. AFRIGEM
+3. Aglow Aqua
+4. AgroKings
+5. Naple Betta
+6. Newage
+7. CSIR
+8. Fisheries Commission
+9. e-SAWA/KNUST
+10. TechnoServe
 
 ### Delivery models (10 slots)
 
-1. BDS: Ideation & Early Business Development
-2. BDS: Accelerator & Enterprise Transition
+1. BDS: Ideation and Early Business Development
+2. BDS: Accelerator and Enterprise Transition
 3. BDS: Partner Half-day Workshops
 4. BDS: Finance Readiness & Referral
-5. WAN: Membership, Charter & Affiliation
-6. WAN: Market Access & Opportunities
-7. WAN: Advocacy & Policy Influence
-8. WAN: Mentoring, Leadership & Exchange
-9. Cross-cutting: Inclusion & Safeguarding
-10. Cross-cutting: Needs Assessment, Coordination & MEAL
+5. WAN: Governance Structure, Membership, Charter and Affiliation
+6. WAN: Market Access, Linkages and Opportunities
+7. WAN: Principled Advocacy and Policy Influence
+8. WAN: Mentoring, Coaching, Leadership and Exchange
+9. Crosscutting: Inclusion and Safeguarding
+10. Crosscutting: Needs Assessment, Risk Assessment, Coordination & MEAL
 
 ### Key impact measures
 
@@ -77,7 +86,7 @@ Each block is a results framework area. "CEL scope" is derived from the font col
 | 1 | SM 5.1 <br>Number of young women and PWDs in Youth-in-Work (YiW) attributable to program interventions across the aquaculture value chain (all aquaculture-related work) | YiW | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: Wage and Self<br>Pathways: Input supply, production, processing, marketing, logistics, digital services, etc<br>Location: Region, district, community | Income earned | YiW records, Program and Participant surveys/assessments | Applicable to CEL |  |
 | 2 | SM 6.1 <br>Percentage of young women accessing dignifed and fulfilling (D&F) work attributable to program interventions across the aquaculture value chain | D&F | Sex: Female<br>Participant Groups: Youth <br>Employment Type: Wage and Self<br>Pathways: Input supply, production, processing, marketing, logistics, digital services, etc<br>Location: Region, district, community | Reliable Income<br>Sense of purpose<br>Respect in the workplace<br>Reputable Work | YiW records, Program and Participant surveys/assessments | Applicable to CEL |  |
 | 3 | SM 6.1 <br>Percentage of PWDs accessing dignifed and fulfilling (D&F) work attributable to program interventions across the aquaculture value chain | D&F | Sex: Female <br>Participant Groups: Youth <br>Employment Type: Wage and Self<br>Pathways: Input supply, production, processing, marketing, logistics, digital services, etc<br>Location: Region, district, community | Reliable Income<br>Sense of purpose<br>Respect in the workplace<br>Reputable Work | YiW records, Program and Participant surveys/assessments | Applicable to CEL |  |
-| 4 | SM 5.1 <br>Percentage of young women and PWDs who report improved ability to meet basic household needs (food, education, health, housing, savings) attributable to incomes earned by participation in SAWA | D&F | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: Wage and Self<br>Pathways: Input supply, production, processing, marketing, logistics, digital services, etc<br>Location: Region, district, community | Reliable Income<br>Sense of purpose<br>Respect in the workplace<br>Reputable Work | Program & Participant surveys, YiW records and Technical reports | To be confirmed (not directly in CEL's consolidated plan) |  |
+| 4 | SM 5.1 <br>Percentage of young women and PWDs who report improved ability to meet basic household needs (food, education, health, housing, savings) attributable to incomes earned by participation in SAWA | D&F | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: Wage and Self<br>Pathways: Input supply, production, processing, marketing, logistics, digital services, etc<br>Location: Region, district, community | Reliable Income<br>Sense of purpose<br>Respect in the workplace<br>Reputable Work | Program & Participant surveys, YiW records and Technical reports | Not in CEL scope |  |
 
 ### 2. Outcome / 2.1 Work, Enterprise development and Income
 
@@ -93,6 +102,12 @@ Each block is a results framework area. "CEL scope" is derived from the font col
 
 •	 Business development services, incubation, access to finance and market linkages are sufficient to support enterprise survival and growth.                                                                                         • 	Referred enterprises meet TechnoServe's criteria and funds are disbursed on schedule.
 
+• 	Partner production and market dates are confirmed with each partner, not provisional.
+
+• 	TechnoServe keeps funding decisions; a referral is not funding.
+
+• 	No additional programme budget is assumed; partner contributions are confirmed before delivery expands.
+
 **Risks:**
 
 • 	Market volatility or shocks that reduce demand for fish or fish-related products, thereby affecting work and income.
@@ -107,14 +122,18 @@ Each block is a results framework area. "CEL scope" is derived from the font col
 
 • 	Barriers to finance or formalization that limit enterprise growth beyond micro scale.                                                                                       • 	Programme-wide TechnoServe targets are not matched by CEL-referred enterprises (attribution to be agreed).
 
+• 	Partner calendars slip (production, stocking or market dates change).
+
+• 	Referrals do not convert to funding.
+
 | # | Indicator | Key Measure | Disaggregation | Markers | Means of verification | CEL scope | Note (CEL consolidated plan) |
 |---|---|---|---|---|---|---|---|
-| 5 | SM 5.1 <br>Number of young women tranistioned into wage- and self-employment in the aquaculture value chain | YiW | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: Wage and Self<br>Pathways: Processing, marketing, logistics, digital services, etc<br>Location: Region, district, community | Income earned | Program & Participant surveys, YiW records and Technical reports | To be confirmed (not directly in CEL's consolidated plan) |  |
-| 6 | SM 5.1 <br>Number of young women in new, improved and additional employments in the aquaculture value chain | YiW | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: Wage and Self<br>Pathways: Input supply, production, processing, marketing, logistics, digital services, etc<br>Location: Region, district, community | Income earned | Program & Participant surveys, YiW records and Technical reports | To be confirmed (not directly in CEL's consolidated plan) |  |
-| 7 | SM 4.2 <br>Number of supported young-women-owned enterprises showing growth through market expansion / diversification | Enterprise | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: Wage and Self<br>Pathways: Input supply, production, processing, marketing, logistics, digital services, etc<br>Location: Region, district, community | Market expansion | WEO records, Training reports, Program & Participants surveys | To be confirmed (not directly in CEL's consolidated plan) |  |
-| 8 | SM 4.1<br>Number of supported young-women-owned enterprisesshowing growth through increased in revenue | Enterprise | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: Wage and Self<br>Pathways: Input supply, production, processing, marketing, logistics, digital services, etc<br>Location: Region, district, community | Income earned | WEO records, Training reports, Program & Participants surveys | To be confirmed (not directly in CEL's consolidated plan) |  |
-| 9 | Number of CEL-referred enterprises supported with Catalytic Fund support | Enterprise | Sex of owner: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Fund type: Catalytic Fund, Micro Investment Fund<br>Location: Region, district, community | Market expansion | TechnoServe award/disbursement records, Partner reports, Enterprise verification | New output indicator (in CEL's consolidated plan) | TechnoServe planner III.3: 10 enterprises in Y1 (Q3 3, Q4 7). Programme-wide figure: agree the CEL-referred share. |
-| 10 | Number of CEL-referred enterprises supported with Micro Investment Fund support | Enterprise | Sex of owner: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Fund type: Catalytic Fund, Micro Investment Fund<br>Location: Region, district, community | Market expansion | TechnoServe award/disbursement records, Partner reports, Enterprise verification | New output indicator (in CEL's consolidated plan) | TechnoServe planner III.4: 150 enterprises in Y1 (Q3 52, Q4 98). Programme-wide figure: agree the CEL-referred share. |
+| 5 | SM 5.1 <br>Number of young women tranistioned into wage- and self-employment in the aquaculture value chain | YiW | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: Wage and Self<br>Pathways: Processing, marketing, logistics, digital services, etc<br>Location: Region, district, community | Income earned | Program & Participant surveys, YiW records and Technical reports | Applicable to CEL |  |
+| 6 | SM 5.1 <br>Number of young women in new, improved and additional employments in the aquaculture value chain | YiW | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: Wage and Self<br>Pathways: Input supply, production, processing, marketing, logistics, digital services, etc<br>Location: Region, district, community | Income earned | Program & Participant surveys, YiW records and Technical reports | Applicable to CEL |  |
+| 7 | SM 4.2 <br>Number of supported young-women-owned enterprises showing growth through market expansion / diversification | Enterprise | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: Wage and Self<br>Pathways: Input supply, production, processing, marketing, logistics, digital services, etc<br>Location: Region, district, community | Market expansion | WEO records, Training reports, Program & Participants surveys | Applicable to CEL |  |
+| 8 | SM 4.1<br>Number of supported young-women-owned enterprisesshowing growth through increased in revenue | Enterprise | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: Wage and Self<br>Pathways: Input supply, production, processing, marketing, logistics, digital services, etc<br>Location: Region, district, community | Income earned | WEO records, Training reports, Program & Participants surveys | Applicable to CEL |  |
+| 9 | Number of CEL-referred participants/ enterprises supported with Catalytic Fund support | Enterprise | Sex of owner: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Fund type: Catalytic Fund, Micro Investment Fund<br>Location: Region, district, community | Market expansion | TechnoServe award/disbursement records, Partner reports, Enterprise verification | Not in CEL scope | TechnoServe planner III.3: 10 enterprises in Y1 (Q3 3, Q4 7). Programme-wide figure: agree the CEL-referred share. |
+| 10 | Number of CEL-referred participants/enterprises supported with Micro Investment Fund support | Enterprise | Sex of owner: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Fund type: Catalytic Fund, Micro Investment Fund<br>Location: Region, district, community | Market expansion | TechnoServe award/disbursement records, Partner reports, Enterprise verification | Not in CEL scope | TechnoServe planner III.4: 150 enterprises in Y1 (Q3 52, Q4 98). Programme-wide figure: agree the CEL-referred share. |
 
 ### 2. Outcome / 2.2 Aquaculture Production and Revenue
 
@@ -136,8 +155,8 @@ Each block is a results framework area. "CEL scope" is derived from the font col
 
 | # | Indicator | Key Measure | Disaggregation | Markers | Means of verification | CEL scope | Note (CEL consolidated plan) |
 |---|---|---|---|---|---|---|---|
-| 9 | Quantity (MT) of fish produced annually |  | Fish Type: Catfish, Tilapia<br>Production model: Enclave hub, community cluster, anchor-firm-lead<br>Location: Region, district, community | Tons of fish reported | Partner reports, production records, field surveys | Applicable to CEL |  |
-| 10 | Amount of revenue (USD) from fish produced annually |  | Fish Type: Catfish, Tilapia<br>Production model: Enclave hub, community cluster, anchor-firm-lead<br>Location: Region, district, community | Amount of money generated from fish sold | Partner reports, production and sales records, field surveys | Applicable to CEL |  |
+| 9 | Quantity (MT) of fish produced annually |  | Fish Type: Catfish, Tilapia<br>Production model: Enclave hub, community cluster, anchor-firm-lead<br>Location: Region, district, community | Tons of fish reported | Partner reports, production records, field surveys | Not in CEL scope |  |
+| 10 | Amount of revenue (USD) from fish produced annually |  | Fish Type: Catfish, Tilapia<br>Production model: Enclave hub, community cluster, anchor-firm-lead<br>Location: Region, district, community | Amount of money generated from fish sold | Partner reports, production and sales records, field surveys | Not in CEL scope |  |
 
 ### 2. Outcome  / 2.3 Agency, Networks and Resilence
 
@@ -149,6 +168,8 @@ Each block is a results framework area. "CEL scope" is derived from the font col
 
 • 	Partners and public institutions respond to WAN advocacy and are open to adjusting practices and policies in favor of inclusive, sustainable aquaculture.
 
+• 	Digital participation is optional; women can attend, speak and lead despite care and mobility constraints.
+
 **Risks:**
 
 • 	Social norms or resistance that limit women’s participation in networks or dampen their influence.
@@ -157,11 +178,13 @@ Each block is a results framework area. "CEL scope" is derived from the font col
 
 • 	Climate and environmental shocks that challenge resilience despite improved practices.
 
+• 	Women do not use reporting routes, or feedback receives no timely response.
+
 | # | Indicator | Key Measure | Disaggregation | Markers | Means of verification | CEL scope | Note (CEL consolidated plan) |
 |---|---|---|---|---|---|---|---|
-| 11 | SM 8.2<br>Percentage of young women and PWDs who report receiving support (business regularisation, mentorship, market linkage, BDS, etc.) from WAN | WAN | Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Location: Region, district, community | Ecosystem strengthening | Program reports, Field and participant surveys | To be confirmed (not directly in CEL's consolidated plan) |  |
-| 12 | SM 8.2<br>Percentage of young women and PWDs who report active participation in WAN activities | Advocacy & WAN | Location: Region, district, community | Ecosystem strengthening | Program reports, Field and participant surveys | To be confirmed (not directly in CEL's consolidated plan) |  |
-| 13 | SM 8.2<br>Percentage of WAN members who demonstrate increased confidence, agency and voice in aquaculture-related decision-making | WAN | Location: Region, district, community | Ecosystem strengthening | Program reports, Field and participant surveys | To be confirmed (not directly in CEL's consolidated plan) |  |
+| 11 | SM 8.2<br>Percentage of young women and PWDs who report receiving support (business regularisation, mentorship, market linkage, BDS, etc.) from WAN | WAN | Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Location: Region, district, community | Ecosystem strengthening | Program reports, Field and participant surveys | Applicable to CEL |  |
+| 12 | SM 8.2<br>Percentage of young women and PWDs who report active participation in WAN activities | Advocacy & WAN | Location: Region, district, community | Ecosystem strengthening | Program reports, Field and participant surveys | Applicable to CEL |  |
+| 13 | SM 8.2<br>Percentage of WAN members who demonstrate increased confidence, agency and voice in aquaculture-related decision-making | WAN | Location: Region, district, community | Ecosystem strengthening | Program reports, Field and participant surveys | Applicable to CEL |  |
 
 ### 2. Outcome  / 2.4 Inclusion, Safeguarding and Accessibility
 
@@ -183,8 +206,8 @@ Each block is a results framework area. "CEL scope" is derived from the font col
 
 | # | Indicator | Key Measure | Disaggregation | Markers | Means of verification | CEL scope | Note (CEL consolidated plan) |
 |---|---|---|---|---|---|---|---|
-| 14 | Percentage of PWDs who report that workplaces are accessible and inclusive | Inclusion & Reach | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Location: Region, district, community | Inclusion and safeguarding | WEO and YiW records, Narrative reports and field surveys | To be confirmed (not directly in CEL's consolidated plan) |  |
-| 15 | Percentage of young women and PWDs who report that workplaces are safe | Inclusion & Reach | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Location: Region, district, community | Inclusion and safeguarding | Narrative reports and field surveys | To be confirmed (not directly in CEL's consolidated plan) |  |
+| 14 | Percentage of PWDs who report that workplaces are accessible and inclusive | Inclusion & Reach | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Location: Region, district, community | Inclusion and safeguarding | WEO and YiW records, Narrative reports and field surveys | Applicable to CEL |  |
+| 15 | Percentage of young women and PWDs who report that workplaces are safe | Inclusion & Reach | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Location: Region, district, community | Inclusion and safeguarding | Narrative reports and field surveys | Applicable to CEL |  |
 
 ### 2. Outcome / 2.5 Regulatory Compliance and Market Assurance
 
@@ -229,7 +252,7 @@ Each block is a results framework area. "CEL scope" is derived from the font col
 | 19 | SM 1.1 <br>Number of young women accessing starter pack for production | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: Wage and Self<br>Pathways: Input supply, production, processing, marketing, logistics, digital services, etc<br>Location: Region, district, community | Number of starter packs given | WEO records, Starter pack distribution and receipt records, field and participant surveys | Not in CEL scope / unclassified (plain font) |  |
 | 20 | SM 1.1 <br>Number of young women accessing starter pack for processing and value-added products development | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: Wage and Self<br>Pathways: Input supply, production, processing, marketing, logistics, digital services, etc<br>Location: Region, district, community | Readiness for work | WEO records, Starter pack distribution and receipt records, field and participant surveys | Not in CEL scope / unclassified (plain font) |  |
 | 21 | SM 1.1 <br>Number of young women accessing starter pack for marketing and distribution of aquaculture products | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: Wage and Self<br>Pathways: Input supply, production, processing, marketing, logistics, digital services, etc<br>Location: Region, district, community | Readiness for work | WEO records, Starter pack distribution and receipt records, field and participant surveys | Not in CEL scope / unclassified (plain font) |  |
-| 22 | SM 4<br>Number of young women supported to start/operate their own aquaculture enterprises | Enterprise | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: Wage <br>Pathways: Input supply, production, processing, marketing, logistics, digital services, etc<br>Location: Region, district, community | BDS | Program reports, Field and participant surveys | Applicable to CEL |  |
+| 22 | SM 4<br>Number of young women supported to start/operate their own aquaculture enterprises | Enterprise | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: Wage <br>Pathways: Input supply, production, processing, marketing, logistics, digital services, etc<br>Location: Region, district, community | BDS | Program reports, Field and participant surveys | Not in CEL scope |  |
 | 23 | SM 4.3 <br>Number of young women and PWDs employed by supported aquaculture enterprises | Enterprise | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: Wage <br>Pathways: Input supply, production, processing, marketing, logistics, digital services, etc<br>Location: Region, district, community | Income earned | WEO records, Training reports, Program & Participants surveys | Not in CEL scope / unclassified (plain font) |  |
 
 ### 3. Output / 3.2 Training and Skills
@@ -264,17 +287,21 @@ Each block is a results framework area. "CEL scope" is derived from the font col
 
 • 	Enterprises are referred before they are ready, or dropped from the pipeline.
 
+• 	The same woman is registered in more than one place or with more than one partner (shared locations prompt checks; location alone is not proof of duplication).
+
+• 	Partner records are incomplete (handled by follow-up, not exclusion).
+
 | # | Indicator | Key Measure | Disaggregation | Markers | Means of verification | CEL scope | Note (CEL consolidated plan) |
 |---|---|---|---|---|---|---|---|
 | 24 | SM 1.1 <br>Number of young women who completed training in aquaculture production | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: <br>Pathways: In Person, Online<br>Location: Region, district, community | Readiness for work | WEO records, Training reports, Program & Participants surveys | Not in CEL scope / unclassified (plain font) |  |
 | 25 | SM 1.1<br>Number of young women who completed training in aquaculture processing and product development | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: <br>Pathways: In Person, Online<br>Location: Region, district, community | Readiness for work | WEO records, Training reports, Program & Participants surveys | Not in CEL scope / unclassified (plain font) |  |
 | 26 | SM 1.1<br>Number of young women who completed training in marketing of aquaculture products (fresh and processed) | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: <br>Pathways: In person, Online<br>Location: Region, district, community | Readiness for work | WEO records, Training reports, Program & Participants surveys | Not in CEL scope / unclassified (plain font) |  |
 | 27 | SM 1.1 <br>Number of young women who completed training in aquaculture business development and entrepreneurship skills | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: <br>Pathways: Inperson, Online <br>Location: Region, district, community | Readiness for work | WEO records, Training reports, Program & Participants surveys | Applicable to CEL |  |
-| 28 | Number of existing aquaculture enterprises trained in BDS, production, and value addition | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: <br>Pathways: Inperson, Online <br>Location: Region, district, community | Readiness for work | WEO records, Training reports, Program & Participants surveys | To be confirmed (not directly in CEL's consolidated plan) |  |
-| 29 | Number of new aquaculture enterprises trained in BDS, production, and value addition | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: <br>Pathways: Inperson, Online <br>Location: Region, district, community | Readiness for work | WEO records, Training reports, Program & Participants surveys | To be confirmed (not directly in CEL's consolidated plan) |  |
-| 30 | Number of enterprises prepared and referred to TechnoServe for Catalytic Fund or Micro Investment Fund support | Enterprise | Fund type: Catalytic Fund, Micro Investment Fund<br>Referral status: Referred, Pending<br>Sex of owner: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Location: Region, district, community | BDS | Referral checklist, Referral register, Enterprise growth plans, TechnoServe feedback | To be confirmed (not directly in CEL's consolidated plan) | TechnoServe planner III.3 / III.4 (referral step). Not a funding or job outcome. No Y1 target yet: agree with TechnoServe and AIL. |
-| 31 | Number of young women in women-led cooperatives/clusters trained in gender, financial literacy and business mentoring | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type:Pathways: Inperson, Online  Cooperative/cluster (name or ID):<br>Location: Region, district, community | Readiness for work | WEO records, Training reports, Program & Participants surveys | New output indicator (in CEL's consolidated plan) | Counts women trained (planner PI.17), not cooperatives; cooperatives reached derived from the cooperative/cluster disaggregation. Planner Pl.17 |
-| 32 | Number of young women trained in mentorship and digital literacy | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type:Pathways: Inperson, Online <br>Location: Region, district, community | Readiness for work | WEO records, Training reports, Program & Participants surveys | New output indicator (in CEL's consolidated plan) | Planner PIV.5. |
+| 28 | Number of existing aquaculture enterprises trained in BDS, production, and value addition | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: <br>Pathways: Inperson, Online <br>Location: Region, district, community | Readiness for work | WEO records, Training reports, Program & Participants surveys | Applicable to CEL |  |
+| 29 | Number of new aquaculture enterprises trained in BDS, production, and value addition | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: <br>Pathways: Inperson, Online <br>Location: Region, district, community | Readiness for work | WEO records, Training reports, Program & Participants surveys | Applicable to CEL |  |
+| 30 | Number of enterprises prepared and referred to TechnoServe for Catalytic Fund or Micro Investment Fund support | Enterprise | Fund type: Catalytic Fund, Micro Investment Fund<br>Referral status: Referred, Pending<br>Sex of owner: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Location: Region, district, community | BDS | Referral checklist, Referral register, Enterprise growth plans, TechnoServe feedback | Applicable to CEL | TechnoServe planner III.3 / III.4 (referral step). Not a funding or job outcome. No Y1 target yet: agree with TechnoServe and AIL. |
+| 31 | Number of young women in women-led cooperatives/clusters trained in gender, financial literacy and business mentoring | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type:Pathways: Inperson, Online  Cooperative/cluster (name or ID):<br>Location: Region, district, community | Readiness for work | WEO records, Training reports, Program & Participants surveys | Missing indicator/new output identified (in CEL's consolidated plan) | Counts women trained (planner PI.17), not cooperatives; cooperatives reached derived from the cooperative/cluster disaggregation. Planner Pl.17 |
+| 32 | Number of young women trained in mentorship and digital literacy | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type:Pathways: Inperson, Online <br>Location: Region, district, community | Readiness for work | WEO records, Training reports, Program & Participants surveys | Missing indicator/new output identified (in CEL's consolidated plan) | Planner PIV.5. |
 | 30 | SM 1.1<br>Number of young women who access training starter pack for aquaculture production | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: <br>Pathways: In person, Online<br>Location: Region, district, community | Readiness for work | Participant Onboarding records, WEO and YiW records, Program reports, Field and participant surveys | Not in CEL scope / unclassified (plain font) |  |
 | 31 | SM 1.1<br>Number of young women who access training starter pack for aquaculture processing and value addition | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: <br>Pathways: In Person, online<br>Location: Region, district, community | Readiness for work | Participant Onboarding records, WEO and YiW records, Program reports, Field and participant surveys | Not in CEL scope / unclassified (plain font) |  |
 | 32 | SM 1.1<br>Number of young women who access training starter pack for marketing of aquaculture products | WEO | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Employment Type: <br>Pathways: In Person, Online<br>Location: Region, district, community | Readiness for work | Participant Onboarding records, WEO and YiW records, Program reports, Field and participant surveys | Not in CEL scope / unclassified (plain font) |  |
@@ -311,9 +338,9 @@ Each block is a results framework area. "CEL scope" is derived from the font col
 |---|---|---|---|---|---|---|---|
 | 33 | Number of Women in Aquaculture Network (WAN) groups established and active. | WAN | Location: Region, district, community Status: Strengthened (cooperative/cluster), Governance framework developed | Ecosystem strengthening | Program reports, Field and participant surveys | Applicable to CEL | Layered on #33: report as a status disaggregation of WAN groups/cooperatives. Planner PIII.6. |
 | 34 | Number of young women actively participating in WAN. | WAN | Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Location: Region, district, community Participation type: Leadership/mentorship forum, Bootcamp, Other WAN activity | Ecosystem strengthening | Program reports, Field and participant surveys | Applicable to CEL | Layered on #34: same planner line (PI.11). Report as the "leadership/mentorship forum" disaggregation of #34, not as an additional total. |
-| 35 | Number of young women-owned enterprises mentored and coached by WAN | WAN | Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Location: Region, district, community | Ecosystem strengthening | Program reports, Field and participant surveys | To be confirmed (not directly in CEL's consolidated plan) |  |
-| 36 | SM 8.2<br>Number of advocacy campaigns undertaken by WAN | Advocacy & WAN | Location: Region, district, community | Ecosystem strengthening | Program reports, Field and participant surveys | To be confirmed (not directly in CEL's consolidated plan) |  |
-| 37 | Number of WAN leadership bootcamps and exchange visits held | WAN | Location: Region, district, community | Ecosystem strengthening | Program reports, Event reports, Field and participant surveys | New output indicator (in CEL's consolidated plan) | Planner PI.12. |
+| 35 | Number of young women-owned enterprises mentored and coached by WAN | WAN | Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Location: Region, district, community | Ecosystem strengthening | Program reports, Field and participant surveys | Applicable to CEL |  |
+| 36 | SM 8.2<br>Number of advocacy campaigns undertaken by WAN | Advocacy & WAN | Location: Region, district, community | Ecosystem strengthening | Program reports, Field and participant surveys | Applicable to CEL |  |
+| 37 | Number of WAN leadership bootcamps and exchange visits held | WAN | Location: Region, district, community | Ecosystem strengthening | Program reports, Event reports, Field and participant surveys | Applicable to CEL | Planner PI.12. |
 
 ### 3. Output / 3.4 Inclusion and Safeguarding
 
@@ -342,12 +369,12 @@ Each block is a results framework area. "CEL scope" is derived from the font col
 | 39 | Number of employers that provided reasonable accommodation to PWDs | Inclusion & Reach | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Location: Region, district, community | Inclusion | Narrative reports and field surveys | Not in CEL scope / unclassified (plain font) |  |
 | 40 | Number of young women PWDs engaged | Inclusion & Reach | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Location: Region, district, community | Inclusion | Strategy development reports | Applicable to CEL |  |
 | 41 | Number of community sensitization campaigns conducted on gender inclusion, disability inclusion and safeguarding | Inclusion & Reach | Location: Region, district, community | Inclusion | WEO and YiW records, Narrative reports and field surveys | Applicable to CEL |  |
-| 42 | Number of communities sensitized on gender inclusion and safeguarding | Inclusion & Reach | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Refugees: <br>Location: Region, district, community | Inclusion | WEO and YiW records, Narrative reports and field surveys | To be confirmed (not directly in CEL's consolidated plan) |  |
-| 43 | Number of young women trained in gender transformative trainings | WEO | Sex: Female and Male Status:  PWDs and Non-PWDs Participant Groups: Youth and Non-Youth Pathways: In Person, Online Location: Region, district, community | Inclusion and safeguarding | WEO records, Training reports, Program & Participation surveys | New output indicator (in CEL's consolidated plan) | Keep one WEO person ID across training lines to avoid double counting. Planner PI.20. |
-| 44 | Number of young women trained to identify and respond to safeguarding issues | WEO | Sex: Female and Male Status:  PWDs and Non-PWDs Participant Groups: Youth and Non-Youth Pathways: In Person, Online Location: Region, district, community | Inclusion and safeguarding | WEO records, Training reports, Program & Participation surveys | New output indicator (in CEL's consolidated plan) | Same double-counting control as #43. Planner PI.20 |
-| 45 | Number of women-led cooperatives/clusters with developed gender-responsive governance frameworks | Inclusion & Reach | Cooperative/cluster type: Value chain segment: Location: Region, district, community | Inclusion and safeguarding | Cooperative/cluster register, Governance framework documents, Program reports | New output indicator (in CEL's consolidated plan) | Same 25 cooperatives/clusters as #33 (see its status disaggregation): one register, with a "governance framework developed" flag. Planner PI.18. |
-| 46 | Number of sites/partners with institutionalized safeguarding and occupational health standards | Inclusion & Reach | Site/partner type: Standard type: Safeguarding, Occupational health Location: Region, district, community | Inclusion and safeguarding | Partner/site assessment records, Policy documents, Narrative reports | New output indicator (in CEL's consolidated plan) | Feeds outcome 2.4 (#14-15). Planner PI.23 |
-| 47 | Number of gender focal persons trained on GALS and EMAP | WEO | Sex: Female and Male Disability Status: PWDs and Non-PWDs Organisation: CEL, partner, cooperative Location: Region, district, community | Inclusion and safeguarding | Training reports, Attendance records, WEO records, Narrative reports | New output indicator (in CEL's consolidated plan) | Staff/partner capacity: count as WEO participants. Planner PI.9 is tagged WEO; confirmed |
+| 42 | Number of communities sensitized on gender inclusion and safeguarding | Inclusion & Reach | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Refugees: <br>Location: Region, district, community | Inclusion | WEO and YiW records, Narrative reports and field surveys | Not in CEL scope |  |
+| 43 | Number of young women trained in gender transformative trainings | WEO | Sex: Female and Male Status:  PWDs and Non-PWDs Participant Groups: Youth and Non-Youth Pathways: In Person, Online Location: Region, district, community | Inclusion and safeguarding | WEO records, Training reports, Program & Participation surveys | Applicable to CEL | Keep one WEO person ID across training lines to avoid double counting. Planner PI.20. |
+| 44 | Number of young women trained to identify and respond to safeguarding issues | WEO | Sex: Female and Male Status:  PWDs and Non-PWDs Participant Groups: Youth and Non-Youth Pathways: In Person, Online Location: Region, district, community | Inclusion and safeguarding | WEO records, Training reports, Program & Participation surveys | Applicable to CEL | Same double-counting control as #43. Planner PI.20 |
+| 45 | Number of women-led cooperatives/clusters with developed gender-responsive governance frameworks | Inclusion & Reach | Cooperative/cluster type: Value chain segment: Location: Region, district, community | Inclusion and safeguarding | Cooperative/cluster register, Governance framework documents, Program reports | Applicable to CEL | Same 25 cooperatives/clusters as #33 (see its status disaggregation): one register, with a "governance framework developed" flag. Planner PI.18. |
+| 46 | Number of sites/partners with institutionalized safeguarding and occupational health standards | Inclusion & Reach | Site/partner type: Standard type: Safeguarding, Occupational health Location: Region, district, community | Inclusion and safeguarding | Partner/site assessment records, Policy documents, Narrative reports | Not in CEL scope | Feeds outcome 2.4 (#14-15). Planner PI.23 |
+| 47 | Number of gender focal persons trained on GALS and EMAP | WEO | Sex: Female and Male Disability Status: PWDs and Non-PWDs Organisation: CEL, partner, cooperative Location: Region, district, community | Inclusion and safeguarding | Training reports, Attendance records, WEO records, Narrative reports | Applicable to CEL | Staff/partner capacity: count as WEO participants. Planner PI.9 is tagged WEO; confirmed |
 
 ### 3. Output / 3.5 Regulations, Compliance and Market Assurance
 
@@ -368,10 +395,10 @@ Each block is a results framework area. "CEL scope" is derived from the font col
 
 | # | Indicator | Key Measure | Disaggregation | Markers | Means of verification | CEL scope | Note (CEL consolidated plan) |
 |---|---|---|---|---|---|---|---|
-| 49 | Number of regions, districts and communities reached through partner operations (hubs, clusters, anchor sites, etc.) | Coverage | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Location: Region, district, community | Impact areas | WEO and YiW records, Narrative reports and field surveys | Not in CEL scope / unclassified (plain font) |  |
-| 50 | Number of region, districts and communities in which participants can be traced to as their residence | Coverage | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Location: Region, district, community | Impact areas | WEO and YiW records, Narrative reports and field surveys | Not in CEL scope / unclassified (plain font) |  |
+| 49 | Number of regions, districts and communities reached through partner operations (hubs, clusters, anchor sites, etc.) | Coverage | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Location: Region, district, community | Impact areas | WEO and YiW records, Narrative reports and field surveys | Applicable to CEL |  |
+| 50 | Number of region, districts and communities in which participants can be traced to as their residence | Coverage | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Location: Region, district, community | Impact areas | WEO and YiW records, Narrative reports and field surveys | Applicable to CEL |  |
 | 51 | Number of communities covered by program intervention | Coverage | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Location: Region, district, community | Impact areas | WEO and YiW records, Narrative reports and field surveys | Not in CEL scope / unclassified (plain font) |  |
-| 52 | Number of youth mobilised into the program (community entry, sensitization, selection) | Coverage (not WEO) | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Location: Region, district, community | Reach / onboarding | Participant onboarding records, Mobilization and sensitization reports, Attendance records | Not treated as WEO (CEL's consolidated plan) | Onboarding count: not WEO. Planner PI.1. |
+| 52 | Number of youth mobilised into the program (community entry, sensitization, selection) | Coverage (not WEO) | Sex: Female and Male<br>Disability Status: PWDs and Non-PWDs<br>Participant Groups: Youth and Non-Youth<br>Location: Region, district, community | Reach / onboarding | Participant onboarding records, Mobilization and sensitization reports, Attendance records | Applicable to CEL | Onboarding count: not WEO. Planner PI.1. |
 
 ### Unplaced text (outside the table columns)
 
@@ -388,8 +415,8 @@ Each block is a results framework area. "CEL scope" is derived from the font col
 
 - Applicable to CEL
 - To Be Confirmed (Not directly in CEL's Consolidated Plan)
-- New output indicators (in CEL's Consolidated Plan)
-- Not treated as WEO indicators (CEL's Consolidated Plan)
+- Missing indicators/new outputs ideintified (in CEL's Consolidated Plan)
+- Out of CEL's delivery model scope (To be confirmed by AIL)
 
 ## Formulas
 

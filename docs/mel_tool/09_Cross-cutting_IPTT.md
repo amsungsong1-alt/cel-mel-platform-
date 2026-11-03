@@ -6,7 +6,7 @@ Model sheet: Cross-cutting indicators (inclusion, safeguarding, PWD, coverage).
 
 - B2: Created on: 15th October 2026 | Last revised on: 18th October 2026
 - B3: Last revised by: Muhammadu Sungsong Aboubakr
-- B4: Indicators: 12  |  With Y1 target: 7  |  With Y1 achievement reported: 0  |  At or above 100% of Y1 target: 0
+- B4: Indicators: 13  |  With Y1 target: 6  |  With Y1 achievement reported: 0  |  At or above 100% of Y1 target: 0
 - B5: Input cells: Target and Achieved for Q1-Q4. Yellow = quarterly phasing to be confirmed. Formula cells (Y1 and % columns) must not be overwritten. Enter achievements only after verification (see CEL IPTT Guide).
 - B6: Cross-cutting Indicator Performance Tracking Table (IPTT) - Inclusion, Safeguarding & Coverage
 
@@ -14,29 +14,29 @@ Model sheet: Cross-cutting indicators (inclusion, safeguarding, PWD, coverage).
 
 | ID | Level | Indicator | Unit of Measure | Fish Type | Aggregation type | Means of verification | Responsible (Collect / Verify / Review) | Planner reference / phasing status |
 |---|---|---|---|---|---|---|---|---|
-| IM3 | Impact | SM 6.1 <br>Percentage of PWDs accessing dignifed and fulfilling (D&F) work attributable to program interventions across the aquaculture value chain | PWDs | Not applicable | Incremental | YiW records, Partner reports, Program and Participant surveys | Collect: GYSI Lead<br>Verify: MEAL Officer<br>Review: MEAL Lead | Planner ref: Pll.R5. Quarterly phasing not stated in the concept notes: confirm with AIL. Subset of IM1 (YiW); phasing mirrors the PWD mentor line, confirm. |
+| IM3 | Impact | SM 6.1 <br>Percentage of PWDs accessing dignifed and fulfilling (D&F) work attributable to program interventions across the aquaculture value chain | PWDs | Not applicable | Incremental | YiW records, Partner reports, Program and Participant surveys | Collect: GYSI Lead<br>Verify: MEAL Officer<br>Review: MEAL Lead | Percentage of young women PWDs in YiW who access D&F work. The count of 8 is carried on OP22. |
 | OC14 | Outcomes | Percentage of PWDs who report that workplaces are accessible and inclusive | PWDs | Not applicable | Annual survey (not summed) | YiW records, Partner reports, Program and Participant surveys | Collect: GYSI Lead<br>Verify: MEAL Officer<br>Review: MEAL Lead | No Y1 target set yet. |
 | OC15 | Outcomes | Percentage of young women and PWDs who report that workplaces are safe | PWDs | Not applicable | Annual survey (not summed) | YiW records, Partner reports, Program and Participant surveys | Collect: GYSI Lead<br>Verify: MEAL Officer<br>Review: MEAL Lead | No Y1 target set yet. |
-| OP22 | Outputs | Number of young women PWDs engaged | PWDs | Not applicable | Incremental | Participant onboarding records, WEO and YiW records, Programme reports | Collect: GYSI Lead<br>Verify: MEAL Officer<br>Review: Program Lead | Planner ref: Pl.13. Phasing confirmed in BDS/WAN concept note (28 Sep 2026). Target follows the WAN note (young women with disabilities identified as mentors). |
-| OP23 | Outputs | Number of community sensitization campaigns held on gender inclusion, disability inclusion and safeguarding | Campaigns | Not applicable | Incremental | Narrative reports, Sensitisation reports, Attendance records | Collect: GYSI Lead; Communication Lead<br>Verify: MEAL Officer<br>Review: Program Lead | Planner ref: Pl.22. Quarterly phasing not stated in the concept notes: confirm with AIL. |
+| OP22 | Outputs | Number of young women PWDs engaged | PWDs | Not applicable | Incremental | Participant onboarding records, WEO and YiW records, Programme reports | Collect: GYSI Lead<br>Verify: MEAL Officer<br>Review: Program Lead | Planner ref: Pl.13. Phasing confirmed in BDS/WAN concept note (1/2/2/3). Mentors also tracked on CI-8. Record disability status for every woman and report the actual PWD share against the 5% aim. |
+| OP23 | Outputs | Number of community sensitization campaigns held on gender inclusion, disability inclusion and safeguarding | Campaigns | Not applicable | Incremental | Narrative reports, Sensitisation reports, Attendance records | Collect: GYSI Lead; Communication Lead<br>Verify: MEAL Officer<br>Review: Program Lead | Planner ref: Pl.22. Quarterly phasing is Updated 22 Oct 2026 (was 3 in Q4 only). |
 | OP24 | Outputs | Number of communities sensitized on gender inclusion and safeguarding | Communities | Not applicable | Incremental | Narrative reports, Sensitisation reports, Programme records | Collect: GYSI Lead; Communication Lead<br>Verify: MEAL Officer<br>Review: Program Lead | No Y1 target set yet. |
-| OP25 | Outputs | Number of regions, districts and communities reached through partner operations (hubs, clusters, anchor sites, etc.) | Regions, districts, communities | Not applicable | Incremental | Programme records/database review, Field verification | Collect: MEAL Officer<br>Verify: MEAL Lead<br>Review: Program Lead | No Y1 target set yet. |
-| OP26 | Outputs | Number of region, districts and communities in which participants can be traced to as their residence | Regions, districts, communities | Not applicable | Incremental | Participant onboarding database review | Collect: MEAL Officer<br>Verify: MEAL Lead<br>Review: Program Lead | No Y1 target set yet. |
+| OP25 | Outputs | Number of regions, districts and communities reached through partner operations (hubs, clusters, anchor sites, etc.) | Regions, districts, communities | Not applicable | Incremental | Programme records/database review, Field verification | Collect: MEAL Officer<br>Verify: MEAL Lead<br>Review: Program Lead | Coverage: report actuals from partner returns and onboarding records; no target. |
+| OP26 | Outputs | Number of region, districts and communities in which participants can be traced to as their residence | Regions, districts, communities | Not applicable | Incremental | Participant onboarding database review | Collect: MEAL Officer<br>Verify: MEAL Lead<br>Review: Program Lead | Coverage: report actuals from the participant onboarding database; no target. |
 | OP28 | Outputs | Number of gender focal persons trained on GALS and EMAP | Focal persons (count of individuals) | Not applicable | Incremental | Training reports, Participant lists, WEO records | Collect: GYSI Lead<br>Verify: MEAL Officer<br>Review: Program Lead | Planner ref: Pl.9. Quarterly phasing not stated in the concept notes: confirm with AIL. |
-| OP30 | Outputs | Number of persons trained in gender transformative trainings | Persons (count of individuals) | Not applicable | Incremental | WEO records, Training reports, Participant lists | Collect: GYSI Lead<br>Verify: MEAL Officer<br>Review: Program Lead | Planner ref: Pl.19. Quarterly phasing not stated in the concept notes: confirm with AIL. |
-| OP31 | Outputs | Number of young women trained to identify and respond to safeguarding issues | Young women (count of individuals) | Not applicable | Incremental | Training reports, Participant lists, WEO records | Collect: GYSI Lead<br>Verify: MEAL Officer<br>Review: Program Lead | Planner ref: Pl.20. Quarterly phasing not stated in the concept notes: confirm with AIL. |
-| OP35 | Outputs | Number of sites/partners with institutionalized safeguarding and occupational health standards | Sites/partners (count) | Not applicable | Incremental | Partner/site assessment records, Policy documents, Programme reports | Collect: GYSI Lead<br>Verify: MEAL Officer<br>Review: Program Lead | Planner ref: Pl.23. Quarterly phasing not stated in the concept notes: confirm with AIL. |
+| OP30 | Outputs | Number of persons trained in gender transformative trainings | Persons (count of individuals) | Not applicable | Incremental | WEO records, Training reports, Participant lists | Collect: GYSI Lead<br>Verify: MEAL Officer<br>Review: Program Lead | Planner ref: Pl.19. Same cohort pathway as OP29 (A5); each woman counted once per indicator. |
+| OP31 | Outputs | Number of young women trained to identify and respond to safeguarding issues | Young women (count of individuals) | Not applicable | Incremental | Training reports, Participant lists, WEO records | Collect: GYSI Lead<br>Verify: MEAL Officer<br>Review: Program Lead | Planner ref: Pl.20. First session of each cohort (A5); each woman counted once per indicator. |
+| OP35 | Outputs | Number of sites/partners with institutionalized safeguarding and occupational health standards | Sites/partners (count) | Not applicable | Incremental | Partner/site assessment records, Policy documents, Programme reports | Collect: GYSI Lead<br>Verify: MEAL Officer<br>Review: Program Lead | Planner ref: Pl.23. Quarterly phasing Updated 22 Oct 2026 (was 2 in Q4 only). Safeguarding focal person and confidential route named for every partner by 23 Oct (A4). |
 
 ## Targets and achievements (cached values)
 
-Blank = not due / not reported (not zero). `-` = percentage not computable. Y1 = Jul 2026 to Jun 2027; Q1 Jul-Sep 2026, Q2 Oct-Dec 2026, Q3 Jan-Mar 2027, Q4 Apr-Jun 2027.
+Blank = not due / not reported (not zero). `-` = percentage not computable. Y1 = Jul 2026 to Jun 2027; Q1 Jul-Sep 2026, Q2 Oct-Dec 2026, Q3 Jan-Mar 2027, Q4 Apr-Jun 2027. Workbook note (A30): "Quarter 1 Targets are added to Quarter 2 targets" — this is why OP22's Q1 target is now blank and its Q2 target is the formula `=2+1` (old Q1 1 folded into old Q2 2).
 
 | ID | Y1 Target | Y1 Achieved | Y1 % | Q1 Target | Q1 Achieved | Q1 % | Q2 Target | Q2 Achieved | Q2 % | Q3 Target | Q3 Achieved | Q3 % | Q4 Target | Q4 Achieved | Q4 % |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| IM3 | 8 |  | - | 1 |  | - | 2 |  | - | 2 |  | - | 3 |  | - |
+| IM3 |  |  | - |  |  | - |  |  | - |  |  | - |  |  | - |
 | OC14 |  |  | - |  |  | - |  |  | - |  |  | - |  |  | - |
 | OC15 |  |  | - |  |  | - |  |  | - |  |  | - |  |  | - |
-| OP22 | 8 |  | - | 1 |  | - | 2 |  | - | 2 |  | - | 3 |  | - |
+| OP22 | 8 |  | - |  |  | - | 3 |  | - | 2 |  | - | 3 |  | - |
 | OP23 | 3 |  | - |  |  | - | 0 |  | - | 0 |  | - | 3 |  | - |
 | OP24 |  |  | - |  |  | - |  |  | - |  |  | - |  |  | - |
 | OP25 |  |  | - |  |  | - |  |  | - |  |  | - |  |  | - |
@@ -48,7 +48,7 @@ Blank = not due / not reported (not zero). `-` = percentage not computable. Y1 =
 
 ## Formulas (active; complete inventory)
 
-85 formulas. Formulas are shown exactly as stored in the workbook. `{r}` stands for the formula's own row number. Cached values appear in the content tables above.
+86 formulas. Formulas are shown exactly as stored in the workbook. `{r}` stands for the formula's own row number. Cached values appear in the content tables above.
 
 **Column B**, rows 4 (1 cell):
 
@@ -80,6 +80,14 @@ Blank = not due / not reported (not zero). `-` = percentage not computable. Y1 =
 =IF(I{r}="","-",IFERROR(I{r}/H{r},"-"))
 ```
 
+**Column K**, row 15 (1 cell):
+
+```
+=2+1
+```
+
+One-off literal arithmetic (OP22's Q2 target: old Q2 target 2 + old Q1 target 1, folded per the A30 note); not part of the repeating row pattern. Cached value: 3.
+
 **Column M**, rows 10, 12-13, 15-23 (12 cells):
 
 ```
@@ -98,7 +106,7 @@ Blank = not due / not reported (not zero). `-` = percentage not computable. Y1 =
 =IF(R{r}="","-",IFERROR(R{r}/Q{r},"-"))
 ```
 
-Total: 85 formulas in 8 distinct patterns.
+Total: 86 formulas in 9 distinct patterns.
 
 ## Data validation
 

@@ -4,9 +4,9 @@ Source workbook: `SAWA_IP_MEL_System_Tool_CEL_v3_10_18_2026.xlsx`. Purpose: give
 
 ## Formula status of the workbook
 
-- **1192 active formulas** across 10 sheets, **0 external-workbook references**, 0 formula errors after recalculation.
-- Project IPTT used to point at another workbook (`[1]`); in this version it reads the BDS, WAN and Cross-cutting IPTT sheets inside the workbook.
-- Formula counts by sheet: Project IPTT: 825, BDS IPTT: 148, WAN IPTT: 64, Cross-cutting IPTT: 85, MEL Plan: 5, A3 Results Framework (ToC): 37, A2 Data Flow & Roles: 4, A4 Onboarding Q2: 2, A5 Training Q2: 11, CEL IPTT Guide: 11.
+- **1255 active formulas** across 10 sheets, **55 external-workbook references** (all in Project IPTT, column V), **55 formula errors** after recalculation (the same 55 cells, all `#VALUE!`).
+- Project IPTT's "Reported in" check (column V) still points at another workbook (`[1]` -> `SAWA_IP_MEL_System_Tool_CEL_v3_10_22_2026_updated.xlsx`, per the workbook's external-link definition) rather than the BDS, WAN and Cross-cutting IPTT sheets inside this workbook. Because that external file is not available at recalculation, all 55 of column V's formulas now cache as `#VALUE!` — the reported-in check is currently broken, not fixed.
+- Formula counts by sheet: Project IPTT: 883, BDS IPTT: 150, WAN IPTT: 64, Cross-cutting IPTT: 86, MEL Plan: 7, A3 Results Framework (ToC): 37, A2 Data Flow & Roles: 4, A4 Onboarding Q2: 2, A5 Training Q2: 11, CEL IPTT Guide: 11.
 
 ## Files
 
@@ -62,6 +62,6 @@ Source workbook: `SAWA_IP_MEL_System_Tool_CEL_v3_10_18_2026.xlsx`. Purpose: give
 - Indicators in plain (not-in-CEL-scope) font in Project IPTT (13): IM4, OP1, OP2, OP3, OP6, OP7, OP8, OP12, OP13, OP14, OP19, OP20, OP21.
 - ProFrame # numbers that repeat across results areas: 9, 10, 30, 31, 32, 37, 43, 44, 45, 46, 47. Use the IPTT ID or a new stable key.
 - The MEL Plan LoP targets and the IPTT Y1 targets use different bases for some indicators (for example YiW). Confirm the Y1 x 4 rule and the tracking level (CEL vs programme).
-- Dates in A4 and A5 and some quarterly phasings are proposals (yellow cells); owners' names and backups in A2 are blank.
+- Dates in A4 and A5 and some quarterly phasings are proposals (yellow cells); owners' names and backups in A2 are now filled in (still headed "proposed: confirm names and backups") rather than blank.
 - A4/A5 conditional-formatting bars and the 'current week' highlight use `TODAY()`; replicate as a computed field in the app.
 - Typos from the source template remain in approved indicator wording (for example "tranistioned", "dignifed", "enterprisesshowing", "Resilence").

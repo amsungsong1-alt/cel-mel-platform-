@@ -17,7 +17,7 @@ through self-employment or wage employment, as a direct result of Foundation sup
 • Additional work: A second income-generating activity alongside existing work.
 • Improved work: Enhanced quality or conditions of work (e.g., higher income, stability, respect, or purpose).
 
-A participant should only be counted as YiW once there is evidence that she is actually engaged in work and earning income, rather than merely receiving training or programme support.
+A participant should only be counted as YiW once there is evidence that she is actually engaged in work and earning income, rather than merely receiving training or programme support. Updated 22 Oct 2026: the Year 1 target of 100 refers to value-addition enterprises (disaggregate "value addition"). A job counts only with verified work and income (employment letter, payroll, production or sales record, or site verification). A referral or attendance is never a job.
 
 **Disaggregation:**
 
@@ -25,6 +25,7 @@ Disability status: PWD/Non-PWD
 Employment type: Wage/Self
 Pathway: input supply, production, processing, marketing, logistics, digital services, etc.
 Location: region, district, community
+Updated 22 Oct 2026: age band (18-24, 25-35); region and district; value-chain role; business stage; group membership; partner. Women and enterprises counted separately.
 
 **Unit of Measurement:**
 
@@ -49,7 +50,7 @@ Participant surveys/assessments
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 2. Percent of young women in YiW who access dignifed and fulfilling (D&F) work attributable to program interventions
@@ -64,7 +65,7 @@ Dignified and Fulfilling (D&F) work: As defined by the young people, youth are c
 • Respect in the workplace: Youth feel respected in their workplaces
 • Sense of purpose: Gives the youth a sense of purpose.
 
-Only young women already classified as YiW are included in the denominator for this indicator.
+Only young women already classified as YiW are included in the denominator for this indicator. Updated 22 Oct 2026: share of verified YiW who pass the D&F test (reliable income plus at least one other marker). Annual survey (Q4), not summed across quarters. Target 86% (programme assumption); AIL to confirm whether the BDS note's 100 jobs must all pass.
 
 **Disaggregation:**
 
@@ -72,6 +73,7 @@ Disability status
 Employment type
 Aquaculture pathway
 Location
+Updated 22 Oct 2026: age band (18-24, 25-35); region and district; value-chain role; business stage; group membership; partner. Women and enterprises counted separately.
 
 **Unit of Measurement:**
 
@@ -94,7 +96,7 @@ Programme and participant surveys/assessments
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 3. Percent of young women PWDs in YiW who access D&F work attributable to program interventions
@@ -105,7 +107,7 @@ Definition: Percentage of young women with disabilities who are in YiW and whose
 
 Dignified and Fulfilling (D&F) work: work characterised by reliable income, sense of purpose, respect in the workplace and reputable work for young women with disabilities in YiW.
 
-Only young women with disabilities already classified as YiW are included in the denominator for this indicator.
+Only young women with disabilities already classified as YiW are included in the denominator for this indicator. Updated 22 Oct 2026: measured as a percentage of young women PWDs in YiW; the count of 8 for Y1 is carried on OP22.
 
 **Disaggregation:**
 
@@ -113,6 +115,7 @@ Disability type/status
 Employment type
 Aquaculture pathway
 Location
+Updated 22 Oct 2026: age band (18-24, 25-35); region and district; value-chain role; business stage; group membership; partner. Women and enterprises counted separately.
 
 **Unit of Measurement:**
 
@@ -135,7 +138,7 @@ Programme and participant surveys/assessments
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 4. Percentage of participants who report improved ability to meet basic household needs due to aquaculture income
@@ -270,6 +273,7 @@ Wage employment: paid employment with an employer or enterprise within the aquac
 Disability status
 Aquaculture pathway
 Location
+Updated 22 Oct 2026: age band (18-24, 25-35); region and district; value-chain role; business stage; group membership; partner. Women and enterprises counted separately.
 
 **Unit of Measurement:**
 
@@ -294,7 +298,7 @@ Programme and participant surveys
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 8. Number of young women transitioned into self-employment in aquaculture value chain
@@ -310,6 +314,7 @@ Self-employment: own-account work or enterprise activity generating income withi
 Disability status
 Aquaculture pathway
 Location
+Updated 22 Oct 2026: age band (18-24, 25-35); region and district; value-chain role; business stage; group membership; partner. Women and enterprises counted separately.
 
 **Unit of Measurement:**
 
@@ -334,7 +339,7 @@ Programme and participant surveys
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 9. Number of young women in new employment in aquaculture value chain
@@ -351,6 +356,7 @@ Disability status
 Employment type
 Aquaculture pathway
 Location
+Updated 22 Oct 2026: age band (18-24, 25-35); region and district; value-chain role; business stage; group membership; partner. Women and enterprises counted separately.
 
 **Unit of Measurement:**
 
@@ -376,7 +382,7 @@ Employer/enterprise records
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 10. Number of young women in improved employment in aquaculture value chain
@@ -393,6 +399,7 @@ Disability status
 Employment type
 Aquaculture pathway
 Location
+Updated 22 Oct 2026: age band (18-24, 25-35); region and district; value-chain role; business stage; group membership; partner. Women and enterprises counted separately.
 
 **Unit of Measurement:**
 
@@ -417,7 +424,7 @@ Employer/enterprise records
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 11. Number of young women in additional employment in aquaculture value chain
@@ -434,6 +441,7 @@ Disability status
 Employment type
 Aquaculture pathway
 Location
+Updated 22 Oct 2026: age band (18-24, 25-35); region and district; value-chain role; business stage; group membership; partner. Women and enterprises counted separately.
 
 **Unit of Measurement:**
 
@@ -456,7 +464,7 @@ Programme and participant surveys
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 12. Number of young women accessing starter pack for production
@@ -628,7 +636,7 @@ Field surveys
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 16. Amount of revenue (USD) from fish produced annually
@@ -670,7 +678,7 @@ Field surveys
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 17. Number of young women-ownerd aquaculture enrerprises supported by the programme that are still active
@@ -712,7 +720,7 @@ Enterprise surveys
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 18. Number of young women newly employed by supported enterprises
@@ -752,7 +760,7 @@ Programme surveys
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 19. Number of supported young-women-owned enterprises achiving increased capacity
@@ -813,6 +821,7 @@ Disability status of owner
 Enterprise type
 Aquaculture pathway
 Location
+Updated 22 Oct 2026: age band (18-24, 25-35); region and district; value-chain role; business stage; group membership; partner. Women and enterprises counted separately.
 
 **Unit of Measurement:**
 
@@ -837,7 +846,7 @@ YiW records
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 21. Number of CEL-referred enterprises supported with Catalytic Fund support
@@ -848,7 +857,7 @@ Definition: Number of enterprises referred by CEL that receive Catalytic Fund su
 
 CEL-referred enterprise: an enterprise whose referral was submitted by CEL (counted in the referral indicator).
 
-Supported: TechnoServe has approved and awarded or disbursed Catalytic Fund support, confirmed by TechnoServe records. Each enterprise is counted once. Only CEL-referred enterprises count; TechnoServe's programme-wide figure is not CEL's result.
+Supported: TechnoServe has approved and awarded or disbursed Catalytic Fund support, confirmed by TechnoServe records. Each enterprise is counted once. Only CEL-referred enterprises count; TechnoServe's programme-wide figure is not CEL's result. Updated 22 Oct 2026: enterprises referred by CEL that TechnoServe confirms as funded, counted once in the quarter of the award. 10 is the TechnoServe programme figure; CEL's share is agreed by 30 Oct.
 
 **Disaggregation:**
 
@@ -881,7 +890,7 @@ Programme reports
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 22. Number of CEL-referred enterprises supported with Micro Investment Fund support
@@ -892,7 +901,7 @@ Definition: Number of enterprises referred by CEL that receive Micro Investment 
 
 CEL-referred enterprise: an enterprise whose referral was submitted by CEL (counted in the referral indicator).
 
-Supported: TechnoServe has approved and awarded or disbursed Micro Investment Fund support, confirmed by TechnoServe records. Each enterprise is counted once. Only CEL-referred enterprises count; TechnoServe's programme-wide figure is not CEL's result.
+Supported: TechnoServe has approved and awarded or disbursed Micro Investment Fund support, confirmed by TechnoServe records. Each enterprise is counted once. Only CEL-referred enterprises count; TechnoServe's programme-wide figure is not CEL's result. Updated 22 Oct 2026: enterprises referred by CEL that TechnoServe confirms as funded, counted once in the quarter of the award. 10 is the TechnoServe programme figure; CEL's share is agreed by 30 Oct.
 
 **Disaggregation:**
 
@@ -925,7 +934,7 @@ Programme reports
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 23. Number of young women who completed training in aquaculture production
@@ -1062,13 +1071,14 @@ Definition: Number of young women who successfully complete programme-supported 
 
 Training completion: successful completion of aquaculture business development and entrepreneurship training.
 
-A participant is counted only when she meets the programme's training completion requirements.
+A participant is counted only when she meets the programme's training completion requirements. Updated 22 Oct 2026: a woman is counted when she attends at least 80% of sessions and completes the practical assignment; each woman is counted once per indicator.
 
 **Disaggregation:**
 
 Disability status
 Enterprise/pathway type
 Location
+Updated 22 Oct 2026: age band (18-24, 25-35); region and district; value-chain role; business stage; group membership; partner. Women and enterprises counted separately.
 
 **Unit of Measurement:**
 
@@ -1094,7 +1104,7 @@ Programme reports
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 27. Number of young women who access training starter pack for aquaculture production
@@ -1230,7 +1240,7 @@ Definition: Number of WAN groups formally established and continuing to function
 
 Active WAN Groups: groups formally established and still functioning through meetings, activities or continued member engagement.
 
-Each WAN group should be counted once when it is both established and active during the reporting period.
+Each WAN group should be counted once when it is both established and active during the reporting period. Updated 22 Oct 2026: a women-led group, cooperative, cluster, market association or peer circle affiliated to WAN (recorded meeting or in writing) that met or acted in the period. One record per group in the group register; do not add to OP34.
 
 **Disaggregation:**
 
@@ -1262,7 +1272,7 @@ Field surveys
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 31. Number of young women actively participating in WAN.
@@ -1273,13 +1283,14 @@ Definition: Number of young women who are members of WAN and demonstrate active 
 
 Active participation in WAN: membership plus actual participation in WAN meetings, mentoring, networking, advocacy, peer learning or related activities.
 
-Membership alone does not qualify a participant as actively participating in WAN.
+Membership alone does not qualify a participant as actively participating in WAN. Updated 22 Oct 2026: unique registered members who took part in at least one WAN activity (meeting, peer circle, forum, mentoring, advocacy) in the period. Membership alone does not count. Forum engagements (attendance lines) are reported separately on CI-10.
 
 **Disaggregation:**
 
 Disability status
 WAN group
 Location
+Updated 22 Oct 2026: age band (18-24, 25-35); region and district; value-chain role; business stage; group membership; partner. Women and enterprises counted separately.
 
 **Unit of Measurement:**
 
@@ -1304,7 +1315,7 @@ Programme reports
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 32. Number of young women-owned enterprises mentored and coached by WAN
@@ -1321,6 +1332,7 @@ Disability status of owner
 Enterprise type/pathway
 WAN group
 Location
+Updated 22 Oct 2026: age band (18-24, 25-35); region and district; value-chain role; business stage; group membership; partner. Women and enterprises counted separately.
 
 **Unit of Measurement:**
 
@@ -1345,7 +1357,7 @@ Programme reports
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 33. Number of advocacy campaigns undertaken by WAN
@@ -1384,7 +1396,7 @@ Programme reports
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 34. Percentage of WAN members who report increased confidence ans voice in aquaculture-related decision-making
@@ -1425,7 +1437,7 @@ Programme reports
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 35. Number of regions covered by program intervention
@@ -1463,7 +1475,7 @@ Programme records
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 36. Number of districts covered by program intervention
@@ -1502,7 +1514,7 @@ Programme records
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 37. Number of communities covered by program intervention
@@ -1543,7 +1555,7 @@ Field records
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 38. Number of regions participants hail from
@@ -1581,7 +1593,7 @@ WEO/YiW records
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 39. Number of districts participants hail from
@@ -1619,7 +1631,7 @@ WEO/YiW records
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 40. Number of communities participants hail from
@@ -1658,7 +1670,7 @@ WEO/YiW records
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 41. Number of community sensitization campaigns conducted
@@ -1701,7 +1713,7 @@ Attendance records
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 42. Number of communities sensitized on gender inclusion and safeguarding
@@ -1742,7 +1754,7 @@ Programme records
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 43. Number of implementing partners that engage PWDs in aquaculture-related work.
@@ -1880,7 +1892,7 @@ According to schedule
 
 Definition: Number of young women with disabilities engaged through programme-supported activities and pathways, particularly aquaculture-related work and economic opportunities.
 
-Young women PWDs engaged: young women with disabilities engaged through programme-supported aquaculture pathways and economic opportunities.
+Young women PWDs engaged: young women with disabilities engaged through programme-supported aquaculture pathways and economic opportunities. Updated 22 Oct 2026: young women with a recorded disability status who are registered and take part in a CEL or WAN activity. Those serving as mentors are also reported on CI-8 (target 8).
 
 **Disaggregation:**
 
@@ -1889,6 +1901,7 @@ Youth category
 Aquaculture pathway
 Employment type
 Location
+Updated 22 Oct 2026: age band (18-24, 25-35); region and district; value-chain role; business stage; group membership; partner. Women and enterprises counted separately.
 
 **Unit of Measurement:**
 
@@ -1914,7 +1927,7 @@ Programme reports
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 47. Percentage of PWD participants who report that workplaces are accessible and inclusive
@@ -2002,7 +2015,7 @@ Narrative reports
 
 **Frequency:**
 
-According to schedule
+Quarterly (aggregate only)
 
 
 ## 49. Number of youth mobilised into the program (community entry, sensitization, selection)
@@ -2021,6 +2034,7 @@ Sex
 Disability status
 Youth category
 Location (region, district, community)
+Updated 22 Oct 2026: age band (18-24, 25-35); region and district; value-chain role; business stage; group membership; partner. Women and enterprises counted separately.
 
 **Unit of Measurement:**
 
@@ -2045,7 +2059,7 @@ Attendance records
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 50. Number of gender focal persons trained on GALS and EMAP
@@ -2090,7 +2104,7 @@ Programme reports
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 51. Number of young women in women-led cooperatives/clusters trained in gender, financial literacy and business mentoring
@@ -2101,7 +2115,7 @@ Definition: Number of young women who are members of women-led cooperatives/clus
 
 Training completion: successful completion of the training according to the programme's completion requirements.
 
-The unit is young women, not cooperatives. Each young woman is counted once per reporting period. The number of cooperatives/clusters reached can be derived from the cooperative/cluster disaggregation.
+The unit is young women, not cooperatives. Each young woman is counted once per reporting period. The number of cooperatives/clusters reached can be derived from the cooperative/cluster disaggregation. Updated 22 Oct 2026: delivered as one pathway per cohort; a woman is counted when she attends at least 80% of sessions and completes the practical assignment; counted once per indicator.
 
 **Disaggregation:**
 
@@ -2109,6 +2123,7 @@ Disability status
 Cooperative/cluster (name or ID)
 Training topic
 Location
+Updated 22 Oct 2026: age band (18-24, 25-35); region and district; value-chain role; business stage; group membership; partner. Women and enterprises counted separately.
 
 **Unit of Measurement:**
 
@@ -2134,7 +2149,7 @@ Programme reports
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 52. Number of young women trained in gender transformative trainings
@@ -2145,7 +2160,7 @@ Definition: Number of young women who successfully complete programme-supported 
 
 Gender transformative training: training that addresses gender norms, roles and power relations that affect women's participation in aquaculture work and decision-making.
 
-A participant is counted only when she meets the completion requirements. Each young woman is counted once.
+A participant is counted only when she meets the completion requirements. Each young woman is counted once. Updated 22 Oct 2026: delivered as one pathway per cohort; counted once per indicator after the completion rule (80% of sessions plus the practical assignment).
 
 **Disaggregation:**
 
@@ -2153,6 +2168,7 @@ Disability status
 Youth category
 Training mode (in person, online)
 Location
+Updated 22 Oct 2026: age band (18-24, 25-35); region and district; value-chain role; business stage; group membership; partner. Women and enterprises counted separately.
 
 **Unit of Measurement:**
 
@@ -2178,7 +2194,7 @@ Programme reports
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 53. Number of young women trained to identify and respond to safeguarding issues
@@ -2189,7 +2205,7 @@ Definition: Number of young women who successfully complete programme-supported 
 
 Training completion: successful completion of the training according to the programme's completion requirements.
 
-Each young woman is counted once. No case details of affected persons are recorded in the training data.
+Each young woman is counted once. No case details of affected persons are recorded in the training data. Updated 22 Oct 2026: first session of each cohort; counted once per indicator after the completion rule. No case details in training records.
 
 **Disaggregation:**
 
@@ -2197,6 +2213,7 @@ Disability status
 Youth category
 Training mode (in person, online)
 Location
+Updated 22 Oct 2026: age band (18-24, 25-35); region and district; value-chain role; business stage; group membership; partner. Women and enterprises counted separately.
 
 **Unit of Measurement:**
 
@@ -2222,7 +2239,7 @@ Programme reports
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 54. Number of young women trained in mentorship and digital literacy
@@ -2233,7 +2250,7 @@ Definition: Number of young women who successfully complete programme-supported 
 
 Mentorship and digital literacy training: training that builds mentoring skills and basic digital skills for work, markets and business records.
 
-A participant is counted only when she meets the completion requirements. Each young woman is counted once.
+A participant is counted only when she meets the completion requirements. Each young woman is counted once. Updated 22 Oct 2026: delivered as one pathway per cohort; counted once per indicator after the completion rule. Paper and phone fallback if e-SAWA tools are not confirmed.
 
 **Disaggregation:**
 
@@ -2241,6 +2258,7 @@ Disability status
 Youth category
 Training mode (in person, online)
 Location
+Updated 22 Oct 2026: age band (18-24, 25-35); region and district; value-chain role; business stage; group membership; partner. Women and enterprises counted separately.
 
 **Unit of Measurement:**
 
@@ -2266,7 +2284,7 @@ Programme reports
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 55. Number of WAN leadership bootcamps and exchange visits held
@@ -2310,7 +2328,7 @@ Programme reports
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 56. Number of women-led cooperatives/clusters with developed gender-responsive governance frameworks
@@ -2321,7 +2339,7 @@ Definition: Number of women-led cooperatives/clusters that have a documented gen
 
 Developed governance framework: a written framework adopted by the cooperative/cluster that sets out gender-responsive rules for membership, leadership, decision-making and benefit-sharing.
 
-Each cooperative/cluster is counted once. It is the same register of cooperatives/clusters used for WAN groups, with a flag for 'governance framework developed'.
+Each cooperative/cluster is counted once. It is the same register of cooperatives/clusters used for WAN groups, with a flag for 'governance framework developed'. Updated 22 Oct 2026: a group counts as strengthened when it has an adopted gender-responsive governance framework and shows evidence of changed practice in at least one of records, decisions, services used, inclusion (confirmed at plan review). The same 25 groups as the group register flags: report once.
 
 **Disaggregation:**
 
@@ -2353,7 +2371,7 @@ Programme reports
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 57. Number of sites/partners with institutionalized safeguarding and occupational health standards
@@ -2396,7 +2414,7 @@ Narrative reports
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 58. Number of enterprises prepared and referred to TechnoServe for Catalytic Fund or Micro Investment Fund support
@@ -2441,7 +2459,7 @@ TechnoServe feedback
 
 **Frequency:**
 
-According to schedule
+Quarterly
 
 
 ## 59. Applicable to CEL
@@ -2450,10 +2468,10 @@ According to schedule
 ## 60. To Be Confirmed (Not directly in CEL's Consolidated Plan)
 
 
-## 61. New output indicators (in CEL's Consolidated Plan)
+## 61. Missing indicators/new outputs ideintified (in CEL's Consolidated Plan)
 
 
-## 62. Not treated as WEO indicators (CEL's Consolidated Plan)
+## 62. Out of CEL's delivery model scope (To be confirmed by AIL)
 
 
 ## Formulas

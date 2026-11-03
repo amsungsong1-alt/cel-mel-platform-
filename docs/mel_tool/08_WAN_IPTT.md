@@ -6,7 +6,7 @@ Model sheet: Women in Aquaculture Network (WAN). Input sheet for WAN indicators 
 
 - B2: Created on: 15th October 2026 | Last revised on: 18th October 2026
 - B3: Last revised by: Muhammadu Sungsong Aboubakr
-- B4: Indicators: 9  |  With Y1 target: 4  |  With Y1 achievement reported: 0  |  At or above 100% of Y1 target: 0
+- B4: Indicators: 9  |  With Y1 target: 3  |  With Y1 achievement reported: 0  |  At or above 100% of Y1 target: 0
 - B5: Input cells: Target and Achieved for Q1-Q4. Yellow = quarterly phasing to be confirmed. Formula cells (Y1 and % columns) must not be overwritten. Enter achievements only after verification (see CEL IPTT Guide).
 - B6: WAN Indicator Performance Tracking Table (IPTT) - Women in Aquaculture Network
 
@@ -17,8 +17,8 @@ Model sheet: Women in Aquaculture Network (WAN). Input sheet for WAN indicators 
 | OC11 | Outcomes | SM 8.2<br>Percentage of young women and PWDs who report receiving support (business regularisation, mentorship, market linkage, BDS, etc.) from WAN | WAN participants | Not applicable | Annual survey (not summed) | YiW records, Partner reports, Program and Participant surveys | Collect: GYSI Lead (WAN); MEAL Officer (surveys)<br>Verify: MEAL Lead<br>Review: Program Lead | No Y1 target set yet. |
 | OC12 | Outcomes | SM 8.2<br>Percentage of young women and PWDs who report active participantion in WAN activities | WAN participants | Not applicable | Annual survey (not summed) | WEO records, Partner reports, Program and Participant surveys | Collect: GYSI Lead (WAN); MEAL Officer (surveys)<br>Verify: MEAL Lead<br>Review: Program Lead | No Y1 target set yet. |
 | OC13 | Outcomes | SM 8.2<br>Percentage of WAN members who demonstrate increased confidence, agency and voice in aquaculture-related decision-making | WAN participants | Not applicable | Annual survey (not summed) | WEO records, Partner reports, Program and Participant surveys | Collect: GYSI Lead (WAN); MEAL Officer (surveys)<br>Verify: MEAL Lead<br>Review: Program Lead | No Y1 target set yet. |
-| OP15 | Outputs | Number of Women in Aquaculture Network (WAN) groups established and active | WAN groups (cooperatives/clusters) | Not applicable | Incremental | WAN group/cooperative/cluster records, capacity assessment, programme reports, Field surveys | Collect: GYSI Lead (WAN)<br>Verify: MEAL Officer<br>Review: Program Lead | Planner ref: PIII.6 Number of strengthened women-led cooperatives/clusters across the aquaculture value chain. CEL planner III.6: Y1 25 x4. Same 25 cooperatives/clusters as the WAN-group proxy (row 47) and I.18. LoP = Y1 x4.. Phasing confirmed in BDS/WAN concept note (28 Sep 2026). Same 25 groups as the governance-framework indicator (OP34) and the "strengthened" status: one register. |
-| OP16 | Outputs | Number of young women actively participating in WAN | Young Women | Not applicable | Incremental | WAN membership/forum attendance records, Participant onboarding records, Programme reports | Collect: GYSI Lead (WAN)<br>Verify: MEAL Officer<br>Review: Program Lead | Planner ref: PI.11 Number of young women engaged in leadership and mentorship forums under WAN. CEL planner I.11: Y1 500 x4. Same planner line as the WAN participation indicator. Phasing confirmed in BDS/WAN concept note (28 Sep 2026). |
+| OP15 | Outputs | Number of Women in Aquaculture Network (WAN) groups established and active | WAN groups (cooperatives/clusters) | Not applicable | Incremental | WAN group/cooperative/cluster records, capacity assessment, programme reports, Field surveys | Collect: GYSI Lead (WAN)<br>Verify: MEAL Officer<br>Review: Program Lead | Counts groups affiliated to WAN and active. Target set after the WAN group map (30 Oct 2026). The 25 strengthened groups are reported once, on OP34 (one group register, three flags). |
+| OP16 | Outputs | Number of young women actively participating in WAN | Young Women | Not applicable | Incremental | WAN membership/forum attendance records, Participant onboarding records, Programme reports | Collect: GYSI Lead (WAN)<br>Verify: MEAL Officer<br>Review: Program Lead | PI.11 Number of young women engaged in leadership and mentorship forums under WAN (Y1 500). Phasing confirmed in BDS/WAN concept note: Q3 300, Q4 200. Keep attendance lines as a supporting count. |
 | OP17 | Outputs | Number of young women-owned enterprises mentored and coached by WAN | WAN participants | Not applicable | Incremental | WAN mentoring/coaching records, Enterprise interviews, Programme reports | Collect: GYSI Lead (WAN)<br>Verify: MEAL Officer<br>Review: Program Lead | No Y1 target set yet. |
 | OP18 | Outputs | SM 8.2<br>Number of advocacy campaigns undertaken by WAN | WAN | Not applicable | Incremental | WAN records, Campaign/event reports, Narrative reports | Collect: GYSI Lead (WAN); Communication Lead<br>Verify: MEAL Officer<br>Review: Program Lead | No Y1 target set yet. |
 | OP33 | Outputs | Number of WAN leadership bootcamps and exchange visits held | Events (count of bootcamps and visits) | Not applicable | Incremental | WAN records, Event reports, Programme reports | Collect: GYSI Lead (WAN)<br>Verify: MEAL Officer<br>Review: Program Lead | Planner ref: Pl.12. Phasing confirmed in BDS/WAN concept note (28 Sep 2026). |
@@ -33,7 +33,7 @@ Blank = not due / not reported (not zero). `-` = percentage not computable. Y1 =
 | OC11 |  |  | - |  |  | - |  |  | - |  |  | - |  |  | - |
 | OC12 |  |  | - |  |  | - |  |  | - |  |  | - |  |  | - |
 | OC13 |  |  | - |  |  | - |  |  | - |  |  | - |  |  | - |
-| OP15 | 25 |  | - | 0 |  | - | 0 |  | - | 15 |  | - | 10 |  | - |
+| OP15 |  |  | - |  |  | - |  |  | - |  |  | - |  |  | - |
 | OP16 | 500 |  | - | 0 |  | - | 0 |  | - | 300 |  | - | 200 |  | - |
 | OP17 |  |  | - |  |  | - |  |  | - |  |  | - |  |  | - |
 | OP18 |  |  | - |  |  | - |  |  | - |  |  | - |  |  | - |
@@ -46,7 +46,7 @@ Blank = not due / not reported (not zero). `-` = percentage not computable. Y1 =
 
 ```
 B4: ="Indicators: "&COUNTA(A9:A80)&"  |  With Y1 target: "&COUNT(E9:E80)&"  |  With Y1 achievement reported: "&COUNT(F9:F80)&"  |  At or above 100% of Y1 target: "&COUNTIF(G9:G80,">=1")
-    => Indicators: 9  |  With Y1 target: 4  |  With Y1 achievement reported: 0  |  At or above 100% of Y1 target: 0
+    => Indicators: 9  |  With Y1 target: 3  |  With Y1 achievement reported: 0  |  At or above 100% of Y1 target: 0
 E10: =IF(COUNT(H10,K10,N10,Q10)=0,"",SUM(H10,K10,N10,Q10))
     => 
 F10: =IF(COUNT(I10,L10,O10,R10)=0,"",SUM(I10,L10,O10,R10))
@@ -90,7 +90,7 @@ P12: =IF(O12="","-",IFERROR(O12/N12,"-"))
 S12: =IF(R12="","-",IFERROR(R12/Q12,"-"))
     => -
 E14: =IF(COUNT(H14,K14,N14,Q14)=0,"",SUM(H14,K14,N14,Q14))
-    => 25
+    => 
 F14: =IF(COUNT(I14,L14,O14,R14)=0,"",SUM(I14,L14,O14,R14))
     => 
 G14: =IF(F14="","-",IFERROR(F14/E14,"-"))
@@ -203,7 +203,7 @@ S19: =IF(R19="","-",IFERROR(R19/Q19,"-"))
 
 | Cell | Comment |
 |---|---|
-| B14 | ams: PIII.6 Number of strengthened women-led cooperatives/clusters across the aquaculture value chain. CEL planner III.6: Y1 25 x4. Same 25 cooperatives/clusters as the WAN-group proxy (row 47) and I.18. LoP = Y1 x4. |
-| B15 | ams: PI.11 Number of young women engaged in leadership and mentorship forums under WAN. CEL planner I.11: Y1 500 x4. Same planner line as the WAN participation indicator |
+| B14 | ams: Omit 'groups' (same as WAN) PIII.6 Number of strengthened women-led cooperatives/clusters across the aquaculture value chain. CEL planner III.6: Y1 25 x4. Same 25 cooperatives/clusters as the WAN-group proxy (row 47) and I.18. LoP = Y1 x4. |
+| B15 | ams: Instead of of using the word participating, use "involved" PI.11 Number of young women engaged in leadership and mentorship forums under WAN. CEL planner I.11: Y1 500 x4. Same planner line as the WAN participation indicator |
 | B18 | ams: Pl.12 |
 | B19 | ams: Pl.18 |
