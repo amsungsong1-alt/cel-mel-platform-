@@ -4,9 +4,9 @@ Source workbook: `SAWA_IP_MEL_System_Tool_CEL_v3_10_18_2026.xlsx`. Purpose: give
 
 ## Formula status of the workbook
 
-- **1255 active formulas** across 10 sheets, **55 external-workbook references** (all in Project IPTT, column V), **55 formula errors** after recalculation (the same 55 cells, all `#VALUE!`).
+- **1288 active formulas** across 11 sheets, **55 external-workbook references** (all in Project IPTT, column V), **55 formula errors** after recalculation (the same 55 cells, all `#VALUE!`).
 - Project IPTT's "Reported in" check (column V) still points at another workbook (`[1]` -> `SAWA_IP_MEL_System_Tool_CEL_v3_10_22_2026_updated.xlsx`, per the workbook's external-link definition) rather than the BDS, WAN and Cross-cutting IPTT sheets inside this workbook. Because that external file is not available at recalculation, all 55 of column V's formulas now cache as `#VALUE!` — the reported-in check is currently broken, not fixed.
-- Formula counts by sheet: Project IPTT: 883, BDS IPTT: 150, WAN IPTT: 64, Cross-cutting IPTT: 86, MEL Plan: 7, A3 Results Framework (ToC): 37, A2 Data Flow & Roles: 4, A4 Onboarding Q2: 2, A5 Training Q2: 11, CEL IPTT Guide: 11.
+- Formula counts by sheet: Project IPTT: 883, BDS IPTT: 150, WAN IPTT: 64, Cross-cutting IPTT: 86, MEL Plan: 7, A3 Results Framework (ToC): 37, A2 Data Flow & Roles: 4, A4 Onboarding Q2: 2, A5 Training Q2: 11, CEL IPTT Guide: 11, CEL Internal IPTT: 33 (new sheet, added 22 Oct 2026 — see 15_CEL_Internal_IPTT.md).
 
 ## Files
 
@@ -26,6 +26,7 @@ Source workbook: `SAWA_IP_MEL_System_Tool_CEL_v3_10_18_2026.xlsx`. Purpose: give
 | 12_PIRS.md | PIRS | 62 indicator reference sheets |
 | 13_Shared_Measures_2.0.md | Shared Measures 2.0 | 46 AIL shared-measure definitions |
 | 14_CEL_IPTT_Guide.md | CEL IPTT Guide | Workflow, roles, counting rules, field guide, worked example |
+| 15_CEL_Internal_IPTT.md | CEL Internal IPTT | New sheet (22 Oct 2026): 11 CEL-only indicators (CI-1 to CI-10, CI-8a) outside the AIL framework, not consolidated into Project IPTT |
 
 ## How the workbook fits together
 

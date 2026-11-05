@@ -596,3 +596,81 @@ def test_no_flags_when_every_indicator_is_correctly_assigned():
     not_assigned, conflicts = _compute_sheet_flags(rows)
     assert not_assigned == []
     assert conflicts == {}
+
+
+# ── CEL Internal IPTT tab (Phase: CEL Internal IPTT integration) ───────────
+
+def _related_indicator_caption(row, by_id):
+    """Mirrors pages/13_M_IPTT.py's related_indicator_id caption logic
+    exactly (same "mirror the page's logic" convention as the rest of
+    this file)."""
+    related_id = row.get("_related_indicator_id")
+    if not related_id:
+        return None
+    related = by_id.get(related_id)
+    if related is None:
+        return f"ℹ️ {row['ID']} is related to {related_id}, which isn't seeded yet."
+    return (
+        f"ℹ️ {row['ID']} is related to {related_id} "
+        f"(Y1 Target: {related['Y1 Target'] if related['Y1 Target'] is not None else '—'}, "
+        f"Y1 Achieved: {related['Y1 Achieved'] if related['Y1 Achieved'] is not None else '—'}) "
+        "— tracked independently; phasing may differ."
+    )
+
+
+def test_related_indicator_caption_shows_target_and_achieved_of_the_related_row():
+    by_id = {
+        "OP22": {"ID": "OP22", "Y1 Target": 8, "Y1 Achieved": 3},
+    }
+    row = {"ID": "CI-8a", "_related_indicator_id": "OP22"}
+    caption = _related_indicator_caption(row, by_id)
+    assert caption == (
+        "ℹ️ CI-8a is related to OP22 (Y1 Target: 8, Y1 Achieved: 3) "
+        "— tracked independently; phasing may differ."
+    )
+
+
+def test_related_indicator_caption_handles_missing_y1_values_as_dash():
+    by_id = {
+        "OP16": {"ID": "OP16", "Y1 Target": 500, "Y1 Achieved": None},
+    }
+    row = {"ID": "CI-10", "_related_indicator_id": "OP16"}
+    caption = _related_indicator_caption(row, by_id)
+    assert "Y1 Target: 500" in caption
+    assert "Y1 Achieved: —" in caption
+
+
+def test_related_indicator_caption_handles_the_related_row_not_being_seeded_yet():
+    row = {"ID": "CI-8a", "_related_indicator_id": "OP22"}
+    caption = _related_indicator_caption(row, {})
+    assert caption == "ℹ️ CI-8a is related to OP22, which isn't seeded yet."
+
+
+def test_related_indicator_caption_is_none_for_a_row_with_no_relation():
+    row = {"ID": "CI-1", "_related_indicator_id": None}
+    assert _related_indicator_caption(row, {}) is None
+
+
+def test_related_indicator_caption_never_implies_auto_sync():
+    # The display must say "tracked independently" and never claim or
+    # imply the two values are kept equal -- this is informational only,
+    # per Decision 1 of the CEL Internal IPTT integration task.
+    by_id = {"OP22": {"ID": "OP22", "Y1 Target": 8, "Y1 Achieved": 3}}
+    row = {"ID": "CI-8a", "_related_indicator_id": "OP22"}
+    caption = _related_indicator_caption(row, by_id)
+    assert "tracked independently" in caption
+    assert "sync" not in caption.lower()
+
+
+def test_module_m_has_a_cel_internal_iptt_tab():
+    source = (Path(__file__).parent.parent / "pages" / "13_M_IPTT.py").read_text(encoding="utf-8")
+    match = __import__("re").search(r'_model_sheets\s*=\s*(\[[^\]]*\])', source)
+    assert match, "could not find _model_sheets list in pages/13_M_IPTT.py"
+    sheets = __import__("ast").literal_eval(match.group(1))
+    assert sheets == ["BDS IPTT", "WAN IPTT", "Cross-cutting IPTT", "CEL Internal IPTT"]
+
+
+def test_module_m_labels_the_cel_internal_iptt_tab_as_pre_ail():
+    source = (Path(__file__).parent.parent / "pages" / "13_M_IPTT.py").read_text(encoding="utf-8")
+    assert "not yet accepted into the" in source
+    assert "AIL-reported framework" in source

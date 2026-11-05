@@ -93,6 +93,18 @@ if _needs_seed:
 # .xlsx, gitignored/local-only) whenever the workbook changes -- including
 # to bootstrap a brand new, never-seeded database. It is deliberately not
 # automatic; see that script's own module docstring for why.
+#
+# CEL Internal IPTT (model_sheet='CEL Internal IPTT', 11 rows: CI-1 to
+# CI-10 plus CI-8a) is also in mel_indicators/mel_indicator_targets, so the
+# exact same carve-out applies to it: database/seed_cel_internal_iptt.py
+# exists and is fully race-safe (ON CONFLICT DO NOTHING + separate SELECT
+# id-resolution, same as every other seed module), but it is deliberately
+# NOT called here. Auto-seeding it on every boot would reintroduce the
+# identical bug class described above on the same table -- an
+# insert-if-missing-only check can't tell a later intentional removal of a
+# CI indicator from "never seeded yet", and would silently resurrect it.
+# Run `python -c "from database.seed_cel_internal_iptt import seed; seed()"`
+# by hand, once, the same deliberate way as seed_from_workbook.py --apply.
 
 # mel_indicator_pirs (PIRS reference, Phase 1 part 3): same idempotent,
 # unconditional-seed pattern as mel_indicators above.

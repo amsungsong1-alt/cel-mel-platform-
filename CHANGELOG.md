@@ -28,6 +28,84 @@ All notable changes to the CEL MEL Platform. Format loosely follows
   automated check) or the reconciliation/schedule modules' small,
   already-curated cross-references. 6 new tests in
   `tests/test_check_reference_data_drift.py`.
+- **CEL Internal IPTT integration.** The 22 Oct 2026 workbook revision
+  added a brand-new sheet, "CEL Internal IPTT" (11 rows: CI-1 to CI-10
+  plus the CI-8a sub-row), tracking CEL-only indicators outside the
+  AIL/Agri-Impact framework — not consolidated into Project IPTT, and
+  previously undocumented and unsupported anywhere in this app. Now:
+  - `mel_indicators.model_sheet` gained `'CEL Internal IPTT'` and
+    `mel_indicators.cel_scope` gained `'CEL internal (pre-AIL)'` (both
+    CHECK-constraint widenings — Postgres via a catalog-lookup-based
+    constraint rename, same pattern as the `partner_visits.status`/
+    `kobo_form_mapping.transform`/`partners.tier` fixes; SQLite via the
+    same table-rebuild-under-`PRAGMA foreign_keys=OFF` pattern as the
+    `partner_visits`/`partners` CHECK-widening rebuilds, which this one
+    additionally recreates `mel_indicators`' own indexes after — the
+    precedent two don't bother, leaving a real but previously-unnoticed
+    gap on two much less heavily queried tables).
+  - A new nullable `mel_indicators.related_indicator_id` column: a
+    free-text (not enforced-FK, never auto-synced) cross-reference to
+    another `indicator_id` in the same project, set to `'OP22'` for
+    CI-8a and `'OP16'` for CI-10 (both explicit in the sheet's own cell
+    text) and `NULL` for the other 9 — checked systematically against
+    all 55 AIL-framework indicators, not just the two the sheet flags.
+    CI-8a's and OP22's quarterly phasing have already diverged (OP22's
+    Q1 was folded into Q2 in this same revision; CI-8a kept its original
+    1/2/2/3 split), confirming these needed to stay independent rows
+    with an informational link, not one auto-computed from the other.
+  - `database/seed_cel_internal_iptt.py`: hardcoded, race-safe (`ON
+    CONFLICT DO NOTHING` + separate `SELECT` id-resolution, same as
+    every other seed module) seed data for all 11 rows, plus CI-8a's
+    known Q1-Q4 target (1/2/2/3) — the other 10 indicators' targets are
+    still pending the 30 Oct/4 Dec 2026 reviews per the sheet itself, so
+    deliberately left unseeded rather than seeded as blank placeholders.
+    Includes a backfill pass (mirrors `seed_proframe.py`'s precedent) so
+    a later hand-fixed wording correction reaches an already-seeded row.
+    **Deliberately NOT called from `app.py`'s boot sequence** — see its
+    and `app.py`'s own comments: `mel_indicators`/`mel_indicator_targets`
+    were carved out of auto-seeding after a real production bug (an
+    insert-if-missing-only idempotency check silently resurrecting
+    intentionally-deleted rows on every boot), and this module has the
+    identical blind spot for its 11 rows. Run by hand, once, the same
+    deliberate way as `scripts/seed_from_workbook.py --apply`.
+  - `pages/13_M_IPTT.py`: a 4th achieved-value-entry tab, "CEL Internal
+    IPTT", labelled "Tracked by CEL internally; not yet accepted into
+    the AIL-reported framework."; a read-only, informational note on
+    CI-8a's and CI-10's rows showing their related indicator's current
+    Y1 Target/Achieved ("tracked independently; phasing may differ.").
+    The pre-existing consolidated view, its summary counts, its
+    data-quality-flag check and its "⬇ Export Excel" button (a sheet
+    literally named "Project IPTT") now all explicitly exclude
+    `model_sheet='CEL Internal IPTT'` rows — the real Project IPTT sheet
+    never includes them either, so including them in anything shaped
+    like a Project IPTT mirror would be new, accidental leakage of
+    pre-AIL-acceptance data into what's effectively a donor/AIL-facing
+    export.
+  - `tests/test_cel_internal_iptt_export_scope.py`: a grep-based guard
+    that `pages/12_L_Quarterly_Report.py` and `pages/7_G_Decision_
+    Reports.py` (neither of which queries `mel_indicators` today) stay
+    that way — if either later adds a generic/unfiltered
+    `... FROM mel_indicators` query, this test fails until excluding
+    `model_sheet='CEL Internal IPTT'` is a conscious choice.
+  - `docs/mel_tool/15_CEL_Internal_IPTT.md`: full sheet documentation
+    (indicator definitions, targets, formulas, data validation), in the
+    same format as 06-09. Also notes a transcription error on the live
+    sheet's own CI-10 Unit cell (three fields concatenated into one,
+    "Attendances / Attendance register / GYSI Lead") — seeded split and
+    clean rather than carried into the app.
+  - `scripts/check_reference_data_drift.py`'s "what it does NOT check"
+    docstring section extended to cover `related_indicator_id`, for the
+    same reason `mel_a3_result_areas` is excluded: it's explicitly not
+    meant to stay equal to the related row.
+  - 24 new tests across `tests/test_seed_cel_internal_iptt.py` (11),
+    `tests/test_cel_internal_iptt_export_scope.py` (4),
+    `tests/test_db_migrations.py` (2) and `tests/test_iptt_module_m.py`
+    (7). Verified against SQLite (fresh install and the upgrade path
+    from an old pre-widening `mel_indicators` table, including that its
+    FK-child `mel_indicator_targets` row survives the rebuild) and real
+    Postgres 15 (same fresh-install/upgrade-path pair, plus confirming
+    the old CHECK values and a genuinely invalid one are still correctly
+    accepted/rejected after the constraint rename).
 
 ### Removed
 - `database/seed_mel_indicators.py` + `tests/test_seed_mel_indicators.py`

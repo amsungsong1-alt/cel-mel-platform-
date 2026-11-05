@@ -491,11 +491,11 @@ CREATE TABLE IF NOT EXISTS mel_indicators (
     fish_type            TEXT    CHECK(fish_type IN ('Catfish','Tilapia','Catfish and Tilapia','Not applicable')),
     aggregation_type     TEXT    NOT NULL DEFAULT 'Incremental'
                          CHECK(aggregation_type IN ('Incremental','Cumulative','Annual survey (not summed)')),
-    model_sheet          TEXT    CHECK(model_sheet IN ('BDS IPTT','WAN IPTT','Cross-cutting IPTT')),
+    model_sheet          TEXT    CHECK(model_sheet IN ('BDS IPTT','WAN IPTT','Cross-cutting IPTT','CEL Internal IPTT')),
     cel_scope            TEXT    NOT NULL CHECK(cel_scope IN (
                               'Applicable to CEL','To be confirmed',
                               'New output indicator','Not treated as WEO',
-                              'Not in CEL scope'
+                              'Not in CEL scope','CEL internal (pre-AIL)'
                           )),
     means_of_verification TEXT,
     responsible_collect  TEXT,
@@ -504,7 +504,12 @@ CREATE TABLE IF NOT EXISTS mel_indicators (
     planner_reference    TEXT,
     source_doc           TEXT,
     source_page          TEXT,
-    sm_code              TEXT    -- AIL Shared Measures 2.0 code (e.g. 'SM 5.1')
+    sm_code              TEXT,   -- AIL Shared Measures 2.0 code (e.g. 'SM 5.1')
+    -- Free-text, non-FK reference to another indicator_id in the same
+    -- project (e.g. CI-8a -> 'OP22') -- see schema.sql's comment on this
+    -- same column for the full rationale (informational display only,
+    -- never auto-synced).
+    related_indicator_id TEXT
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_mind_key   ON mel_indicators(project_id, indicator_id);
 CREATE INDEX IF NOT EXISTS idx_mind_model_sheet  ON mel_indicators(model_sheet);

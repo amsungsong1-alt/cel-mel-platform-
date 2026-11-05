@@ -80,7 +80,7 @@ def _sort_key(indicator_id: str, level: str) -> tuple[int, int]:
 def _load_iptt_rows(project_id: int) -> list[dict]:
     indicators = run_query(
         """SELECT id, indicator_id, level, statement, unit_of_measure, fish_type,
-                  aggregation_type, model_sheet, cel_scope
+                  aggregation_type, model_sheet, cel_scope, related_indicator_id
            FROM mel_indicators WHERE project_id=:pid""",
         {"pid": project_id},
     )
@@ -121,6 +121,7 @@ def _load_iptt_rows(project_id: int) -> list[dict]:
             "_sort": _sort_key(ind["indicator_id"], ind["level"]),
             "_q_target": tq, "_q_achieved": aq, "_agg": agg,
             "_internal_id": ind["id"], "_fish_type": ind["fish_type"],
+            "_related_indicator_id": ind["related_indicator_id"],
         })
     rows.sort(key=lambda r: r["_sort"])
     return rows
@@ -132,6 +133,16 @@ if not _rows:
     st.info("No indicators seeded yet for this project.")
     st.stop()
 
+# The consolidated view below (data-quality flags, summary counts, the main
+# table and the Excel export) mirrors the real workbook's Project IPTT
+# sheet, which has exactly 55 AIL-framework indicators and never includes
+# CEL Internal IPTT rows (they're outside that framework, pending AIL
+# acceptance — see pages' CEL Internal IPTT tab further down for their own
+# dedicated, clearly-labelled entry surface). Filtering them out here keeps
+# this consolidated view, and anything exported from it, from silently
+# growing to "55 + 11" and misrepresenting what's actually in Project IPTT.
+_ail_rows = [r for r in _rows if r["Model sheet"] != "CEL Internal IPTT"]
+
 # ── Data-quality flags (CEL IPTT Guide §1, §5 step 6) ────────────────────
 # "NOT ASSIGNED" = in-CEL-scope but no reporting sheet; "CHECK: in more
 # than one sheet" = the same indicator_id assigned to two sheets. The
@@ -142,15 +153,19 @@ if not _rows:
 # find_id_sheet_conflicts() (previously written, tested, and never
 # actually called from any page). Mutates the Model sheet field in place
 # on the (already-copied, since st.cache_data deep-copies its return
-# value) _rows list so both the on-screen table and the Excel export see
-# the same flags without duplicating the detection logic.
+# value) _rows list — via _ail_rows, which holds the same dict objects, not
+# copies — so both the on-screen table and the Excel export see the same
+# flags without duplicating the detection logic. Scoped to _ail_rows, not
+# _rows: this is specifically the AIL framework's "one indicator, one
+# sheet" rule (CEL IPTT Guide §1), and CEL Internal IPTT's own IDs (CI-1
+# etc.) never collide with the 55 AIL ones anyway.
 _ids_by_sheet: dict[str, list[str]] = {}
-for _r in _rows:
+for _r in _ail_rows:
     if _r["Model sheet"] != "—":
         _ids_by_sheet.setdefault(_r["Model sheet"], []).append(_r["ID"])
 _sheet_conflicts = find_id_sheet_conflicts(_ids_by_sheet)
 _not_assigned_ids = []
-for _r in _rows:
+for _r in _ail_rows:
     if _r["ID"] in _sheet_conflicts:
         _r["Model sheet"] = f"⚠ CHECK: {_r['Model sheet']} + {len(_sheet_conflicts[_r['ID']]) - 1} more"
     elif _r["Model sheet"] == "—" and _r["CEL scope"] != "Not in CEL scope":
@@ -169,14 +184,14 @@ if _sheet_conflicts or _not_assigned_ids:
 else:
     st.caption("✅ No CHECK / NOT ASSIGNED flags.")
 
-_n_with_y1_target = sum(1 for r in _rows if r["Y1 Target"] is not None)
-_n_with_achievement = sum(1 for r in _rows if r["Y1 Achieved"] is not None)
-_n_on_track = sum(1 for r in _rows if isinstance(r["Y1 %"], (int, float)) and r["Y1 %"] >= 1.0)
+_n_with_y1_target = sum(1 for r in _ail_rows if r["Y1 Target"] is not None)
+_n_with_achievement = sum(1 for r in _ail_rows if r["Y1 Achieved"] is not None)
+_n_on_track = sum(1 for r in _ail_rows if isinstance(r["Y1 %"], (int, float)) and r["Y1 %"] >= 1.0)
 
 _col_summary, _col_export = st.columns([4, 1])
 with _col_summary:
     st.caption(
-        f"{len(_rows)} indicators · {_n_with_y1_target} with a Y1 target · "
+        f"{len(_ail_rows)} indicators · {_n_with_y1_target} with a Y1 target · "
         f"{_n_with_achievement} with a Y1 achievement reported · "
         f"{_n_on_track} at or above 100% of Y1 target"
     )
@@ -184,7 +199,17 @@ with _col_export:
     def _build_iptt_excel(rows: list[dict]) -> bytes:
         """Full consolidated table, every indicator and quarter, regardless
         of the on-screen filter/quarterly-breakdown toggle — matches the
-        real workbook's Project IPTT sheet content most closely."""
+        real workbook's Project IPTT sheet content most closely, which is
+        exactly why CEL Internal IPTT rows (model_sheet='CEL Internal IPTT')
+        are excluded here: the real Project IPTT sheet's own lookup
+        formulas never reference the CEL Internal IPTT sheet either (it
+        isn't part of the AIL-reported framework yet), so including them
+        in a sheet literally named "Project IPTT" would be new, accidental
+        leakage of pre-AIL-acceptance data into a donor/AIL-facing export —
+        the exact thing this task's cel_scope/model_sheet design was meant
+        to prevent by construction. See tests/test_iptt_module_m.py's
+        regression test for this."""
+        rows = [r for r in rows if r["Model sheet"] != "CEL Internal IPTT"]
         export_cols = [
             "ID", "Level", "Indicator", "Model sheet", "CEL scope",
             "Y1 Target", "Y1 Achieved", "Y1 %",
@@ -210,7 +235,7 @@ with _col_export:
 
     st.download_button(
         "⬇ Export Excel",
-        data=_build_iptt_excel(_rows),
+        data=_build_iptt_excel(_ail_rows),
         file_name="SAWA_Project_IPTT.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         width="stretch",
@@ -219,7 +244,7 @@ with _col_export:
 _level_filter = st.selectbox("Filter by level", ["All", "Impact", "Outcomes", "Outputs"])
 _show_quarterly = st.checkbox("Show quarterly breakdown (Q1–Q4)", value=False)
 
-_visible = [r for r in _rows if _level_filter == "All" or r["Level"] == _level_filter]
+_visible = [r for r in _ail_rows if _level_filter == "All" or r["Level"] == _level_filter]
 
 _cols = ["ID", "Level", "Indicator", "Model sheet", "CEL scope", "Y1 Target", "Y1 Achieved", "Y1 %"]
 if _show_quarterly:
@@ -281,14 +306,45 @@ else:
         key="iptt_entry_quarter",
     )
 
-    _model_sheets = ["BDS IPTT", "WAN IPTT", "Cross-cutting IPTT"]
+    _model_sheets = ["BDS IPTT", "WAN IPTT", "Cross-cutting IPTT", "CEL Internal IPTT"]
     _sheet_tabs = st.tabs(_model_sheets)
     for _tab, _sheet_name in zip(_sheet_tabs, _model_sheets):
         with _tab:
+            if _sheet_name == "CEL Internal IPTT":
+                st.caption(
+                    "Tracked by CEL internally; not yet accepted into the "
+                    "AIL-reported framework."
+                )
             _sheet_rows = [r for r in _rows if r["Model sheet"] == _sheet_name]
             if not _sheet_rows:
                 st.caption("No indicators assigned to this sheet.")
                 continue
+
+            # Read-only, informational note for indicators that carry a
+            # related_indicator_id (currently only CI-8a -> OP22 and
+            # CI-10 -> OP16) -- shows the related row's own Y1 Target/
+            # Achieved for context. Never auto-computed from or synced to
+            # the related indicator: both are filled in independently by
+            # their own responsible roles, and their quarterly phasing can
+            # (and for CI-8a vs OP22, already has) drift apart -- see
+            # schema.sql's comment on related_indicator_id.
+            _by_id = {r["ID"]: r for r in _rows}
+            for r in _sheet_rows:
+                related_id = r.get("_related_indicator_id")
+                if not related_id:
+                    continue
+                related = _by_id.get(related_id)
+                if related is None:
+                    st.caption(
+                        f"ℹ️ {r['ID']} is related to {related_id}, which isn't seeded yet."
+                    )
+                    continue
+                st.caption(
+                    f"ℹ️ {r['ID']} is related to {related_id} "
+                    f"(Y1 Target: {related['Y1 Target'] if related['Y1 Target'] is not None else '—'}, "
+                    f"Y1 Achieved: {related['Y1 Achieved'] if related['Y1 Achieved'] is not None else '—'}) "
+                    "— tracked independently; phasing may differ."
+                )
 
             _existing = run_query(
                 """SELECT i.indicator_id, a.achieved_value, a.tilapia_value, a.catfish_value,

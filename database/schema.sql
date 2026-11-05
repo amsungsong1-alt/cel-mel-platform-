@@ -632,11 +632,11 @@ CREATE TABLE IF NOT EXISTS mel_indicators (
                          CHECK(aggregation_type IN ('Incremental','Cumulative','Annual survey (not summed)')),
     -- NULL only for indicators with cel_scope = 'Not in CEL scope' (not
     -- reported in any model sheet).
-    model_sheet          TEXT    CHECK(model_sheet IN ('BDS IPTT','WAN IPTT','Cross-cutting IPTT')),
+    model_sheet          TEXT    CHECK(model_sheet IN ('BDS IPTT','WAN IPTT','Cross-cutting IPTT','CEL Internal IPTT')),
     cel_scope            TEXT    NOT NULL CHECK(cel_scope IN (
                               'Applicable to CEL','To be confirmed',
                               'New output indicator','Not treated as WEO',
-                              'Not in CEL scope'
+                              'Not in CEL scope','CEL internal (pre-AIL)'
                           )),
     means_of_verification TEXT,
     responsible_collect  TEXT,
@@ -646,10 +646,20 @@ CREATE TABLE IF NOT EXISTS mel_indicators (
                                   -- CEL planner code (PI.1 etc.) as history
     source_doc           TEXT,
     source_page          TEXT,
-    sm_code              TEXT    -- AIL Shared Measures 2.0 code this indicator
+    sm_code              TEXT,   -- AIL Shared Measures 2.0 code this indicator
                                   -- rolls up to (e.g. 'SM 5.1'), extracted from
                                   -- the workbook statement text at seed time.
                                   -- Nullable: not every CEL indicator has one.
+    -- Free-text reference to another indicator_id in the SAME project (e.g.
+    -- CI-8a -> 'OP22'), same style as planner_reference -- NOT an enforced
+    -- FK (the related row may not exist, or may be seeded later) and NOT
+    -- auto-synced: both rows are filled in independently by their own
+    -- responsible roles and their quarterly phasing can (and already has,
+    -- for CI-8a vs OP22) drift apart. Informational display only -- see
+    -- pages/13_M_IPTT.py and scripts/check_reference_data_drift.py's "what
+    -- it does NOT check" note. NULL for every indicator that isn't a
+    -- CEL-internal row explicitly tracking a related AIL-framework one.
+    related_indicator_id TEXT
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_mind_key   ON mel_indicators(project_id, indicator_id);
 CREATE INDEX IF NOT EXISTS idx_mind_model_sheet  ON mel_indicators(model_sheet);

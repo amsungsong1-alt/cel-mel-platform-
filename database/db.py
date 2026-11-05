@@ -338,6 +338,7 @@ def _run_migrations(schema_fingerprint: str) -> bool:
                 CREATE INDEX IF NOT EXISTS idx_rda_partner ON raw_data_analysis(partner_id);
                 ALTER TABLE mel_indicators ADD COLUMN IF NOT EXISTS sm_code TEXT;
                 CREATE INDEX IF NOT EXISTS idx_mind_sm_code ON mel_indicators(sm_code);
+                ALTER TABLE mel_indicators ADD COLUMN IF NOT EXISTS related_indicator_id TEXT;
                 ALTER TABLE mel_plan_indicators ADD COLUMN IF NOT EXISTS indicator_id TEXT;
                 CREATE INDEX IF NOT EXISTS idx_mpi_indicator ON mel_plan_indicators(indicator_id);
                 ALTER TABLE team_tasks ADD COLUMN IF NOT EXISTS schedule_activity_id INTEGER REFERENCES mel_schedule_activities(id) ON DELETE SET NULL;
@@ -400,6 +401,42 @@ def _run_migrations(schema_fingerprint: str) -> bool:
             conn.execute(text(
                 "ALTER TABLE partners ADD CONSTRAINT partners_tier_check "
                 "CHECK (tier IN ('Anchor','Technical','Implementing','Institutional Strengthening'))"
+            ))
+            # Add 'CEL Internal IPTT' to mel_indicators.model_sheet and
+            # 'CEL internal (pre-AIL)' to mel_indicators.cel_scope (CEL
+            # Internal IPTT sheet integration) — same attribute-based
+            # catalog lookup as the two fixes above.
+            _mind_model_sheet_constraints = conn.execute(text("""
+                SELECT c.conname
+                FROM   pg_constraint c
+                JOIN   pg_attribute a
+                       ON a.attrelid = c.conrelid AND a.attnum = ANY(c.conkey)
+                WHERE  c.conrelid = 'mel_indicators'::regclass
+                  AND  c.contype  = 'c'
+                  AND  a.attname  = 'model_sheet'
+            """)).fetchall()
+            for (_con_name,) in _mind_model_sheet_constraints:
+                conn.execute(text(f'ALTER TABLE mel_indicators DROP CONSTRAINT "{_con_name}"'))
+            conn.execute(text(
+                "ALTER TABLE mel_indicators ADD CONSTRAINT mel_indicators_model_sheet_check "
+                "CHECK (model_sheet IN ('BDS IPTT','WAN IPTT','Cross-cutting IPTT','CEL Internal IPTT'))"
+            ))
+            _mind_cel_scope_constraints = conn.execute(text("""
+                SELECT c.conname
+                FROM   pg_constraint c
+                JOIN   pg_attribute a
+                       ON a.attrelid = c.conrelid AND a.attnum = ANY(c.conkey)
+                WHERE  c.conrelid = 'mel_indicators'::regclass
+                  AND  c.contype  = 'c'
+                  AND  a.attname  = 'cel_scope'
+            """)).fetchall()
+            for (_con_name,) in _mind_cel_scope_constraints:
+                conn.execute(text(f'ALTER TABLE mel_indicators DROP CONSTRAINT "{_con_name}"'))
+            conn.execute(text(
+                "ALTER TABLE mel_indicators ADD CONSTRAINT mel_indicators_cel_scope_check "
+                "CHECK (cel_scope IN ("
+                "'Applicable to CEL','To be confirmed','New output indicator',"
+                "'Not treated as WEO','Not in CEL scope','CEL internal (pre-AIL)'))"
             ))
             # (idx_rda_partner's CREATE INDEX now lives in the ALTER batch
             # above, right after the ADD COLUMN it depends on, in the same
@@ -1297,6 +1334,7 @@ def _run_migrations(schema_fingerprint: str) -> bool:
         "ALTER TABLE raw_data_analysis ADD COLUMN disaggregation TEXT",
         "ALTER TABLE raw_data_analysis ADD COLUMN partner_id INTEGER",
         "ALTER TABLE mel_indicators ADD COLUMN sm_code TEXT",
+        "ALTER TABLE mel_indicators ADD COLUMN related_indicator_id TEXT",
         "ALTER TABLE mel_plan_indicators ADD COLUMN indicator_id TEXT",
         "ALTER TABLE team_tasks ADD COLUMN schedule_activity_id INTEGER",
     ):
@@ -1492,6 +1530,104 @@ def _run_migrations(schema_fingerprint: str) -> bool:
             )
             conn.execute("DROP TABLE partners")
             conn.execute("ALTER TABLE partners_new RENAME TO partners")
+            conn.commit()
+            conn.execute("PRAGMA foreign_keys=ON")
+    except Exception:
+        pass
+    # Add 'CEL Internal IPTT' to mel_indicators.model_sheet and 'CEL internal
+    # (pre-AIL)' to mel_indicators.cel_scope (CEL Internal IPTT sheet
+    # integration). SQLite has no ALTER TABLE ... DROP/ADD CONSTRAINT, so
+    # rebuild the table when the old CHECK (without 'CEL Internal IPTT') is
+    # still in place — only runs once, since the rebuilt table's own CREATE
+    # statement already includes it. related_indicator_id already exists on
+    # the old table by this point (added via the ADD COLUMN pass above, in
+    # this same migration run), so the copy below can select it directly.
+    try:
+        _mind_row = conn.execute(
+            "SELECT sql FROM sqlite_master WHERE type='table' AND name='mel_indicators'"
+        ).fetchone()
+        if _mind_row and _mind_row[0] and "'CEL Internal IPTT'" not in _mind_row[0]:
+            # Build the replacement under a NEW name, copy into it, drop the
+            # old table, then rename the new one onto "mel_indicators" —
+            # rather than renaming "mel_indicators" out of the way first, for
+            # the same FK-rewrite reason as the partner_visits/partners
+            # rebuilds above: mel_indicator_targets and mel_indicator_actuals
+            # both reference mel_indicators(id), and SQLite only rewrites
+            # OTHER tables' FK clauses when the table THEY reference is
+            # renamed, not when it's replaced out from under them by a
+            # same-named successor.
+            #
+            # schema.sql turns on PRAGMA foreign_keys, under which DROP TABLE
+            # performs every ON DELETE CASCADE as if each row had been
+            # deleted first — wiping mel_indicator_targets/mel_indicator_actuals
+            # when the old mel_indicators table below is dropped. Toggling it
+            # off (and committing first — SQLite ignores this pragma
+            # mid-transaction) makes the DROP a pure schema change again.
+            conn.commit()
+            conn.execute("PRAGMA foreign_keys=OFF")
+            conn.execute("""
+                CREATE TABLE mel_indicators_new (
+                    id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+                    project_id           INTEGER NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+                    indicator_id         TEXT    NOT NULL,
+                    level                TEXT    NOT NULL CHECK(level IN ('Impact','Outcomes','Outputs')),
+                    statement            TEXT    NOT NULL,
+                    unit_of_measure      TEXT,
+                    fish_type            TEXT    CHECK(fish_type IN ('Catfish','Tilapia','Catfish and Tilapia','Not applicable')),
+                    aggregation_type     TEXT    NOT NULL DEFAULT 'Incremental'
+                                         CHECK(aggregation_type IN ('Incremental','Cumulative','Annual survey (not summed)')),
+                    model_sheet          TEXT    CHECK(model_sheet IN ('BDS IPTT','WAN IPTT','Cross-cutting IPTT','CEL Internal IPTT')),
+                    cel_scope            TEXT    NOT NULL CHECK(cel_scope IN (
+                                              'Applicable to CEL','To be confirmed',
+                                              'New output indicator','Not treated as WEO',
+                                              'Not in CEL scope','CEL internal (pre-AIL)'
+                                          )),
+                    means_of_verification TEXT,
+                    responsible_collect  TEXT,
+                    responsible_verify   TEXT,
+                    responsible_review   TEXT,
+                    planner_reference    TEXT,
+                    source_doc           TEXT,
+                    source_page          TEXT,
+                    sm_code              TEXT,
+                    related_indicator_id TEXT
+                )
+            """)
+            conn.execute(
+                "INSERT INTO mel_indicators_new "
+                "(id, project_id, indicator_id, level, statement, unit_of_measure, fish_type, "
+                " aggregation_type, model_sheet, cel_scope, means_of_verification, "
+                " responsible_collect, responsible_verify, responsible_review, "
+                " planner_reference, source_doc, source_page, sm_code, related_indicator_id) "
+                "SELECT id, project_id, indicator_id, level, statement, unit_of_measure, fish_type, "
+                "       aggregation_type, model_sheet, cel_scope, means_of_verification, "
+                "       responsible_collect, responsible_verify, responsible_review, "
+                "       planner_reference, source_doc, source_page, sm_code, related_indicator_id "
+                "FROM mel_indicators"
+            )
+            conn.execute("DROP TABLE mel_indicators")
+            conn.execute("ALTER TABLE mel_indicators_new RENAME TO mel_indicators")
+            # Recreate the indexes dropped along with the old table. (The
+            # precedent partner_visits/partners rebuilds above don't do
+            # this — those two tables' CREATE INDEX IF NOT EXISTS statements
+            # in schema.sql only ever ran once, earlier in this same
+            # function call, so their indexes are left missing until the
+            # fingerprint changes again. Recreating them here explicitly is
+            # cheap and avoids leaving mel_indicators — a much more heavily
+            # queried table — without idx_mind_key's UNIQUE constraint in
+            # the meantime.)
+            conn.execute(
+                "CREATE UNIQUE INDEX IF NOT EXISTS idx_mind_key ON mel_indicators(project_id, indicator_id)"
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_mind_model_sheet ON mel_indicators(model_sheet)"
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_mind_cel_scope ON mel_indicators(cel_scope)"
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_mind_sm_code ON mel_indicators(sm_code)"
+            )
             conn.commit()
             conn.execute("PRAGMA foreign_keys=ON")
     except Exception:

@@ -56,6 +56,15 @@ What it does NOT check (by design, not an oversight):
     informational-only cross-references (3 and 3 respectively), not a
     bulk-linked dataset -- cheap enough to eyeball directly in
     database/seed_schedule.py / database/seed_reconciliation.py.
+  - mel_indicators.related_indicator_id itself (CI-8a -> OP22, CI-10 ->
+    OP16, the only two set): same kind of small, curated,
+    informational-only cross-reference as the schedule/reconciliation
+    ones above, and for the same reason this script doesn't validate it --
+    it is explicitly NOT meant to stay equal to the related indicator
+    (CI-8a's and OP22's quarterly phasing have already diverged on
+    purpose; see pages/13_M_IPTT.py's read-only display and
+    database/seed_cel_internal_iptt.py's module docstring). A drift check
+    here would be checking for the wrong thing.
 """
 from __future__ import annotations
 
